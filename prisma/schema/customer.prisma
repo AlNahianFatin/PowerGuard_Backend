@@ -1,5 +1,5 @@
-model Patient {
-  id String @id @default(uuid(7))
+model Customer {
+  id String @id @default(uuid())
 
   name          String
   email         String    @unique
@@ -13,10 +13,10 @@ model Patient {
   //relations
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  
-  appointments Apppointment[]
-  
-  @@index([email], name: "idx_patient_email")
-  @@index([isDeleted], name: "idx_patient_isDeleted")
-  @@map("patients")
+
+  outageReports OutageReport[]
+
+  @@index([email])
+  @@index([isDeleted])
+  @@map("customers")
 }

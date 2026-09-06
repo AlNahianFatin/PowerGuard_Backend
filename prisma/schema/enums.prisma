@@ -1,8 +1,8 @@
 enum Role {
-  SUPER_ADMIN
   ADMIN
-  DOCTOR
-  PATIENT
+  OPERATOR
+  TECHNICIAN
+  CUSTOMER
 }
 
 enum UserStatus {
@@ -11,41 +11,45 @@ enum UserStatus {
   DELETED
 }
 
-enum Gender {
-  MALE
-  FEMALE
-  OTHER
-}
-
 enum AuthProvider {
   GOOGLE
   CREDENTIAL
 }
 
-enum AppointmentStatus {
-  PENDING
-  CONFIRMED
+enum ScheduleStatus {
+  DRAFT
+  PUBLISHED
   CANCELLED
-  ONGOING
   COMPLETED
 }
 
+enum OutageStatus {
+  PENDING
+  VERIFIED
+  ASSIGNED
+  INPROGRESS
+  RESOLVED
+  FAILED
+  REJECTED
+  CANCELLED
+}
+
 enum PaymentStatus {
-  UNPAID
+  PENDING
   PAID
   FAILED
   CANCELLED
-  REFUNDED
 }
 
-enum DoctorVerificationStatus {
+enum OperatorTechnicianVerificationStatus {
   PENDING
   APPROVED
   REJECTED
 }
 
-enum ScheduleStatus {
-  DRAFT
-  PUBLISHED
+enum TechnicianStatus {
+  AVAILABLE
+  ASSIGNED
+  BUSY
+  OFFDUTY
 }
-

@@ -1,0 +1,19 @@
+model Feeder {
+    id   String @id @default(uuid())
+    name String
+    code String @unique
+
+    repairingCost Decimal @db.Decimal(10, 2)
+
+    substationId String
+    substation   Substation @relation(fields: [substationId], references: [id])
+
+    areas         Area[]
+    schedules     Schedule[]
+    outageReports OutageReport[]
+
+    @@index([name])
+    @@index([code])
+    @@index([substationId])
+    @@map("feeders")
+}
