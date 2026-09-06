@@ -41,7 +41,7 @@ enum PaymentStatus {
   CANCELLED
 }
 
-enum OperatorTechnicianVerificationStatus {
+enum TechnicianVerificationStatus {
   PENDING
   APPROVED
   REJECTED

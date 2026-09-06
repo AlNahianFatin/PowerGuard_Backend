@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { DoctorVerificationStatus, Role } from '../../generated/prisma/enums';
+import { OperatorTechnicianVerificationStatus, Role } from '../../generated/prisma/enums';
 import { prisma } from './prisma';
 
 
@@ -10,11 +10,11 @@ export const deleteUnverifiedDoctors = async () => {
            const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
            const deletedDoctors = await prisma.user.deleteMany({
                where: {
-                   role: Role.DOCTOR,
+                   role: Role.TECHNICIAN,
                    emailVerified: false,
                    createdAt: { lt: oneHourAgo },
                    doctor: {
-                       verificationStatus: DoctorVerificationStatus.PENDING
+                       verificationStatus: OperatorTechnicianVerificationStatus.PENDING
                    }
                }
            });

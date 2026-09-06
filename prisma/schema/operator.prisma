@@ -7,14 +7,9 @@ model Operator {
 
   contactNumber String?
 
-  verificationStatus OperatorTechnicianVerificationStatus @default(PENDING)
-  rejectionReason    String?
-  reviewedBy         String?
-  reviewedAt         DateTime?
-
   resume          String?
   resumePublicId  String?
-  additionalFiles Json? 
+  additionalFiles Json?
 
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
