@@ -1,35 +1,35 @@
 import cron from 'node-cron';
-import { OperatorTechnicianVerificationStatus, Role } from '../../generated/prisma/enums';
+import { TechnicianVerificationStatus, Role } from '../../generated/prisma/enums';
 import { prisma } from './prisma';
 
 
-export const deleteUnverifiedDoctors = async () => {
+export const deleteUnverifiedTechnicians = async () => {
     cron.schedule('*/10 * * * *', async () => {
 
        try {
            const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
-           const deletedDoctors = await prisma.user.deleteMany({
+           const deletedTechnicians = await prisma.user.deleteMany({
                where: {
                    role: Role.TECHNICIAN,
                    emailVerified: false,
                    createdAt: { lt: oneHourAgo },
-                   doctor: {
-                       verificationStatus: OperatorTechnicianVerificationStatus.PENDING
+                   technician: {
+                       verificationStatus: TechnicianVerificationStatus.PENDING
                    }
                }
            });
 
 
-           if (deletedDoctors.count > 0) {
+           if (deletedTechnicians.count > 0) {
                console.log(`
-                Cron: Deleted ${deletedDoctors.count} unverified email doctor applications older than 1 hour
+                Cron: Deleted ${deletedTechnicians.count} unverified email technician applications older than 1 hour
                 `);
            }
        } catch (error) {
 
-            console.log("Cron: Failed to delete unverified doctor applications", error);
+            console.log("Cron: Failed to delete unverified technician applications", error);
        }
 
-       console.log("Unverified Doctor Delete cron schedule (every 10 minutes)");
+       console.log("Unverified technician delete cron schedule (every 10 minutes)");
     });
 }

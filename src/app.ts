@@ -13,7 +13,7 @@ import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { notFound } from "./app/middleware/notFound";
 // import { AnalyticsRoutes } from "./app/module/analytics/analytics.route";
 // import { AppointmentRoutes } from "./app/module/appointment/appointment.route";
-// import { AuthRoutes } from "./app/module/auth/auth.route";
+import { AuthRoutes } from "./app/module/auth/auth.route";
 // import { DoctorRoutes } from "./app/module/doctor/doctor.route";
 // import { PaymentRoutes } from "./app/module/payment/payment.route";
 // import { PrescriptionRoutes } from "./app/module/prescription/prescription.route";
@@ -36,7 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-// app.use("/api/v1/auth", AuthRoutes);
+app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/user", UserRoutes);
 // app.use("/api/v1/appointment", AppointmentRoutes);
 // app.use("/api/v1/doctor", DoctorRoutes);
