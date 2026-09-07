@@ -7,35 +7,9 @@ import type { IRequestUser } from "./auth.interface";
 import { AuthService } from "./auth.service";
 
 const registerCustomer = catchAsync(async (req: Request, res: Response) => {
-	// const payload = PatientValidation.PatientRegistrationZodSchema.safeParse(req.body);
-
-	// if(!payload.success){
-	// 	console.log(payload.error);
-	// 	console.log(payload.error.issues);
-
-	// 	throw new Error(payload.error.issues[0].message)
-	// }
-
-	// console.log(payload);
-
 	const payload = req.body;
 
 	await AuthService.registerCustomer(payload);
-
-	// const { accessToken, refreshToken, user, patient } = result;
-
-	// res.cookie("accessToken", accessToken, {
-	// 	httpOnly: true,
-	// 	secure: false,
-	// 	sameSite: "none",
-	// 	maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
-	// });
-	// res.cookie("refreshToken", refreshToken, {
-	// 	httpOnly: true,
-	// 	secure: false,
-	// 	sameSite: "none",
-	// 	maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-	// });
 
 	sendResponse(res, {
 		statusCode: httpStatus.CREATED,
@@ -44,6 +18,7 @@ const registerCustomer = catchAsync(async (req: Request, res: Response) => {
 		data: null,
 	});
 });
+
 const verifyCustomerEmail = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
 
@@ -110,7 +85,10 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user as unknown as IRequestUser;
 
 	if (!user) {
-		throw new AppError(httpStatus.UNAUTHORIZED, "User information is missing in the request");
+		throw new AppError(
+			httpStatus.UNAUTHORIZED,
+			"User information is missing in the request",
+		);
 	}
 
 	const result = await AuthService.getMe(user);
@@ -152,6 +130,7 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 		},
 	});
 });
+
 const googleLogin = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
 
@@ -182,6 +161,7 @@ const googleLogin = catchAsync(async (req: Request, res: Response) => {
 		},
 	});
 });
+
 const forgotPassword = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
 
@@ -194,6 +174,7 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
 		data: null,
 	});
 });
+
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
 
