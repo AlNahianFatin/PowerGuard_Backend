@@ -119,18 +119,6 @@ const getMyAppointedSchedules = async (query: IQuery, user: RequestUser) => {
 		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
 	}
 
-	// let limit = 10;
-	// if (query.limit) {
-	//     limit = Number(query.limit);
-	// }
-
-	// let page = 1;
-	// if (query.page) {
-	//     page = Number(query.page);
-	// }
-
-	// const skip = (page - 1) * limit;
-
 	const andConditions: ScheduleWhereInput[] = [
 		{
 			operatorId: operator.id,
@@ -142,6 +130,63 @@ const getMyAppointedSchedules = async (query: IQuery, user: RequestUser) => {
 
 	if (query.status) {
 		andConditions.push({ status: query.status });
+	}
+
+	if (query.feederCode) {
+		andConditions.push({ feeder: { code: query.feederCode } });
+	}
+
+	if (query.areaCode) {
+		andConditions.push({
+			feeder: { areas: { some: { code: query.areaCode } } },
+		});
+	}
+
+	if (query.searchTerm) {
+		andConditions.push({
+			OR: [
+				{
+					feeder: {
+						name: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+				{
+					feeder: {
+						code: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+				{
+					feeder: {
+						areas: {
+							some: {
+								name: {
+									contains: query.searchTerm,
+									mode: "insensitive",
+								},
+							},
+						},
+					},
+				},
+				{
+					feeder: {
+						areas: {
+							some: {
+								code: {
+									contains: query.searchTerm,
+									mode: "insensitive",
+								},
+							},
+						},
+					},
+				},
+			],
+		});
 	}
 
 	const schedules = await prisma.schedule.findMany({
@@ -189,26 +234,100 @@ const getAllSchedules = async (query: IQuery) => {
 	if (query.operatorId) {
 		andConditions.push({ operatorId: query.operatorId });
 	}
-	if (query.email) {
-		andConditions.push({
-			operator: {
-				email: query.email,
-			},
-		});
-	}
+
+	// if (query.email) {
+	// 	andConditions.push({
+	// 		operator: {
+	// 			email: query.email,
+	// 		},
+	// 	});
+	// }
 
 	if (query.status) {
 		andConditions.push({ status: query.status });
 	}
 
+	if (query.feederCode) {
+		andConditions.push({ feeder: { code: query.feederCode } });
+	}
+
+	if (query.areaCode) {
+		andConditions.push({
+			feeder: { areas: { some: { code: query.areaCode } } },
+		});
+	}
+
 	if (query.searchTerm) {
 		andConditions.push({
-			operator: {
-				OR: [
-					{ name: { contains: query.searchTerm, mode: "insensitive" } },
-					{ email: { contains: query.searchTerm, mode: "insensitive" } },
-				],
-			},
+			OR: [
+				// Feeder name
+				{
+					feeder: {
+						name: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+
+				// Feeder code
+				{
+					feeder: {
+						code: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+
+				// Feeder area name
+				{
+					feeder: {
+						areas: {
+							some: {
+								name: {
+									contains: query.searchTerm,
+									mode: "insensitive",
+								},
+							},
+						},
+					},
+				},
+
+				// Feeder area code
+				{
+					feeder: {
+						areas: {
+							some: {
+								code: {
+									contains: query.searchTerm,
+									mode: "insensitive",
+								},
+							},
+						},
+					},
+				},
+
+				// Operator name
+				{
+					operator: {
+						name: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+
+				// Operator email
+				{
+					operator: {
+						email: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+			],
 		});
 	}
 
@@ -257,9 +376,9 @@ const getScheduleById = async (scheduleId: string) => {
 					userId: true,
 				},
 			},
-			appointments: {
+			feeder: {
 				include: {
-					patient: true,
+					areas: true,
 				},
 			},
 		},
@@ -277,31 +396,28 @@ const updateSchedule = async (
 	payload: IUpdateSchedulePayload,
 	user: RequestUser,
 ) => {
-	const doctor = await prisma.doctor.findUnique({
+	const operator = await prisma.operator.findUnique({
 		where: { userId: user.userId },
 	});
 
-	if (!doctor) {
-		throw new AppError(httpStatus.NOT_FOUND, "Doctor Profile Not Found");
+	if (!operator) {
+		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
 	}
 
 	const schedule = await prisma.schedule.findUnique({
-		where: { id: scheduleId, doctorId: doctor.id },
+		where: { id: scheduleId, operatorId: operator.id },
 	});
 
 	if (!schedule || schedule.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Schedule Not Found");
 	}
 
-	if (
-		schedule.status === ScheduleStatus.PUBLISHED &&
-		schedule.totalSlots !== schedule.availableSlots
-	) {
-		throw new AppError(
-			httpStatus.CONFLICT,
-			"Schedule Once Published And Appoinemtn Booked Cannot Be Updated",
-		);
-	}
+	// if (schedule.status === ScheduleStatus.PUBLISHED) {
+	// 	throw new AppError(
+	// 		httpStatus.CONFLICT,
+	// 		"Schedule Once Published And Appointment Booked Cannot Be Updated",
+	// 	);
+	// }
 
 	// if (schedule.doctorId !== doctor.id) {
 	//     throw new AppError(
@@ -316,19 +432,20 @@ const updateSchedule = async (
 	//     updateData.meetingLink = payload.meetingLink || schedule.meetingLink
 	// }
 
-	payload.meetingLink = payload.meetingLink || schedule.meetingLink;
+	// payload.meetingLink = payload.meetingLink || schedule.meetingLink;
 	payload.startDateTime = payload.startDateTime || schedule.startDateTime;
 	payload.endDateTime = payload.endDateTime || schedule.endDateTime;
 
 	// 25 August => start Time  : 9:00 PM
 	// 26 August => end Time : 3:00AM
 
-	if (!isSameDay(payload.startDateTime, payload.endDateTime)) {
-		throw new AppError(
-			httpStatus.CONFLICT,
-			"Start Date Time And End Date Time Must Be On The Same Day",
-		);
-	}
+	// if (!isSameDay(payload.startDateTime, payload.endDateTime)) {
+	// 	throw new AppError(
+	// 		httpStatus.CONFLICT,
+	// 		"Start Date Time And End Date Time Must Be On The Same Day",
+	// 	);
+	// }
+
 	if (isAfter(payload.startDateTime, payload.endDateTime)) {
 		// 25 August =>  3:00 PM - 9:00 PM
 
@@ -344,7 +461,7 @@ const updateSchedule = async (
 
 	const existingScheduleOnThisDate = await prisma.schedule.findFirst({
 		where: {
-			doctorId: doctor.id,
+			feederId: payload.feederId,
 			isDeleted: false,
 			startDateTime: {
 				gte: startOfTheDay,
@@ -356,25 +473,25 @@ const updateSchedule = async (
 	if (existingScheduleOnThisDate) {
 		throw new AppError(
 			httpStatus.CONFLICT,
-			"You Already Have A Schedule For This Date",
+			"A schedule for this date and time has already been published",
 		);
 	}
 
-	const durationInMinutes = differenceInMinutes(
-		payload.endDateTime,
-		payload.startDateTime,
-	);
+	// const durationInMinutes = differenceInMinutes(
+	// 	payload.endDateTime,
+	// 	payload.startDateTime,
+	// );
 
-	const MINUTES_ALLOCATED_PER_SLOT = 20;
+	// const MINUTES_ALLOCATED_PER_SLOT = 20;
 
-	const totalSlots = Math.floor(durationInMinutes / MINUTES_ALLOCATED_PER_SLOT);
+	// const totalSlots = Math.floor(durationInMinutes / MINUTES_ALLOCATED_PER_SLOT);
 
-	if (totalSlots < 1) {
-		throw new AppError(
-			httpStatus.CONFLICT,
-			`Schedule Must Be At Least ${MINUTES_ALLOCATED_PER_SLOT} Minutes Long To Fit One Slot`,
-		);
-	}
+	// if (totalSlots < 1) {
+	// 	throw new AppError(
+	// 		httpStatus.CONFLICT,
+	// 		`Schedule Must Be At Least ${MINUTES_ALLOCATED_PER_SLOT} Minutes Long To Fit One Slot`,
+	// 	);
+	// }
 
 	const updatedSchedule = await prisma.schedule.update({
 		where: {
@@ -383,13 +500,12 @@ const updateSchedule = async (
 		data: {
 			startDateTime: payload.startDateTime,
 			endDateTime: payload.endDateTime,
-			meetingLink: payload.meetingLink,
-			totalSlots,
-			availableSlots: totalSlots,
-			doctorId: doctor.id,
+			reason: payload.reason,
+			feederId: payload.feederId,
+			operatorId: operator.id,
 		},
 		include: {
-			doctor: {
+			operator: {
 				select: {
 					name: true,
 					email: true,
@@ -403,16 +519,16 @@ const updateSchedule = async (
 };
 
 const publishSchedule = async (scheduleId: string, user: RequestUser) => {
-	const doctor = await prisma.doctor.findUnique({
+	const operator = await prisma.operator.findUnique({
 		where: { userId: user.userId },
 	});
 
-	if (!doctor) {
-		throw new AppError(httpStatus.NOT_FOUND, "Doctor Profile Not Found");
+	if (!operator) {
+		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
 	}
 
 	const schedule = await prisma.schedule.findUnique({
-		where: { id: scheduleId, doctorId: doctor.id },
+		where: { id: scheduleId, operatorId: operator.id },
 	});
 
 	if (!schedule || schedule.isDeleted) {
@@ -432,31 +548,31 @@ const publishSchedule = async (scheduleId: string, user: RequestUser) => {
 };
 
 const deleteSchedule = async (scheduleId: string, user: RequestUser) => {
-	const doctor = await prisma.doctor.findUnique({
+	const operator = await prisma.operator.findUnique({
 		where: { userId: user.userId },
 	});
 
-	if (!doctor) {
+	if (!operator) {
 		throw new AppError(httpStatus.NOT_FOUND, "Doctor Profile Not Found");
 	}
 
 	const schedule = await prisma.schedule.findUnique({
-		where: { id: scheduleId, doctorId: doctor.id },
+		where: { id: scheduleId },
 	});
 
 	if (!schedule || schedule.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Schedule Not Found");
 	}
 
-	if (
-		schedule.status === ScheduleStatus.PUBLISHED &&
-		schedule.totalSlots !== schedule.availableSlots
-	) {
-		throw new AppError(
-			httpStatus.CONFLICT,
-			"Schedule Once Published And Appoinement Booked Cannot Be Deleted",
-		);
-	}
+	// if (
+	// 	schedule.status === ScheduleStatus.PUBLISHED &&
+	// 	schedule.totalSlots !== schedule.availableSlots
+	// ) {
+	// 	throw new AppError(
+	// 		httpStatus.CONFLICT,
+	// 		"Schedule Once Published And Appoinement Booked Cannot Be Deleted",
+	// 	);
+	// }
 
 	const deletedSchedule = await prisma.schedule.update({
 		where: { id: schedule.id },
@@ -467,20 +583,20 @@ const deleteSchedule = async (scheduleId: string, user: RequestUser) => {
 };
 
 const getTodaysSchedules = async (query: IQuery) => {
-	if (!query.doctorId) {
-		throw new AppError(
-			httpStatus.NOT_FOUND,
-			"Doctor Id Must Be Provided In Query",
-		);
-	}
+	// if (!query.operatorId) {
+	// 	throw new AppError(
+	// 		httpStatus.NOT_FOUND,
+	// 		"Operator Id Must Be Provided In Query",
+	// 	);
+	// }
 
-	const doctor = await prisma.doctor.findUnique({
-		where: { id: query.doctorId },
-	});
+	// const operator = await prisma.operator.findUnique({
+	// 	where: { id: query.operatorId },
+	// });
 
-	if (!doctor) {
-		throw new AppError(httpStatus.NOT_FOUND, "Doctor Profile Not Found");
-	}
+	// if (!operator) {
+	// 	throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
+	// }
 
 	const limit = query.limit ? Number(query.limit) : 10;
 	const page = query.page ? Number(query.page) : 1;
@@ -493,9 +609,9 @@ const getTodaysSchedules = async (query: IQuery) => {
 	const startOfTomorrow = addDays(startOfToday, 1);
 
 	const andConditions: ScheduleWhereInput[] = [
-		{
-			doctorId: query.doctorId,
-		},
+		// {
+		// 	operatorId: query.operatorId,
+		// },
 		{
 			isDeleted: false,
 		},
@@ -509,10 +625,107 @@ const getTodaysSchedules = async (query: IQuery) => {
 				gt: now,
 			},
 		},
-		{
-			availableSlots: { gt: 0 },
-		},
 	];
+
+    if (query.operatorId) {
+		andConditions.push({ operatorId: query.operatorId });
+	}
+
+	// if (query.email) {
+	// 	andConditions.push({
+	// 		operator: {
+	// 			email: query.email,
+	// 		},
+	// 	});
+	// }
+
+	if (query.status) {
+		andConditions.push({ status: query.status });
+	}
+
+	if (query.feederCode) {
+		andConditions.push({ feeder: { code: query.feederCode } });
+	}
+
+	if (query.areaCode) {
+		andConditions.push({
+			feeder: { areas: { some: { code: query.areaCode } } },
+		});
+	}
+
+	if (query.searchTerm) {
+		andConditions.push({
+			OR: [
+				// Feeder name
+				{
+					feeder: {
+						name: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+
+				// Feeder code
+				{
+					feeder: {
+						code: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+
+				// Feeder area name
+				{
+					feeder: {
+						areas: {
+							some: {
+								name: {
+									contains: query.searchTerm,
+									mode: "insensitive",
+								},
+							},
+						},
+					},
+				},
+
+				// Feeder area code
+				{
+					feeder: {
+						areas: {
+							some: {
+								code: {
+									contains: query.searchTerm,
+									mode: "insensitive",
+								},
+							},
+						},
+					},
+				},
+
+				// Operator name
+				{
+					operator: {
+						name: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+
+				// Operator email
+				{
+					operator: {
+						email: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+			],
+		});
+	}
 
 	const schedules = await prisma.schedule.findMany({
 		where: {

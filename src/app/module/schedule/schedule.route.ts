@@ -19,13 +19,13 @@ router.post(
 
 router.get(
     "/my-appointed-schedules",
-    auth(Role.DOCTOR),
+    auth(Role.OPERATOR),
     ScheduleController.getMyAppointedSchedules,
 );
 
 router.get(
     "/all-schedules",
-    auth(Role.ADMIN, Role.SUPER_ADMIN),
+    auth(Role.ADMIN, Role.OPERATOR),
     ScheduleController.getAllSchedules,
 );
 
@@ -33,26 +33,26 @@ router.get("/todays-schedule", ScheduleController.getTodaysSchedules);
 
 router.patch(
     "/update-schedule/:scheduleId",
-    auth(Role.DOCTOR),
+    auth(Role.OPERATOR),
     validateRequest(UpdateScheduleValidationZodSchema),
     ScheduleController.updateSchedule,
 );
 
 router.patch(
     "/publish-schedule/:scheduleId",
-    auth(Role.DOCTOR),
+    auth(Role.OPERATOR),
     ScheduleController.publishSchedule,
 );
 
 router.get(
     "/:scheduleId",
-    auth(Role.DOCTOR, Role.ADMIN, Role.SUPER_ADMIN),
+    auth(Role.ADMIN, Role.OPERATOR),
     ScheduleController.getScheduleById,
 );
 
 router.delete(
     "/:scheduleId",
-    auth(Role.DOCTOR),
+    auth(Role.OPERATOR),
     ScheduleController.deleteSchedule,
 );
 
