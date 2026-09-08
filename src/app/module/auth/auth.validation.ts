@@ -2,20 +2,21 @@ import z from "zod";
 
 const CustomerRegistrationZodSchema = z.object({
 	name: z
-		.string("Not A String!!!!!")
+		.string("Not a string!!!!!")
+		.trim()
 		.min(3, "Name must be at least 3 characters long!!!")
 		.max(15, "Name cannot be greater than 15 characters long!!!"),
-	email: z.email("Not email!!"),
+	email: z.email("Not a valid email!").trim().toLowerCase(),
 	password: z
-		.string()
-		.min(8, "Password Must Minimum 8 Characters Long.")
-		.regex(/[a-z]/, "Password must contain at least 1 Lowercase Letter")
-		.regex(/[A-Z]/, "Password must contain at least 1 Uppercase Letter")
+		.string("Not a string!!!!!")
+		.min(8, "Password must be minimum 8 characters Long.")
+		.regex(/[a-z]/, "Password must contain at least 1 lowercase letter")
+		.regex(/[A-Z]/, "Password must contain at least 1 uppercase letter")
 
-		.regex(/[0-9]/, "Password must contain at least 1 Number")
+		.regex(/[0-9]/, "Password must contain at least 1 number")
 		.regex(
 			/[^A-Za-z0-9]/,
-			"Password must contain at least 1 Special Character",
+			"Password must contain at least 1 special character",
 		),
 	patient: z
 		.object({
@@ -24,41 +25,41 @@ const CustomerRegistrationZodSchema = z.object({
 		.optional(),
 });
 const CustomerEmailVerifyZodSchema = z.object({
-	email: z.email("Not email!!"),
+	email: z.email("Not a valid email!").trim().toLowerCase(),
 	otp: z.string().length(6),
 });
 
 const LoginZodSchema = z.object({
-	email: z.email(),
+	email: z.email("Not a valid email!").trim().toLowerCase(),
 	password: z
-		.string()
-		.min(8, "Password Must Minimum 8 Characters Long.")
-		.regex(/[a-z]/, "Password must contain at least 1 Lowercase Letter")
-		.regex(/[A-Z]/, "Password must contain at least 1 Uppercase Letter")
+		.string("Not a string!!!!!")
+		.min(8, "Password must be minimum 8 characters Long.")
+		.regex(/[a-z]/, "Password must contain at least 1 lowercase letter")
+		.regex(/[A-Z]/, "Password must contain at least 1 uppercase letter")
 
-		.regex(/[0-9]/, "Password must contain at least 1 Number")
+		.regex(/[0-9]/, "Password must contain at least 1 number")
 		.regex(
 			/[^A-Za-z0-9]/,
-			"Password must contain at least 1 Special Character",
+			"Password must contain at least 1 special character",
 		),
 });
 
 const ForgotPasswordZodSchema = z.object({
-	email: z.email(),
+	email: z.email("Not a valid email!").trim().toLowerCase(),
 });
 
 const ResetPasswordZodSchema = z.object({
-	email: z.email(),
+	email: z.email("Not a valid email!").trim().toLowerCase(),
 	newPassword: z
-		.string()
-		.min(8, "Password Must Minimum 8 Characters Long.")
-		.regex(/[a-z]/, "Password must contain at least 1 Lowercase Letter")
-		.regex(/[A-Z]/, "Password must contain at least 1 Uppercase Letter")
+		.string("Not a string!!!!!")
+		.min(8, "Password must be minimum 8 characters Long.")
+		.regex(/[a-z]/, "Password must contain at least 1 lowercase letter")
+		.regex(/[A-Z]/, "Password must contain at least 1 uppercase letter")
 
-		.regex(/[0-9]/, "Password must contain at least 1 Number")
+		.regex(/[0-9]/, "Password must contain at least 1 number")
 		.regex(
 			/[^A-Za-z0-9]/,
-			"Password must contain at least 1 Special Character",
+			"Password must contain at least 1 special character",
 		),
 	otp: z.string().length(6),
 });
