@@ -65,6 +65,19 @@ const approveTechnician = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const changePassword = catchAsync(async (req: Request, res: Response) => {
+	const payload = req.body;
+
+	const result = await TechnicianService.changePassword(payload);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Technician Password Updated Successfully",
+		data: result,
+	});
+});
+
 const getAllTechnicians = catchAsync(async (req: Request, res: Response) => {
 	const { data, meta } = await TechnicianService.getAllTechnicians(req.query);
 	sendResponse(res, {
@@ -143,6 +156,7 @@ export const TechnicianController = {
 	applyAsTechnician,
 	verifyTechnicianEmail,
 	approveTechnician,
+	changePassword,
 	getAllTechnicians,
 	updateTechnicianProfile,
 	getAvailableTechnicianByTodaysSchedule,

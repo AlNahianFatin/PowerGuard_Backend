@@ -30,3 +30,8 @@ export interface IUpdateTechnicianProfilePayload {
     bio?: string;
     contactNumber?: string;
 }
+
+export interface IChangeTechnicianPasswordPayload {
+    email: string;
+    password: string;
+}

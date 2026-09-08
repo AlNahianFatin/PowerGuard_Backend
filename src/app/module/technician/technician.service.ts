@@ -10,6 +10,7 @@ import {
 	Role,
 	ScheduleStatus,
 	TechnicianStatus,
+	UserStatus,
 } from "../../../generated/prisma/enums";
 import { TechnicianWhereInput } from "../../../generated/prisma/models";
 import config from "../../config";
@@ -23,6 +24,7 @@ import { AppError } from "../../utils/AppError";
 import {
 	IApplyAsTechnicianPayload,
 	IApproveTechnicianPayload,
+	IChangeTechnicianPasswordPayload,
 	IUpdateTechnicianProfilePayload,
 	IVerifyTechnicianEmailPayload,
 } from "./technician.interface";
@@ -74,8 +76,6 @@ const applyAsTechnician = async (
 		},
 	);
 
-	console.log({ resumeUploadResult });
-
 	const additionalFilesUploadResults = await Promise.all(
 		additionalFiles.map((file) => {
 			return new Promise<UploadApiResponse>((resolve, reject) => {
@@ -101,8 +101,6 @@ const applyAsTechnician = async (
 			});
 		}),
 	);
-
-	console.log({ additionalFilesUploadResults });
 
 	const randomTechnicianPassword = Math.random().toString(36).slice(-8);
 
@@ -269,7 +267,7 @@ const approveTechnician = async (
 	) {
 		throw new AppError(
 			httpStatus.BAD_REQUEST,
-			"Rejection Reason Is Required When Rejecting A Doctor Application",
+			"Rejection Reason Is Required When Rejecting A Technician Application",
 		);
 	}
 
@@ -312,6 +310,65 @@ const approveTechnician = async (
 			? "Your Technician Application Has Been Approved"
 			: "Your Technician Application Has Been Rejected",
 		html,
+	});
+
+	return updatedTechnician;
+};
+
+const changePassword = async (payload: IChangeTechnicianPasswordPayload) => {
+	const email = payload.email;
+	const password = payload.password;
+
+	const user = await prisma.user.findUnique({
+		where: { email },
+		include: { technician: true },
+	});
+
+	if (!user || !user.technician) {
+		throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
+	}
+
+	if (user.status === UserStatus.BLOCKED) {
+		throw new AppError(httpStatus.FORBIDDEN, "Your account is blocked");
+	}
+
+	if (user.isDeleted || user.status === UserStatus.DELETED) {
+		throw new AppError(httpStatus.FORBIDDEN, "Your account is deleted");
+	}
+
+	if (
+		user.technician.verificationStatus === TechnicianVerificationStatus.REJECTED
+	) {
+		throw new AppError(
+			httpStatus.FORBIDDEN,
+			`Your profile is rejected : ${user.technician.rejectionReason}`,
+		);
+	}
+
+	if (!user.emailVerified) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"Please verify your email with the OTP sent to your email first!",
+		);
+	}
+
+	if (!user.needPasswordChange) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"Your account currently doesn't require password change",
+		);
+	}
+
+	const hashedPassword = await bcrypt.hash(
+		password,
+		Number(config.bcrypt_salt_rounds),
+	);
+
+	const updatedTechnician = await prisma.user.update({
+		where: { email },
+		data: { password: hashedPassword, needPasswordChange: false },
+		omit: { password: true },
+		include: { technician: true },
 	});
 
 	return updatedTechnician;
@@ -576,6 +633,7 @@ export const TechnicianService = {
 	applyAsTechnician,
 	verifyTechnicianEmail,
 	approveTechnician,
+	changePassword,
 	getAllTechnicians,
 	updateTechnicianProfile,
 	getAvailableTechnicianByTodaysSchedule,

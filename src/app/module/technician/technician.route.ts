@@ -4,7 +4,10 @@ import { upload } from "../../lib/multer";
 import { auth } from "../../middleware/checkAuth";
 import { validateRequest } from "../../middleware/validateRequest";
 import { TechnicianController } from "./technician.controller";
-import { UpdateTechnicianProfileValidationZodSchema } from "./technician.validation";
+import {
+	UpdateTechnicianProfileValidationZodSchema,
+	ChangeTechnicianPasswordValidationZodSchema,
+} from "./technician.validation";
 
 const router = Router();
 
@@ -33,6 +36,11 @@ router.post(
 	auth(Role.ADMIN, Role.OPERATOR),
 	TechnicianController.approveTechnician,
 );
+router.patch(
+	"/change-password",
+	validateRequest(ChangeTechnicianPasswordValidationZodSchema),
+	TechnicianController.changePassword,
+);
 router.get(
 	"/all-technicians",
 	auth(Role.ADMIN, Role.OPERATOR),
@@ -48,7 +56,7 @@ router.patch(
 
 // Operator technician-discovery routes (no auth) — meant for operators browsing to assign to resolve outage.
 router.get(
-	"/public/available-today",
+	"/available-today",
 	auth(Role.ADMIN, Role.OPERATOR),
 	TechnicianController.getAvailableTechnicianByTodaysSchedule,
 );
