@@ -49,7 +49,7 @@ router.patch(
 // Operator technician-discovery routes (no auth) — meant for operators browsing to assign to resolve outage.
 router.get(
 	"/public/available-today",
-	auth(Role.TECHNICIAN),
+	auth(Role.ADMIN, Role.OPERATOR),
 	TechnicianController.getAvailableTechnicianByTodaysSchedule,
 );
 
@@ -57,4 +57,4 @@ router.get(
 
 // router.get("/public/:technicianId", TechnicianController.getSingleTechnicianPublicProfile);
 
-export const DoctorRoutes = router;
+export const TechnicianRoutes = router;

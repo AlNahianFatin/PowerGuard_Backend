@@ -5,6 +5,8 @@ model Technician {
   email   String  @unique
   address String?
 
+  status TechnicianStatus @default(AVAILABLE)
+
   experienceYears Int
 
   bio String?

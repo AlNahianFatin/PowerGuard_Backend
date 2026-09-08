@@ -1,38 +1,32 @@
-import { OperatorTechnicianVerificationStatus } from "../../../generated/prisma/enums";
+import { TechnicianVerificationStatus } from "../../../generated/prisma/enums";
 
-export interface IApplyAsDoctorPayload {
+export interface IApplyAsTechnicianPayload {
     user: {
         name: string;
         email: string;
     };
-    doctor: {
+    technician: {
         address?: string;
-        specialization: string;
-        licenseNumber: string;
-        qualifications: string;
         experienceYears: number;
         bio?: string;
-        consultationFee?: number;
         contactNumber?: string;
     };
 }
 
-
-export interface IVerifyDoctorEmailPayload {
+export interface IVerifyTechnicianEmailPayload {
     email: string;
     otp: string;
 }
 
 
-export interface IApproveDoctorPayload {
-    doctorId: string;
-    verificationStatus: OperatorTechnicianVerificationStatus;
+export interface IApproveTechnicianPayload {
+    technicianId: string;
+    verificationStatus: TechnicianVerificationStatus;
     rejectionReason: string;
 }
 
-export interface IUpdateDoctorProfilePayload {
+export interface IUpdateTechnicianProfilePayload {
     address?: string;
     bio?: string;
-    consultationFee?: number;
     contactNumber?: string;
 }

@@ -25,7 +25,7 @@ const applyAsTechnician = catchAsync(async (req: Request, res: Response) => {
 
 	const payload = zodValidationResult.data;
 
-	const result = await TechnicianService.applyAsDoctor(
+	const result = await TechnicianService.applyAsTechnician(
 		payload,
 		resume,
 		additionalFiles,
@@ -33,7 +33,7 @@ const applyAsTechnician = catchAsync(async (req: Request, res: Response) => {
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
-		message: "Applied As Doctor Successfuly",
+		message: "Applied As Technician Successfully",
 		data: result,
 	});
 });
@@ -42,11 +42,11 @@ const verifyTechnicianEmail = catchAsync(
 	async (req: Request, res: Response) => {
 		const payload = req.body;
 
-		const result = await TechnicianService.verifyDoctorEmail(payload);
+		const result = await TechnicianService.verifyTechnicianEmail(payload);
 		sendResponse(res, {
 			statusCode: httpStatus.OK,
 			success: true,
-			message: "Doctor Email Verified Successfully",
+			message: "Technician Email Verified Successfully",
 			data: result,
 		});
 	},
@@ -56,21 +56,21 @@ const approveTechnician = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
 	const user = req.user!;
 
-	const result = await TechnicianService.approveDoctor(payload, user);
+	const result = await TechnicianService.approveTechnician(payload, user);
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
-		message: "Doctor Email Verified Successfully",
+		message: "Technician Email Verified Successfully",
 		data: result,
 	});
 });
 
 const getAllTechnicians = catchAsync(async (req: Request, res: Response) => {
-	const { data, meta } = await TechnicianService.getAllDoctors(req.query);
+	const { data, meta } = await TechnicianService.getAllTechnicians(req.query);
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
-		message: "Doctors Retrieved Successfully",
+		message: "Technicians Retrieved Successfully",
 		data: data,
 		meta: meta,
 	});
@@ -81,11 +81,14 @@ const updateTechnicianProfile = catchAsync(
 		const payload = req.body;
 		const user = req.user!;
 
-		const result = await TechnicianService.updateDoctorProfile(payload, user);
+		const result = await TechnicianService.updateTechnicianProfile(
+			payload,
+			user,
+		);
 		sendResponse(res, {
 			statusCode: httpStatus.OK,
 			success: true,
-			message: "Doctor Profile Updated Successfully",
+			message: "Technician Profile Updated Successfully",
 			data: result,
 		});
 	},
@@ -94,11 +97,11 @@ const updateTechnicianProfile = catchAsync(
 const getAvailableTechnicianByTodaysSchedule = catchAsync(
 	async (req: Request, res: Response) => {
 		const { data, meta } =
-			await TechnicianService.getAvailableDoctorByTodaysSchedule(req.query);
+			await TechnicianService.getAvailableTechnicianByTodaysSchedule(req.query);
 		sendResponse(res, {
 			statusCode: httpStatus.OK,
 			success: true,
-			message: "Today's Available Doctors Retrieved Successfully",
+			message: "Today's Available Technicians Retrieved Successfully",
 			data,
 			meta,
 		});

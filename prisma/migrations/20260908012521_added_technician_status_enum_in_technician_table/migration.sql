@@ -4,29 +4,23 @@
   - The values [UNPAID,REFUNDED] on the enum `PaymentStatus` will be removed. If these variants are still used in the database, this will fail.
   - The values [SUPER_ADMIN,DOCTOR,PATIENT] on the enum `Role` will be removed. If these variants are still used in the database, this will fail.
   - You are about to drop the column `appointmentId` on the `payments` table. All the data in the column will be lost.
-  - You are about to drop the column `availableSlots` on the `schedules` table. All the data in the column will be lost.
-  - You are about to drop the column `doctorId` on the `schedules` table. All the data in the column will be lost.
-  - You are about to drop the column `meetingLink` on the `schedules` table. All the data in the column will be lost.
-  - You are about to drop the column `totalSlots` on the `schedules` table. All the data in the column will be lost.
   - You are about to drop the `appointments` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `doctors` table. If the table is not empty, all the data it contains will be lost.
   - You are about to drop the `patients` table. If the table is not empty, all the data it contains will be lost.
   - A unique constraint covering the columns `[assignmentId]` on the table `payments` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[startDateTime,endDateTime]` on the table `schedules` will be added. If there are existing duplicate values, this will fail.
   - Added the required column `assignmentId` to the `payments` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `feederId` to the `schedules` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `operatorId` to the `schedules` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `reason` to the `schedules` table without a default value. This is not possible if the table is not empty.
 
 */
+-- CreateEnum
+CREATE TYPE "ScheduleStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'CANCELLED', 'COMPLETED');
+
 -- CreateEnum
 CREATE TYPE "OutageStatus" AS ENUM ('PENDING', 'VERIFIED', 'ASSIGNED', 'INPROGRESS', 'RESOLVED', 'FAILED', 'REJECTED', 'CANCELLED');
 
 -- CreateEnum
-CREATE TYPE "OperatorTechnicianVerificationStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+CREATE TYPE "TechnicianVerificationStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 
 -- CreateEnum
-CREATE TYPE "TechnicianStatus" AS ENUM ('AVAILABLE', 'ASSIGNED', 'BUSY', 'OFFDUTY');
+CREATE TYPE "TechnicianStatus" AS ENUM ('AVAILABLE', 'ASSIGNED', 'OFFDUTY');
 
 -- AlterEnum
 BEGIN;
@@ -50,43 +44,14 @@ DROP TYPE "public"."Role_old";
 ALTER TABLE "users" ALTER COLUMN "role" SET DEFAULT 'CUSTOMER';
 COMMIT;
 
--- AlterEnum
--- This migration adds more than one value to an enum.
--- With PostgreSQL versions 11 and earlier, this is not possible
--- in a single migration. This can be worked around by creating
--- multiple migrations, each migration adding only one value to
--- the enum.
-
-
-ALTER TYPE "ScheduleStatus" ADD VALUE 'CANCELLED';
-ALTER TYPE "ScheduleStatus" ADD VALUE 'COMPLETED';
-
--- DropForeignKey
-ALTER TABLE "appointments" DROP CONSTRAINT "appointments_doctorId_fkey";
-
--- DropForeignKey
-ALTER TABLE "appointments" DROP CONSTRAINT "appointments_patientId_fkey";
-
--- DropForeignKey
-ALTER TABLE "appointments" DROP CONSTRAINT "appointments_scheduleId_fkey";
-
--- DropForeignKey
-ALTER TABLE "doctors" DROP CONSTRAINT "doctors_userId_fkey";
-
 -- DropForeignKey
 ALTER TABLE "patients" DROP CONSTRAINT "patients_userId_fkey";
 
 -- DropForeignKey
 ALTER TABLE "payments" DROP CONSTRAINT "payments_appointmentId_fkey";
 
--- DropForeignKey
-ALTER TABLE "schedules" DROP CONSTRAINT "schedules_doctorId_fkey";
-
 -- DropIndex
 DROP INDEX "payments_appointmentId_key";
-
--- DropIndex
-DROP INDEX "schedules_doctorId_startDateTime_endDateTime_key";
 
 -- AlterTable
 ALTER TABLE "payments" DROP COLUMN "appointmentId",
@@ -95,31 +60,16 @@ ADD COLUMN     "userId" TEXT,
 ALTER COLUMN "status" SET DEFAULT 'PENDING';
 
 -- AlterTable
-ALTER TABLE "schedules" DROP COLUMN "availableSlots",
-DROP COLUMN "doctorId",
-DROP COLUMN "meetingLink",
-DROP COLUMN "totalSlots",
-ADD COLUMN     "feederId" TEXT NOT NULL,
-ADD COLUMN     "operatorId" TEXT NOT NULL,
-ADD COLUMN     "reason" TEXT NOT NULL;
-
--- AlterTable
 ALTER TABLE "users" ALTER COLUMN "role" SET DEFAULT 'CUSTOMER';
 
 -- DropTable
 DROP TABLE "appointments";
 
 -- DropTable
-DROP TABLE "doctors";
-
--- DropTable
 DROP TABLE "patients";
 
 -- DropEnum
 DROP TYPE "AppointmentStatus";
-
--- DropEnum
-DROP TYPE "DoctorVerificationStatus";
 
 -- DropEnum
 DROP TYPE "Gender";
@@ -198,10 +148,6 @@ CREATE TABLE "operators" (
     "email" TEXT NOT NULL,
     "address" TEXT,
     "contactNumber" TEXT,
-    "verificationStatus" "OperatorTechnicianVerificationStatus" NOT NULL DEFAULT 'PENDING',
-    "rejectionReason" TEXT,
-    "reviewedBy" TEXT,
-    "reviewedAt" TIMESTAMP(3),
     "resume" TEXT,
     "resumePublicId" TEXT,
     "additionalFiles" JSONB,
@@ -234,6 +180,23 @@ CREATE TABLE "outagereports" (
 );
 
 -- CreateTable
+CREATE TABLE "schedules" (
+    "id" TEXT NOT NULL,
+    "startDateTime" TIMESTAMP(3) NOT NULL,
+    "endDateTime" TIMESTAMP(3) NOT NULL,
+    "reason" TEXT NOT NULL,
+    "status" "ScheduleStatus" NOT NULL DEFAULT 'DRAFT',
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
+    "deletedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "feederId" TEXT NOT NULL,
+    "operatorId" TEXT NOT NULL,
+
+    CONSTRAINT "schedules_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "substations" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -249,10 +212,11 @@ CREATE TABLE "technicians" (
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "address" TEXT,
+    "status" "TechnicianStatus" NOT NULL DEFAULT 'AVAILABLE',
     "experienceYears" INTEGER NOT NULL,
     "bio" TEXT,
     "contactNumber" TEXT,
-    "verificationStatus" "OperatorTechnicianVerificationStatus" NOT NULL DEFAULT 'PENDING',
+    "verificationStatus" "TechnicianVerificationStatus" NOT NULL DEFAULT 'PENDING',
     "rejectionReason" TEXT,
     "reviewedBy" TEXT,
     "reviewedAt" TIMESTAMP(3),
@@ -335,6 +299,9 @@ CREATE INDEX "outagereports_customerId_idx" ON "outagereports"("customerId");
 CREATE INDEX "outagereports_areaId_idx" ON "outagereports"("areaId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "schedules_startDateTime_endDateTime_key" ON "schedules"("startDateTime", "endDateTime");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "substations_code_key" ON "substations"("code");
 
 -- CreateIndex
@@ -357,9 +324,6 @@ CREATE INDEX "technicians_email_idx" ON "technicians"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "payments_assignmentId_key" ON "payments"("assignmentId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "schedules_startDateTime_endDateTime_key" ON "schedules"("startDateTime", "endDateTime");
 
 -- CreateIndex
 CREATE INDEX "users_status_idx" ON "users"("status");

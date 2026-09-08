@@ -50,6 +50,5 @@ enum TechnicianVerificationStatus {
 enum TechnicianStatus {
   AVAILABLE
   ASSIGNED
-  BUSY
   OFFDUTY
 }
