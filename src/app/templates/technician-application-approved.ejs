@@ -7,6 +7,13 @@
       body { font-family: Arial, sans-serif; background: #f7f7f7; color: #333; }
       .container { max-width: 500px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
       .footer { margin-top: 30px; font-size: 12px; color: #888; }
+      .link {display: inline-block;
+        padding: 12px 20px;
+        background-color: #2563eb;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: bold;}
     </style>
   </head>
   <body>
@@ -14,6 +21,14 @@
       <h2>Congratulations, <%= name %>!</h2>
       <p>Your application to join Power Guard as a technician has been reviewed and approved.</p>
       <p>You can now log in and start managing your account and resolve outages.</p>
+
+      <% if (changePassLink) { %>
+        <div>
+          <a href="<%= changePassLink %>" class="link" style="color: #ffffff; text-decoration: none;">
+            Set Password & Access Account
+          </a>
+        </div>
+      <% } %>
       <div class="footer">&copy; Power Guard. All rights reserved.</div>
     </div>
   </body>

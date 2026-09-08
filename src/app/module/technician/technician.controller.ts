@@ -5,10 +5,10 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { TechnicianService } from "./technician.service";
 import { ApplyAsTechnicianValidationZodSchema } from "./technician.validation";
+import { TechnicianVerificationStatus } from "../../../generated/prisma/enums";
 
 const applyAsTechnician = catchAsync(async (req: Request, res: Response) => {
 	const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-	console.log({ files });
 	const resume = files?.["resume"] ? files["resume"][0] : null;
 	const additionalFiles = files?.["additionalFiles"] || [];
 
@@ -60,7 +60,12 @@ const approveTechnician = catchAsync(async (req: Request, res: Response) => {
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
-		message: "Technician Email Verified Successfully",
+		message:
+			payload.reason === TechnicianVerificationStatus.APPROVED
+				? "Technician approved successfully"
+				: payload.reason === TechnicianVerificationStatus.REJECTED
+					? "Technician rejected successfully"
+					: "Request managed",
 		data: result,
 	});
 });

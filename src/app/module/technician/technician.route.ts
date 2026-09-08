@@ -33,7 +33,7 @@ router.post(
 );
 router.post(
 	"/approve-technician",
-	auth(Role.ADMIN, Role.OPERATOR),
+	auth(Role.ADMIN),
 	TechnicianController.approveTechnician,
 );
 router.patch(

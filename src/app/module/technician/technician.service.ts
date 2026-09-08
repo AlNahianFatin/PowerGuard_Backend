@@ -296,9 +296,12 @@ const approveTechnician = async (
 		}`,
 	);
 
+	const changePassLink = `${config.frontend_technician_change_pass_link}/${updatedTechnician.userId}/change-password`;
+
 	const templateData = {
 		name: updatedTechnician.name,
 		reason: updatedTechnician.rejectionReason,
+		changePassLink
 	};
 
 	const html = await ejs.renderFile(templatePath, templateData);
