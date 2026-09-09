@@ -6,7 +6,6 @@
 // import { RequestUser } from "../../middleware/checkAuth";
 // import { AppError } from "../../utils/AppError";
 
-
 // const getMyPayments = async (query : IQuery, user : RequestUser) => {
 
 //     const limit = query.limit ? Number(query.limit) : 10;
@@ -57,7 +56,6 @@
 //             totalPages: Math.ceil(total / limit),
 //         },
 //     };
-
 
 // }
 

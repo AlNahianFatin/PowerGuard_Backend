@@ -61,5 +61,4 @@
 // 	AppointmentController.getSingleAppointment,
 // );
 
-
 // export const AppointementRoutes = router;

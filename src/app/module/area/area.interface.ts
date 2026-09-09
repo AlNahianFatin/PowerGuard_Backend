@@ -2,14 +2,11 @@ export interface ICreateAreaPayload {
 	name: string;
 	code: string;
 	description?: string;
-	repairingCost: string;
-	substationId: string;
+	feederId: string;
 }
 export interface IUpdateAreaPayload {
 	name?: string;
 	code?: string;
 	description?: string;
-	repairingCost?: string;
-	substationId?: string;
-	areaIds?: string[];
+	feederId?: string;
 }

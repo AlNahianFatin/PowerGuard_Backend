@@ -7,12 +7,12 @@ import {
 } from "date-fns";
 import httpStatus from "http-status";
 import { ScheduleStatus } from "../../../generated/prisma/enums";
-import { ScheduleWhereInput } from "../../../generated/prisma/models";
-import { IQuery } from "../../interfaces";
+import type { ScheduleWhereInput } from "../../../generated/prisma/models";
+import type { IQuery } from "../../interfaces";
 import { prisma } from "../../lib/prisma";
-import { RequestUser } from "../../middleware/checkAuth";
+import type { RequestUser } from "../../middleware/checkAuth";
 import { AppError } from "../../utils/AppError";
-import {
+import type {
 	ICreateSchedulePayload,
 	IUpdateSchedulePayload,
 } from "./schedule.interface";

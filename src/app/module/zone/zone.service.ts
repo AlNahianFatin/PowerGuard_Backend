@@ -1,10 +1,10 @@
 import httpStatus from "http-status";
-import { DistributionZoneWhereInput } from "../../../generated/prisma/models";
-import { IQuery } from "../../interfaces";
+import type { DistributionZoneWhereInput } from "../../../generated/prisma/models";
+import type { IQuery } from "../../interfaces";
 import { prisma } from "../../lib/prisma";
-import { RequestUser } from "../../middleware/checkAuth";
+import type { RequestUser } from "../../middleware/checkAuth";
 import { AppError } from "../../utils/AppError";
-import { ICreateZonePayload, IUpdateZonePayload } from "./zone.interface";
+import type { ICreateZonePayload, IUpdateZonePayload } from "./zone.interface";
 
 const getAllZones = async (query: IQuery) => {
 	const limit = query.limit ? Number(query.limit) : 10;

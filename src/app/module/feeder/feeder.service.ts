@@ -1,10 +1,13 @@
 import httpStatus from "http-status";
-import { FeederWhereInput } from "../../../generated/prisma/models";
-import { IQuery } from "../../interfaces";
+import type { FeederWhereInput } from "../../../generated/prisma/models";
+import type { IQuery } from "../../interfaces";
 import { prisma } from "../../lib/prisma";
-import { RequestUser } from "../../middleware/checkAuth";
+import type { RequestUser } from "../../middleware/checkAuth";
 import { AppError } from "../../utils/AppError";
-import { ICreateFeederPayload, IUpdateFeederPayload } from "./feeder.interface";
+import type {
+	ICreateFeederPayload,
+	IUpdateFeederPayload,
+} from "./feeder.interface";
 
 const getAllFeeders = async (query: IQuery) => {
 	const limit = query.limit ? Number(query.limit) : 10;

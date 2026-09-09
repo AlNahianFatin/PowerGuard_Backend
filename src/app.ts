@@ -22,6 +22,7 @@ import { UserRoutes } from "./app/module/user/user.route";
 import { ZoneRoutes } from "./app/module/zone/zone.route";
 import { SubstationRoutes } from "./app/module/substation/substation.route";
 import { FeederRoutes } from "./app/module/feeder/feeder.route";
+import { AreaRoutes } from "./app/module/area/area.route";
 
 const app: Application = express();
 
@@ -49,6 +50,7 @@ app.use("/api/v1/technician", TechnicianRoutes);
 app.use("/api/v1/zone", ZoneRoutes);
 app.use("/api/v1/substation", SubstationRoutes);
 app.use("/api/v1/feeder", FeederRoutes);
+app.use("/api/v1/area", AreaRoutes);
 // app.use("/api/v1/analytics", AnalyticsRoutes);
 
 // app.get("/test", async (req: Request, res: Response, next: NextFunction) => {

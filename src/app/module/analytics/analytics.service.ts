@@ -34,7 +34,6 @@
 //         },
 //     });
 
-
 //     const totalPatients = await prisma.patient.count({
 //         where: { isDeleted: false },
 //     });
@@ -69,9 +68,7 @@
 //         }
 //     })
 
-//     const totalRevenue = (totalRevenueResult._sum.amount?.toNumber() || 0) - totalRefunded 
-
-    
+//     const totalRevenue = (totalRevenueResult._sum.amount?.toNumber() || 0) - totalRefunded
 
 //     return {
 //         totalDoctors,
@@ -85,7 +82,6 @@
 //         totalRevenue,
 //         totalRefunded
 //     }
-
 
 // }
 // const getPatientAnalytics = async (user : RequestUser) => {
@@ -150,7 +146,6 @@
 //         totalAmountSpent,
 //         totalRefunded
 //     }
-
 
 // }
 // const getDoctorAnalytics = async (user : RequestUser) => {
@@ -221,8 +216,6 @@
 //     });
 
 //     const totalDoctorEarnings = (totalDoctorEarningsResult._sum.amount?.toNumber() || 0) - totalDoctorRefunded;
-
-    
 
 //     return {
 //         totalSchedules,

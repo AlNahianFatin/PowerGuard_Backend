@@ -16,5 +16,5 @@ export const UpdateScheduleValidationZodSchema = z.object({
 		.string("Must include a valid reason")
 		.max(1000, "Reason must be within 1000 characters!!!")
 		.optional(),
-	feederId: z.string("Must include a valid feeder").optional()
+	feederId: z.string("Must include a valid feeder").optional(),
 });

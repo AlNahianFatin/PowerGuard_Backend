@@ -142,7 +142,6 @@
 // 	});
 // });
 
-
 // export const AppointmentController = {
 // 	bookAppointment,
 // 	payAppointment,

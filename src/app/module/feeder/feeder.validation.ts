@@ -17,7 +17,7 @@ export const CreateFeederValidationZodSchema = z.object({
 		.optional(),
 
 	repairingCost: z
-		.number()
+		.number("Repairing cost must be a valid number")
 		.min(0, "Repairing cost cannot be negative"),
 
 	substationId: z
@@ -41,6 +41,11 @@ export const UpdateFeederValidationZodSchema = z.object({
 	description: z
 		.string("Must include a valid description")
 		.max(1000, "Description must be within 1000 characters")
+		.optional(),
+
+	repairingCost: z
+		.number("Repairing cost must be a valid number")
+		.min(0, "Repairing cost cannot be negative")
 		.optional(),
 
 	substationId: z

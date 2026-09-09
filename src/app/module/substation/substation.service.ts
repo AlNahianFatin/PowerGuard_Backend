@@ -1,10 +1,10 @@
 import httpStatus from "http-status";
-import { SubstationWhereInput } from "../../../generated/prisma/models";
-import { IQuery } from "../../interfaces";
+import type { SubstationWhereInput } from "../../../generated/prisma/models";
+import type { IQuery } from "../../interfaces";
 import { prisma } from "../../lib/prisma";
-import { RequestUser } from "../../middleware/checkAuth";
+import type { RequestUser } from "../../middleware/checkAuth";
 import { AppError } from "../../utils/AppError";
-import {
+import type {
 	ICreateSubstationPayload,
 	IUpdateSubstationPayload,
 } from "./substation.interface";

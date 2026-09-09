@@ -138,6 +138,8 @@ export const updateTechnicianExperience = async () => {
 				error,
 			);
 		}
-		console.log("Verified technician experience cron scheduled: every day at midnight");
+		console.log(
+			"Verified technician experience cron scheduled: every day at midnight",
+		);
 	});
 };

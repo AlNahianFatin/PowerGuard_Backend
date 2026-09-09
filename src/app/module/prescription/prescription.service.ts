@@ -89,11 +89,9 @@
 //         pdfDocument.moveDown(0.5);
 //     }
 
-
 //     pdfDocument.end();
 
 //     const pdfBuffer = await pdfReadyPromise;
-
 
 //     const uploadResult = await new Promise<UploadApiResponse>(
 //         (resolve, reject) => {
@@ -144,7 +142,6 @@
 
 //     return updatedAppointment
 // }
-
 
 // const getSinglePrescription = async (appointmentId: string, user: RequestUser) => {
 //     const appointment = await prisma.apppointment.findUnique({

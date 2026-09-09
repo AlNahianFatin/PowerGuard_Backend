@@ -199,7 +199,6 @@
 // 		);
 // 	}
 
-
 // 	const amount = existingAppointment.schedule.doctor.consultationFee.toString();
 // 	const bkashIdToken = await getBkashIdToken();
 
@@ -306,10 +305,6 @@
 // 				throw new AppError(httpStatus.NOT_FOUND, "Appointment Not Found!")
 // 			}
 
-
-
-			
-
 // 			// total slot = 3 , available slot = 2
 // 			// (total - available) + 1
 
@@ -324,19 +319,18 @@
 // 			// 2nd person joining time => startDateTime = 2026-08-25T15:20:00.436Z => 3:00 PM
 // 			// serial number (2) - 1 * 20 => 20 minutes
 
-
 // 			// 3nd person joining time => startDateTime = 2026-08-25T15:40:00.436Z => 3:00 PM
 // 			// serial number (3) - 1 * 20 => 40 mintes
 
 // 			const joiningTime = addMinutes(
-// 				appointment.schedule.startDateTime, 
+// 				appointment.schedule.startDateTime,
 // 				(serialNumber - 1) * 20
 // 			)
 
 // 			await tx.apppointment.update({
 // 				where: {
 // 					id: executedPaymentResult.merchantInvoiceNumber,
-					
+
 // 				},
 // 				data: {
 // 					status: AppointmentStatus.CONFIRMED,
@@ -583,9 +577,6 @@
 // 			},
 // 		})
 
-
-		
-
 // 		return {
 // 			appointment: updatedAppointment,
 // 			payment: newPaymentInfo,
@@ -643,7 +634,6 @@
 // 			}
 // 		})
 
-
 // 	}
 
 // 	if(appointment.status === AppointmentStatus.ONGOING){
@@ -673,7 +663,6 @@
 
 // //patient appointments
 // const getMyAppointments = async (query : IQuery, user : RequestUser) => {
-
 
 // 	const limit = query.limit ? Number(query.limit) : 10;
 // 	const page = query.page ? Number(query.page) : 1;
@@ -724,7 +713,6 @@
 // 			totalPages: Math.ceil(total / limit),
 // 		},
 // 	};
-
 
 // }
 
@@ -847,7 +835,6 @@
 // 			totalPages: Math.ceil(total / limit),
 // 		},
 // 	};
-
 
 // }
 
