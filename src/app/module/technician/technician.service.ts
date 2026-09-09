@@ -28,6 +28,8 @@ import {
 	IUpdateTechnicianProfilePayload,
 	IVerifyTechnicianEmailPayload,
 } from "./technician.interface";
+import type { SignOptions } from "jsonwebtoken";
+import { jwtUtils } from "../../utils/jwt";
 
 const applyAsTechnician = async (
 	payload: IApplyAsTechnicianPayload,
@@ -301,7 +303,7 @@ const approveTechnician = async (
 	const templateData = {
 		name: updatedTechnician.name,
 		reason: updatedTechnician.rejectionReason,
-		changePassLink
+		changePassLink,
 	};
 
 	const html = await ejs.renderFile(templatePath, templateData);
@@ -374,7 +376,29 @@ const changePassword = async (payload: IChangeTechnicianPasswordPayload) => {
 		include: { technician: true },
 	});
 
-	return updatedTechnician;
+	const jwtPayload = {
+		userId: updatedTechnician.id,
+		name: updatedTechnician.name,
+		email: updatedTechnician.email,
+		role: updatedTechnician.role,
+	};
+
+	const accessToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_access_secret,
+		config.jwt_access_expires_in as SignOptions,
+	);
+
+	const refreshToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_refresh_secret,
+		config.jwt_refresh_expires_in as SignOptions,
+	);
+
+	return {
+		accessToken,
+		refreshToken,
+	};
 };
 
 const getAllTechnicians = async (query: IQuery) => {
