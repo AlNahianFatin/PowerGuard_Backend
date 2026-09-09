@@ -19,6 +19,7 @@ import { TechnicianRoutes } from "./app/module/technician/technician.route";
 // import { PrescriptionRoutes } from "./app/module/prescription/prescription.route";
 // import { ScheduleRoutes } from "./app/module/schedule/schedule.route";
 import { UserRoutes } from "./app/module/user/user.route";
+import { ZoneRoutes } from "./app/module/zone/zone.route";
 
 const app: Application = express();
 
@@ -43,6 +44,7 @@ app.use("/api/v1/technician", TechnicianRoutes);
 // app.use("/api/v1/schedule", ScheduleRoutes);
 // app.use("/api/v1/payment", PaymentRoutes);
 // app.use("/api/v1/prescription", PrescriptionRoutes);
+app.use("/api/v1/zone", ZoneRoutes);
 // app.use("/api/v1/analytics", AnalyticsRoutes);
 
 // app.get("/test", async (req: Request, res: Response, next: NextFunction) => {

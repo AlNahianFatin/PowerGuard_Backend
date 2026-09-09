@@ -29,16 +29,6 @@ const createSchedule = async (
 		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
 	}
 
-	const feeder = await prisma.feeder.findUnique({
-		where: {
-			id: payload.feederId,
-		},
-	});
-
-	if (!feeder || feeder.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Feeder Not Found!");
-	}
-
 	// 25 August => start Time  : 9:00 PM
 	// 26 August => end Time : 3:00AM
 
@@ -66,16 +56,13 @@ const createSchedule = async (
 				gte: startOfTheDay,
 				lt: startOfNextDay,
 			},
-			feeder: {
-				isDeleted: false,
-			},
 		},
 	});
 
 	if (existingScheduleOnThisDate) {
 		throw new AppError(
 			httpStatus.CONFLICT,
-			"An outage schedule for this date and time has already been published",
+			"A schedule for this date and time has already been published",
 		);
 	}
 
@@ -138,11 +125,6 @@ const getMyAppointedSchedules = async (query: IQuery, user: RequestUser) => {
 		},
 		{
 			isDeleted: false,
-		},
-		{
-			feeder: {
-				isDeleted: false,
-			},
 		},
 	];
 
@@ -247,19 +229,7 @@ const getAllSchedules = async (query: IQuery) => {
 	const sortBy = query.sortBy ? query.sortBy : "createdAt";
 	const sortOrder = query.sortOrder ? query.sortOrder : "desc";
 
-	const andConditions: ScheduleWhereInput[] = [
-		{
-			isDeleted: false,
-		},
-		{
-			isDeleted: false,
-		},
-		{
-			feeder: {
-				isDeleted: false,
-			},
-		},
-	];
+	const andConditions: ScheduleWhereInput[] = [];
 
 	if (query.operatorId) {
 		andConditions.push({ operatorId: query.operatorId });
@@ -278,22 +248,12 @@ const getAllSchedules = async (query: IQuery) => {
 	}
 
 	if (query.feederCode) {
-		andConditions.push({
-			feeder: {
-				code: query.feederCode,
-			},
-		});
+		andConditions.push({ feeder: { code: query.feederCode } });
 	}
 
 	if (query.areaCode) {
 		andConditions.push({
-			feeder: {
-				areas: {
-					some: {
-						code: query.areaCode,
-					},
-				},
-			},
+			feeder: { areas: { some: { code: query.areaCode } } },
 		});
 	}
 
@@ -418,13 +378,8 @@ const getScheduleById = async (scheduleId: string) => {
 			},
 			feeder: {
 				include: {
-					areas: {
-						where: {
-							isDeleted: false,
-						},
-					},
+					areas: true,
 				},
-				isDeleted: false,
 			},
 		},
 	});
@@ -512,9 +467,6 @@ const updateSchedule = async (
 				gte: startOfTheDay,
 				lt: startOfNextDay,
 			},
-			feeder: {
-				isDeleted: false,
-			},
 		},
 	});
 
@@ -544,9 +496,6 @@ const updateSchedule = async (
 	const updatedSchedule = await prisma.schedule.update({
 		where: {
 			id: schedule.id,
-			feeder: {
-				isDeleted: false,
-			},
 		},
 		data: {
 			startDateTime: payload.startDateTime,
@@ -563,7 +512,6 @@ const updateSchedule = async (
 					contactNumber: true,
 				},
 			},
-			feeder: true,
 		},
 	});
 
@@ -580,13 +528,7 @@ const publishSchedule = async (scheduleId: string, user: RequestUser) => {
 	}
 
 	const schedule = await prisma.schedule.findUnique({
-		where: {
-			id: scheduleId,
-			operatorId: operator.id,
-			feeder: {
-				isDeleted: false,
-			},
-		},
+		where: { id: scheduleId, operatorId: operator.id },
 	});
 
 	if (!schedule || schedule.isDeleted) {
@@ -611,35 +553,51 @@ const deleteSchedule = async (scheduleId: string, user: RequestUser) => {
 	});
 
 	if (!operator) {
-		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
+		throw new AppError(httpStatus.NOT_FOUND, "Doctor Profile Not Found");
 	}
 
 	const schedule = await prisma.schedule.findUnique({
-		where: {
-			id: scheduleId,
-			feeder: {
-				isDeleted: false,
-			},
-		},
+		where: { id: scheduleId },
 	});
 
 	if (!schedule || schedule.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Schedule Not Found");
 	}
 
+	// if (
+	// 	schedule.status === ScheduleStatus.PUBLISHED &&
+	// 	schedule.totalSlots !== schedule.availableSlots
+	// ) {
+	// 	throw new AppError(
+	// 		httpStatus.CONFLICT,
+	// 		"Schedule Once Published And Appoinement Booked Cannot Be Deleted",
+	// 	);
+	// }
+
 	const deletedSchedule = await prisma.schedule.update({
 		where: { id: schedule.id },
-		data: {
-			isDeleted: true,
-			deletedBy: operator.userId,
-			deletedAt: new Date(),
-		},
+		data: { isDeleted: true, deletedAt: new Date() },
 	});
 
 	return deletedSchedule;
 };
 
 const getTodaysSchedules = async (query: IQuery) => {
+	// if (!query.operatorId) {
+	// 	throw new AppError(
+	// 		httpStatus.NOT_FOUND,
+	// 		"Operator Id Must Be Provided In Query",
+	// 	);
+	// }
+
+	// const operator = await prisma.operator.findUnique({
+	// 	where: { id: query.operatorId },
+	// });
+
+	// if (!operator) {
+	// 	throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
+	// }
+
 	const limit = query.limit ? Number(query.limit) : 10;
 	const page = query.page ? Number(query.page) : 1;
 	const skip = (page - 1) * limit;
@@ -667,12 +625,9 @@ const getTodaysSchedules = async (query: IQuery) => {
 				gt: now,
 			},
 		},
-		{
-			feeder: { isDeleted: false },
-		},
 	];
 
-	if (query.operatorId) {
+    if (query.operatorId) {
 		andConditions.push({ operatorId: query.operatorId });
 	}
 

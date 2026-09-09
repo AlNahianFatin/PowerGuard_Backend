@@ -1,32 +1,37 @@
 model OutageReport {
-    id          String  @id @default(uuid())
-    title       String
-    description String?
+  id          String  @id @default(uuid())
+  title       String
+  description String?
 
-    status OutageStatus @default(PENDING)
+  status OutageStatus @default(PENDING)
 
-    isRejected      Boolean @default(false)
-    rejectionReason String?
+  isRejected      Boolean @default(false)
+  rejectionReason String?
 
-    verifiedAt DateTime
-    resolvedAt DateTime
+  verifiedAt DateTime
+  resolvedAt DateTime
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    customerId String
-    customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  isDeleted Boolean   @default(false)
+  deletedBy String?
+  user      User?     @relation(fields: [deletedBy], references: [id])
+  deletedAt DateTime?
 
-    areaId String
-    area   Area   @relation(fields: [areaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-    assignments Assignment[]
+  areaId String
+  area   Area   @relation(fields: [areaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-    feederId String?
-    feeder   Feeder? @relation(fields: [feederId], references: [id])
+  assignments Assignment[]
 
-    @@index([status])
-    @@index([customerId])
-    @@index([areaId])
-    @@map("outagereports")
+  feederId String?
+  feeder   Feeder? @relation(fields: [feederId], references: [id])
+
+  @@index([status])
+  @@index([customerId])
+  @@index([areaId])
+  @@map("outagereports")
 }

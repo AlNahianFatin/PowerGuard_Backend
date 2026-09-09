@@ -26,7 +26,14 @@ model User {
 
   // notifications Notification[]
   // auditLogs     AuditLog[]
-  payments Payment[]
+  payments          Payment[]
+  areas             Area[]
+  distributionZones DistributionZone[]
+  feeders           Feeder[]
+  substations       Substation[]
+  assignments       Assignment[]
+  outageReports     OutageReport[]
+  schedules         Schedule[]
 
   @@unique([email])
   @@index([status])

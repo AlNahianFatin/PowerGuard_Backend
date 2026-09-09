@@ -1,15 +1,23 @@
 model Area {
-    id   String @id @default(uuid())
-    name String
-    code String @unique
+  id   String @id @default(uuid())
+  name String @unique
+  code String @unique
 
-    feederId String
-    feeder   Feeder @relation(fields: [feederId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    outageReports OutageReport[]
+  isDeleted Boolean   @default(false)
+  deletedBy String?
+  user      User?     @relation(fields: [deletedBy], references: [id])
+  deletedAt DateTime?
 
-    @@index([name])
-    @@index([code])
-    @@index([feederId])
-    @@map("areas")
+  feederId String
+  feeder   Feeder @relation(fields: [feederId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  outageReports OutageReport[]
+
+  @@index([name])
+  @@index([code])
+  @@index([feederId])
+  @@map("areas")
 }
