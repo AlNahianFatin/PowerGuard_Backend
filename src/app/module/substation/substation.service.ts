@@ -296,12 +296,12 @@ const updateSubstation = async (
 					code: payload.code,
 				}),
 
-				...(payload.zoneId && {
-					code: payload.zoneId,
-				}),
-
 				...(payload.description !== undefined && {
 					description: payload.description,
+				}),
+
+				...(payload.zoneId && {
+					zoneId: payload.zoneId,
 				}),
 			},
 			include: {

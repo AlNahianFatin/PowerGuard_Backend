@@ -18,7 +18,7 @@ export const CreateSubstationValidationZodSchema = z.object({
 
 	zoneId: z
 		.string("Distribution zone ID must be a valid string")
-		.min(1, "At least one feeder is required"),
+		.length(1, "A substation may belong to only 1 distribution zone"),
 });
 
 export const UpdateSubstationValidationZodSchema = z.object({
@@ -41,7 +41,7 @@ export const UpdateSubstationValidationZodSchema = z.object({
 
 	zoneId: z
 		.string("Distribution zone ID must be a valid string")
-		.min(1, "At least one feeder is required")
+		.length(1, "A substation may belong to only 1 distribution zone")
 		.optional(),
 
 	substationIds: z
