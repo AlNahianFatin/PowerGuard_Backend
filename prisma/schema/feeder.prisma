@@ -1,7 +1,8 @@
 model Feeder {
-    id   String @id @default(uuid())
-    name String @unique
-    code String @unique
+    id          String  @id @default(uuid())
+    name        String  @unique
+    code        String  @unique
+    description String?
 
     repairingCost Decimal @db.Decimal(10, 2)
 
