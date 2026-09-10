@@ -17,7 +17,7 @@ router.get(
 );
 
 router.get(
-	"/:feederId",
+	"/feeder/:feederId",
 	auth(Role.ADMIN, Role.OPERATOR),
 	FeederController.getFeederById,
 );

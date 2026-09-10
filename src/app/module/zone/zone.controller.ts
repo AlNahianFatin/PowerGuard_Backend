@@ -58,12 +58,12 @@ const deleteZone = catchAsync(async (req: Request, res: Response) => {
 	const zoneId = req.params.zoneId as string;
 	const user = req.user!;
 
-	const result = await ZoneService.deleteZone(zoneId, user);
+	await ZoneService.deleteZone(zoneId, user);
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
 		message: "Zone Deleted Successfully",
-		data: result,
+		data: null,
 	});
 });
 

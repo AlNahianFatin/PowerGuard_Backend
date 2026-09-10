@@ -338,7 +338,7 @@ const deleteZone = async (zoneId: string, user: RequestUser) => {
 		throw new AppError(httpStatus.NOT_FOUND, "Zone Not Found");
 	}
 
-	const deletedZone = await prisma.distributionZone.update({
+	await prisma.distributionZone.update({
 		where: { id: zone.id },
 		data: {
 			isDeleted: true,
@@ -347,7 +347,7 @@ const deleteZone = async (zoneId: string, user: RequestUser) => {
 		},
 	});
 
-	return deletedZone;
+	return;
 };
 
 export const ZoneService = {

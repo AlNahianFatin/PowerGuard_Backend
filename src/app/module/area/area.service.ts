@@ -56,11 +56,6 @@ const getAllAreas = async (query: IQuery) => {
 		},
 		include: {
 			feeder: true,
-			areas: {
-				where: {
-					isDeleted: false,
-				},
-			},
 		},
 	});
 
@@ -106,7 +101,7 @@ const createArea = async (payload: ICreateAreaPayload, user: RequestUser) => {
 	const name = payload.name.trim().toUpperCase();
 	const code = payload.code.trim().toUpperCase();
 	const description = payload.description ?? "";
-	const feederId = payload.feederId.trim().toUpperCase();
+	const feederId = payload.feederId.trim();
 
 	const existingAreaName = await prisma.area.findFirst({
 		where: {
@@ -277,7 +272,7 @@ const deleteArea = async (areaId: string, user: RequestUser) => {
 		throw new AppError(httpStatus.NOT_FOUND, "Area Not Found");
 	}
 
-	const deletedArea = await prisma.area.update({
+	await prisma.area.update({
 		where: { id: area.id },
 		data: {
 			isDeleted: true,
@@ -286,7 +281,7 @@ const deleteArea = async (areaId: string, user: RequestUser) => {
 		},
 	});
 
-	return deletedArea;
+	return;
 };
 
 export const AreaService = {

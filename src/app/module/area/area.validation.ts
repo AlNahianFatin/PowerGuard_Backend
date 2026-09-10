@@ -18,7 +18,6 @@ export const CreateAreaValidationZodSchema = z.object({
 
 	feederId: z
 		.string("Feeder ID must be a valid string")
-		.length(1, "An area may belong to only 1 feeder"),
 });
 
 export const UpdateAreaValidationZodSchema = z.object({
@@ -41,6 +40,5 @@ export const UpdateAreaValidationZodSchema = z.object({
 
 	feederId: z
 		.string("Feeder ID must be a valid string")
-		.length(1, "An area may belong to only 1 feeder")
 		.optional(),
 });

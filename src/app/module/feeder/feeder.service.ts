@@ -118,7 +118,7 @@ const createFeeder = async (
 	const code = payload.code.trim().toUpperCase();
 	const description = payload.description ?? "";
 	const repairingCost = Number(payload.repairingCost);
-	const substationId = payload.substationId.trim().toUpperCase();
+	const substationId = payload.substationId.trim();
 
 	const existingFeederName = await prisma.feeder.findFirst({
 		where: {
@@ -343,7 +343,7 @@ const deleteFeeder = async (feederId: string, user: RequestUser) => {
 		throw new AppError(httpStatus.NOT_FOUND, "Feeder Not Found");
 	}
 
-	const deletedFeeder = await prisma.feeder.update({
+	await prisma.feeder.update({
 		where: { id: feeder.id },
 		data: {
 			isDeleted: true,
@@ -352,7 +352,7 @@ const deleteFeeder = async (feederId: string, user: RequestUser) => {
 		},
 	});
 
-	return deletedFeeder;
+	return;
 };
 
 export const FeederService = {

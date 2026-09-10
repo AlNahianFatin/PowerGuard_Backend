@@ -17,7 +17,7 @@ router.get(
 );
 
 router.get(
-	"/:zoneId",
+	"/distribution-zone/:zoneId",
 	auth(Role.ADMIN, Role.OPERATOR),
 	ZoneController.getZoneById,
 );

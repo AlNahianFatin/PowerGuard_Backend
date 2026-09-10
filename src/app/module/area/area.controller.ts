@@ -58,12 +58,13 @@ const deleteArea = catchAsync(async (req: Request, res: Response) => {
 	const areaId = req.params.areaId as string;
 	const user = req.user!;
 
-	const result = await AreaService.deleteArea(areaId, user);
+	await AreaService.deleteArea(areaId, user);
+
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
 		message: "Area Deleted Successfully",
-		data: result,
+		data: null,
 	});
 });
 

@@ -17,7 +17,7 @@ router.get(
 );
 
 router.get(
-	"/:substationId",
+	"/substation/:substationId",
 	auth(Role.ADMIN, Role.OPERATOR),
 	SubstationController.getSubstationById,
 );

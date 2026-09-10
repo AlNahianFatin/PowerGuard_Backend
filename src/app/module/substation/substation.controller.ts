@@ -62,12 +62,12 @@ const deleteSubstation = catchAsync(async (req: Request, res: Response) => {
 	const substationId = req.params.substationId as string;
 	const user = req.user!;
 
-	const result = await SubstationService.deleteSubstation(substationId, user);
+	await SubstationService.deleteSubstation(substationId, user);
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
 		message: "Substation Deleted Successfully",
-		data: result,
+		data: null,
 	});
 });
 

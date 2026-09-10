@@ -17,7 +17,7 @@ router.get(
 );
 
 router.get(
-	"/:areaId",
+	"/area/:areaId",
 	auth(Role.ADMIN, Role.OPERATOR),
 	AreaController.getAreaById,
 );

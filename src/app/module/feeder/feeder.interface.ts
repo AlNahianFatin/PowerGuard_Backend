@@ -1,11 +1,11 @@
-export interface ICreateAreaPayload {
+export interface ICreateFeederPayload {
 	name: string;
 	code: string;
 	description?: string;
 	repairingCost: string;
 	substationId: string;
 }
-export interface IUpdateAreaPayload {
+export interface IUpdateFeederPayload {
 	name?: string;
 	code?: string;
 	description?: string;

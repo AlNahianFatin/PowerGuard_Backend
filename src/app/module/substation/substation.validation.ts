@@ -16,9 +16,7 @@ export const CreateSubstationValidationZodSchema = z.object({
 		.max(1000, "Description must be within 1000 characters")
 		.optional(),
 
-	zoneId: z
-		.string("Distribution zone ID must be a valid string")
-		.length(1, "A substation may belong to only 1 distribution zone"),
+	zoneId: z.string("Distribution zone ID must be a valid string"),
 });
 
 export const UpdateSubstationValidationZodSchema = z.object({
@@ -39,10 +37,7 @@ export const UpdateSubstationValidationZodSchema = z.object({
 		.max(1000, "Description must be within 1000 characters")
 		.optional(),
 
-	zoneId: z
-		.string("Distribution zone ID must be a valid string")
-		.length(1, "A substation may belong to only 1 distribution zone")
-		.optional(),
+	zoneId: z.string("Distribution zone ID must be a valid string").optional(),
 
 	substationIds: z
 		.array(

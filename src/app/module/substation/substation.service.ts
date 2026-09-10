@@ -131,7 +131,7 @@ const createSubstation = async (
 	const name = payload.name.trim().toUpperCase();
 	const code = payload.code.trim().toUpperCase();
 	const description = payload.description ?? "";
-	const zoneId = payload.zoneId.trim().toUpperCase();
+	const zoneId = payload.zoneId.trim();
 
 	const existingSubstationName = await prisma.substation.findFirst({
 		where: {
@@ -357,7 +357,7 @@ const deleteSubstation = async (substationId: string, user: RequestUser) => {
 		throw new AppError(httpStatus.NOT_FOUND, "Substation Not Found");
 	}
 
-	const deletedSubstation = await prisma.substation.update({
+	await prisma.substation.update({
 		where: { id: substation.id },
 		data: {
 			isDeleted: true,
@@ -366,7 +366,7 @@ const deleteSubstation = async (substationId: string, user: RequestUser) => {
 		},
 	});
 
-	return deletedSubstation;
+	return;
 };
 
 export const SubstationService = {

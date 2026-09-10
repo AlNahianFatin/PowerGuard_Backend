@@ -16,13 +16,11 @@ export const CreateFeederValidationZodSchema = z.object({
 		.max(1000, "Description must be within 1000 characters")
 		.optional(),
 
-	repairingCost: z
+	repairingCost: z.coerce
 		.number("Repairing cost must be a valid number")
 		.min(0, "Repairing cost cannot be negative"),
 
-	substationId: z
-		.string("Substation ID must be a valid string")
-		.length(1, "A feeder may belong to only 1 substation"),
+	substationId: z.string("Substation ID must be a valid string"),
 });
 
 export const UpdateFeederValidationZodSchema = z.object({
@@ -43,15 +41,12 @@ export const UpdateFeederValidationZodSchema = z.object({
 		.max(1000, "Description must be within 1000 characters")
 		.optional(),
 
-	repairingCost: z
+	repairingCost: z.coerce
 		.number("Repairing cost must be a valid number")
 		.min(0, "Repairing cost cannot be negative")
 		.optional(),
 
-	substationId: z
-		.string("Substation ID must be a valid string")
-		.length(1, "A feeder may belong to only 1 substation")
-		.optional(),
+	substationId: z.string("Substation ID must be a valid string").optional(),
 
 	areaIds: z
 		.array(
