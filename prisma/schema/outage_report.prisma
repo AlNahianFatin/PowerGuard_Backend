@@ -3,13 +3,16 @@ model OutageReport {
   title       String
   description String?
 
-  status OutageStatus @default(PENDING)
+  status OutageReportStatus @default(PENDING)
 
+  isFailed    Boolean @default(false)
+  failureNote String?
+  
   isRejected      Boolean @default(false)
   rejectionReason String?
 
-  verifiedAt DateTime
-  resolvedAt DateTime
+  assignedAt DateTime?
+  resolvedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -27,8 +30,8 @@ model OutageReport {
 
   assignments Assignment[]
 
-  feederId String?
-  feeder   Feeder? @relation(fields: [feederId], references: [id])
+  // feederId String?
+  // feeder   Feeder? @relation(fields: [feederId], references: [id])
 
   @@index([status])
   @@index([customerId])

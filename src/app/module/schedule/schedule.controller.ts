@@ -4,37 +4,6 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { ScheduleServices } from "./schedule.service";
 
-const createSchedule = catchAsync(async (req: Request, res: Response) => {
-	const payload = req.body;
-	const user = req.user!;
-
-	const result = await ScheduleServices.createSchedule(payload, user);
-	sendResponse(res, {
-		statusCode: httpStatus.CREATED,
-		success: true,
-		message: "Schedule Created Successfully",
-		data: result,
-	});
-});
-
-const getMyAppointedSchedules = catchAsync(
-	async (req: Request, res: Response) => {
-		const user = req.user!;
-
-		const { data, meta } = await ScheduleServices.getMyAppointedSchedules(
-			req.query,
-			user,
-		);
-		sendResponse(res, {
-			statusCode: httpStatus.OK,
-			success: true,
-			message: "Schedules Retrieved Successfully",
-			data,
-			meta,
-		});
-	},
-);
-
 const getAllSchedules = catchAsync(async (req: Request, res: Response) => {
 	const { data, meta } = await ScheduleServices.getAllSchedules(req.query);
 	sendResponse(res, {
@@ -69,6 +38,50 @@ const getScheduleById = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const getMyAppointedSchedules = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user!;
+
+		const { data, meta } = await ScheduleServices.getMyAppointedSchedules(
+			req.query,
+			user,
+		);
+		sendResponse(res, {
+			statusCode: httpStatus.OK,
+			success: true,
+			message: "Schedules Retrieved Successfully",
+			data,
+			meta,
+		});
+	},
+);
+
+const createSchedule = catchAsync(async (req: Request, res: Response) => {
+	const payload = req.body;
+	const user = req.user!;
+
+	const result = await ScheduleServices.createSchedule(payload, user);
+	sendResponse(res, {
+		statusCode: httpStatus.CREATED,
+		success: true,
+		message: "Schedule Created Successfully",
+		data: result,
+	});
+});
+
+const publishSchedule = catchAsync(async (req: Request, res: Response) => {
+	const scheduleId = req.params.scheduleId as string;
+	const user = req.user!;
+
+	const result = await ScheduleServices.publishSchedule(scheduleId, user);
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Schedule Published Successfully",
+		data: result,
+	});
+});
+
 const updateSchedule = catchAsync(async (req: Request, res: Response) => {
 	const scheduleId = req.params.scheduleId as string;
 	const payload = req.body;
@@ -87,19 +100,6 @@ const updateSchedule = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-const publishSchedule = catchAsync(async (req: Request, res: Response) => {
-	const scheduleId = req.params.scheduleId as string;
-	const user = req.user!;
-
-	const result = await ScheduleServices.publishSchedule(scheduleId, user);
-	sendResponse(res, {
-		statusCode: httpStatus.OK,
-		success: true,
-		message: "Schedule Published Successfully",
-		data: result,
-	});
-});
-
 const deleteSchedule = catchAsync(async (req: Request, res: Response) => {
 	const scheduleId = req.params.scheduleId as string;
 	const user = req.user!;
@@ -114,12 +114,12 @@ const deleteSchedule = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const ScheduleController = {
-	createSchedule,
-	getMyAppointedSchedules,
 	getAllSchedules,
 	getTodaysSchedules,
 	getScheduleById,
-	updateSchedule,
+	getMyAppointedSchedules,
+	createSchedule,
 	publishSchedule,
+	updateSchedule,
 	deleteSchedule,
 };

@@ -23,7 +23,7 @@ enum ScheduleStatus {
   COMPLETED
 }
 
-enum OutageStatus {
+enum OutageReportStatus {
   PENDING
   VERIFIED
   ASSIGNED

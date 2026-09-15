@@ -157,22 +157,22 @@ const getAvailableTechnicianByTodaysSchedule = catchAsync(
 // 	});
 // });
 
-// const getSingleDoctorPublicProfile = catchAsync(
-// 	async (req: Request, res: Response) => {
+const getSingleTechnicianPublicProfile = catchAsync(
+	async (req: Request, res: Response) => {
 
-// 		const doctorId = req.params.doctorId as string
+		const technicianId = req.params.technicianId as string
 
-// 		const result = await DoctorServices.getSingleDoctorPublicProfile(
-// 			doctorId
-// 		);
-// 		sendResponse(res, {
-// 			statusCode: httpStatus.OK,
-// 			success: true,
-// 			message: "Doctor Profile Retrieved Successfully",
-// 			data: result,
-// 		});
-// 	},
-// );
+		const result = await TechnicianService.getSingleTechnicianPublicProfile(
+			technicianId
+		);
+		sendResponse(res, {
+			statusCode: httpStatus.OK,
+			success: true,
+			message: "Technician Profile Retrieved Successfully",
+			data: result,
+		});
+	},
+);
 
 export const TechnicianController = {
 	applyAsTechnician,
@@ -183,5 +183,5 @@ export const TechnicianController = {
 	updateTechnicianProfile,
 	getAvailableTechnicianByTodaysSchedule,
 	// getAllDoctorsListPublic,
-	// getSingleDoctorPublicProfile,
+	getSingleTechnicianPublicProfile,
 };

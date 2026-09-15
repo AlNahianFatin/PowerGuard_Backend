@@ -10,19 +10,6 @@ import {
 
 const router = Router();
 
-router.post(
-	"/create-schedule",
-	auth(Role.OPERATOR),
-	validateRequest(CreateScheduleValidationZodSchema),
-	ScheduleController.createSchedule,
-);
-
-router.get(
-	"/my-appointed-schedules",
-	auth(Role.OPERATOR),
-	ScheduleController.getMyAppointedSchedules,
-);
-
 router.get(
 	"/all-schedules",
 	auth(Role.ADMIN, Role.OPERATOR),
@@ -31,11 +18,19 @@ router.get(
 
 router.get("/todays-schedule", ScheduleController.getTodaysSchedules);
 
-router.patch(
-	"/update-schedule/:scheduleId",
+router.get("/:scheduleId", ScheduleController.getScheduleById);
+
+router.get(
+	"/my-appointed-schedules",
 	auth(Role.OPERATOR),
-	validateRequest(UpdateScheduleValidationZodSchema),
-	ScheduleController.updateSchedule,
+	ScheduleController.getMyAppointedSchedules,
+);
+
+router.post(
+	"/create-schedule",
+	auth(Role.OPERATOR),
+	validateRequest(CreateScheduleValidationZodSchema),
+	ScheduleController.createSchedule,
 );
 
 router.patch(
@@ -44,15 +39,16 @@ router.patch(
 	ScheduleController.publishSchedule,
 );
 
-router.get(
-	"/:scheduleId",
-	auth(Role.ADMIN, Role.OPERATOR),
-	ScheduleController.getScheduleById,
+router.patch(
+	"/update-schedule/:scheduleId",
+	auth(Role.OPERATOR),
+	validateRequest(UpdateScheduleValidationZodSchema),
+	ScheduleController.updateSchedule,
 );
 
 router.delete(
 	"/:scheduleId",
-	auth(Role.OPERATOR),
+	auth(Role.ADMIN, Role.OPERATOR),
 	ScheduleController.deleteSchedule,
 );
 

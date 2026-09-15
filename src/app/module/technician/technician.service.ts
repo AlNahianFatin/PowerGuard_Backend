@@ -495,10 +495,6 @@ const updateTechnicianProfile = async (
 	return updatedTechnician;
 };
 
-// Fields safe to expose on the public (unauthenticated) doctor-discovery endpoints.
-// Deliberately excludes resume/additionalFiles, verification review metadata, and
-// anything relation/auth related (user, userId, isDeleted, deletedAt...).
-
 const getAvailableTechnicianByTodaysSchedule = async (query: IQuery) => {
 	const limit = query.limit ? Number(query.limit) : 10;
 	const page = query.page ? Number(query.page) : 1;
@@ -629,32 +625,30 @@ const getAvailableTechnicianByTodaysSchedule = async (query: IQuery) => {
 // 	};
 // };
 
-// const getSingleDoctorPublicProfile = async (doctorId: string) => {
-// 	const doctor = await prisma.doctor.findUnique({
-// 		where: {
-// 			id: doctorId,
-// 			isDeleted: false,
-// 			verificationStatus: DoctorVerificationStatus.APPROVED,
-// 		},
-// 		select: {
-// 			id: true,
-// 			name: true,
-// 			specialization: true,
-// 			licenseNumber: true,
-// 			qualifications: true,
-// 			experienceYears: true,
-// 			bio: true,
-// 			consultationFee: true,
-// 			createdAt: true,
-// 		},
-// 	});
+const getSingleTechnicianPublicProfile = async (technicianId: string) => {
+	const technician = await prisma.technician.findUnique({
+		where: {
+			id: technicianId,
+			isDeleted: false,
+			verificationStatus: TechnicianVerificationStatus.APPROVED,
+		},
+		select: {
+			id: true,
+			name: true,
+			address: true,
+			status: true,
+			experienceYears: true,
+			bio: true,
+			createdAt: true,
+		},
+	});
 
-// 	if (!doctor) {
-// 		throw new AppError(httpStatus.NOT_FOUND, "Doctor Not Found");
-// 	}
+	if (!technician) {
+		throw new AppError(httpStatus.NOT_FOUND, "Technician Not Found");
+	}
 
-// 	return doctor;
-// };
+	return technician;
+};
 
 export const TechnicianService = {
 	applyAsTechnician,
@@ -665,5 +659,5 @@ export const TechnicianService = {
 	updateTechnicianProfile,
 	getAvailableTechnicianByTodaysSchedule,
 	// getAllDoctorsListPublic,
-	// getSingleDoctorPublicProfile
+	getSingleTechnicianPublicProfile
 };

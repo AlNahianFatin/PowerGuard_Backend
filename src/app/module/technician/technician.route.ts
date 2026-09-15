@@ -27,20 +27,24 @@ router.post(
 	]),
 	TechnicianController.applyAsTechnician,
 );
+
 router.post(
 	"/apply-as-technician/verify-email",
 	TechnicianController.verifyTechnicianEmail,
 );
+
 router.post(
 	"/approve-technician",
 	auth(Role.ADMIN),
 	TechnicianController.approveTechnician,
 );
+
 router.patch(
 	"/change-password",
 	validateRequest(ChangeTechnicianPasswordValidationZodSchema),
 	TechnicianController.changePassword,
 );
+
 router.get(
 	"/all-technicians",
 	auth(Role.ADMIN, Role.OPERATOR),
@@ -63,6 +67,6 @@ router.get(
 
 // router.get("/public/all-technicians", TechnicianController.getAllTechniciansListPublic);
 
-// router.get("/public/:technicianId", TechnicianController.getSingleTechnicianPublicProfile);
+router.get("/public/:technicianId", TechnicianController.getSingleTechnicianPublicProfile);
 
 export const TechnicianRoutes = router;

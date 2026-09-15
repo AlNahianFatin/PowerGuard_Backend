@@ -2,8 +2,10 @@ import cron from "node-cron";
 import {
 	TechnicianVerificationStatus,
 	Role,
+	ScheduleStatus,
 } from "../../generated/prisma/enums";
 import { prisma } from "./prisma";
+import { addDays, startOfDay } from "date-fns";
 
 export const deleteUnverifiedTechnicians = async () => {
 	cron.schedule("*/10 * * * *", async () => {
@@ -37,45 +39,6 @@ export const deleteUnverifiedTechnicians = async () => {
 		);
 	});
 };
-
-// export const updateTechnicianExperience = async () => {
-// 	cron.schedule("0 0 0 0 */1", async () => {
-// 		try {
-// 			const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
-
-// 			const updatedTechnicians = await prisma.technician.updateMany({
-// 				where: {
-// 					verificationStatus: TechnicianVerificationStatus.APPROVED,
-// 					user: {
-// 						role: Role.TECHNICIAN,
-// 						emailVerified: true,
-// 						createdAt: { lt: oneYearAgo },
-// 					},
-// 				},
-// 				data: {
-// 					experienceYears: {
-// 						increment: 1,
-// 					},
-// 				},
-// 			});
-
-// 			if (updatedTechnicians.count > 0) {
-// 				console.log(`
-//                 Cron: Updated ${updatedTechnicians.count} verified technician experience older than 1 year
-//                 `);
-// 			}
-// 		} catch (error) {
-// 			console.log(
-// 				"Cron: Failed to update verified technician experience",
-// 				error,
-// 			);
-// 		}
-
-// 		console.log(
-// 			"Verified technician experience update cron schedule (every 10 days)",
-// 		);
-// 	});
-// };
 
 export const updateTechnicianExperience = async () => {
 	cron.schedule("0 0 * * *", async () => {
@@ -141,5 +104,33 @@ export const updateTechnicianExperience = async () => {
 		console.log(
 			"Verified technician experience cron scheduled: every day at midnight",
 		);
+	});
+};
+
+export const updateCompletedSchedules = async () => {
+	cron.schedule("*/10 * * * *", async () => {
+		try {
+			const updatedSchedules = await prisma.schedule.updateMany({
+				where: {
+					status: ScheduleStatus.PUBLISHED,
+					isDeleted: false,
+					endDateTime: {
+						lt: new Date(),
+					},
+				},
+				data: {
+					status: ScheduleStatus.COMPLETED,
+				},
+			});
+
+			if (updatedSchedules.count > 0) {
+				console.log(
+					`Cron: Updated ${updatedSchedules.count} schedules as they have been completed.`,
+				);
+			}
+		} catch (error) {
+			console.error("Cron: Failed to update schedule completion.", error);
+		}
+		console.log("Schedule status update cron scheduled: every 10 minutes");
 	});
 };

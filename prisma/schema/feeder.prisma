@@ -19,7 +19,7 @@ model Feeder {
 
     areas         Area[]
     schedules     Schedule[]
-    outageReports OutageReport[]
+    // outageReports OutageReport[]
 
     @@index([name])
     @@index([code])
