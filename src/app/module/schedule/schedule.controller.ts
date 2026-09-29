@@ -40,7 +40,7 @@ const getScheduleById = catchAsync(async (req: Request, res: Response) => {
 
 const getMyAppointedSchedules = catchAsync(
 	async (req: Request, res: Response) => {
-		console.log("controller reached----------------")
+		console.log("controller reached----------------");
 		const user = req.user!;
 
 		const { data, meta } = await ScheduleService.getMyAppointedSchedules(

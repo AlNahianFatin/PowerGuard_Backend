@@ -16,8 +16,7 @@ export const CreateAreaValidationZodSchema = z.object({
 		.max(1000, "Description must be within 1000 characters")
 		.optional(),
 
-	feederId: z
-		.string("Feeder ID must be a valid string")
+	feederId: z.string("Feeder ID must be a valid string"),
 });
 
 export const UpdateAreaValidationZodSchema = z.object({
@@ -38,7 +37,5 @@ export const UpdateAreaValidationZodSchema = z.object({
 		.max(1000, "Description must be within 1000 characters")
 		.optional(),
 
-	feederId: z
-		.string("Feeder ID must be a valid string")
-		.optional(),
+	feederId: z.string("Feeder ID must be a valid string").optional(),
 });

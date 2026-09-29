@@ -1,6 +1,6 @@
-import { addDays, isAfter, isBefore, startOfDay } from "date-fns";
+import { addDays, isBefore, startOfDay } from "date-fns";
 import httpStatus from "http-status";
-import { Role, ScheduleStatus } from "../../../generated/prisma/enums";
+import { ScheduleStatus } from "../../../generated/prisma/enums";
 import type { ScheduleWhereInput } from "../../../generated/prisma/models";
 import type { IQuery } from "../../interfaces";
 import { prisma } from "../../lib/prisma";

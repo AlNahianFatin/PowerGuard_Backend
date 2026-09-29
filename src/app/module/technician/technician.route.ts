@@ -67,6 +67,9 @@ router.get(
 
 // router.get("/public/all-technicians", TechnicianController.getAllTechniciansListPublic);
 
-router.get("/public/:technicianId", TechnicianController.getSingleTechnicianPublicProfile);
+router.get(
+	"/public/:technicianId",
+	TechnicianController.getSingleTechnicianPublicProfile,
+);
 
 export const TechnicianRoutes = router;

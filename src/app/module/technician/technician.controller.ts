@@ -159,12 +159,10 @@ const getAvailableTechnicianByTodaysSchedule = catchAsync(
 
 const getSingleTechnicianPublicProfile = catchAsync(
 	async (req: Request, res: Response) => {
+		const technicianId = req.params.technicianId as string;
 
-		const technicianId = req.params.technicianId as string
-
-		const result = await TechnicianService.getSingleTechnicianPublicProfile(
-			technicianId
-		);
+		const result =
+			await TechnicianService.getSingleTechnicianPublicProfile(technicianId);
 		sendResponse(res, {
 			statusCode: httpStatus.OK,
 			success: true,

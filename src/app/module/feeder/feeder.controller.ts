@@ -59,7 +59,7 @@ const deleteFeeder = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user!;
 
 	await FeederService.deleteFeeder(feederId, user);
-	
+
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,

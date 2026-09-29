@@ -9,17 +9,17 @@ import {
 } from "../../../generated/prisma/enums";
 import { OutageReportWhereInput } from "../../../generated/prisma/models";
 import config from "../../config";
-import { IQuery } from "../../interfaces";
+import type { IQuery } from "../../interfaces";
 import { getBkashIdToken } from "../../lib/bkash";
 import { transporter } from "../../lib/nodemailer";
 import { prisma } from "../../lib/prisma";
 import type { RequestUser } from "../../middleware/checkAuth";
 import { AppError } from "../../utils/AppError";
 import {
-	ISubmitReportPayload,
-	ICancelAppointmentPayload,
+	type ISubmitReportPayload,
+	type ICancelAppointmentPayload,
 	IPayAppointmentPayload,
-	IUpdateAppointmentStatusPayload,
+	type IUpdateAppointmentStatusPayload,
 } from "./report.interface";
 
 const submitReport = async (
@@ -36,7 +36,7 @@ const submitReport = async (
 		}
 
 		const now = new Date();
-		console.log(now)
+		console.log(now);
 		return;
 
 		const schedule = await prisma.schedule.findUnique({

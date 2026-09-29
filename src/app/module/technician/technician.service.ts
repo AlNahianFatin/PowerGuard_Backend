@@ -659,5 +659,5 @@ export const TechnicianService = {
 	updateTechnicianProfile,
 	getAvailableTechnicianByTodaysSchedule,
 	// getAllDoctorsListPublic,
-	getSingleTechnicianPublicProfile
+	getSingleTechnicianPublicProfile,
 };
