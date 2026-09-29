@@ -2,10 +2,10 @@ import type { Request, Response } from "express";
 import httpStatus from "http-status";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import { ScheduleServices } from "./schedule.service";
+import { ScheduleService } from "./schedule.service";
 
 const getAllSchedules = catchAsync(async (req: Request, res: Response) => {
-	const { data, meta } = await ScheduleServices.getAllSchedules(req.query);
+	const { data, meta } = await ScheduleService.getAllSchedules(req.query);
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
@@ -16,7 +16,7 @@ const getAllSchedules = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getTodaysSchedules = catchAsync(async (req: Request, res: Response) => {
-	const { data, meta } = await ScheduleServices.getTodaysSchedules(req.query);
+	const { data, meta } = await ScheduleService.getTodaysSchedules(req.query);
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
@@ -29,7 +29,7 @@ const getTodaysSchedules = catchAsync(async (req: Request, res: Response) => {
 const getScheduleById = catchAsync(async (req: Request, res: Response) => {
 	const scheduleId = req.params.scheduleId as string;
 
-	const result = await ScheduleServices.getScheduleById(scheduleId);
+	const result = await ScheduleService.getScheduleById(scheduleId);
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
@@ -40,9 +40,10 @@ const getScheduleById = catchAsync(async (req: Request, res: Response) => {
 
 const getMyAppointedSchedules = catchAsync(
 	async (req: Request, res: Response) => {
+		console.log("controller reached----------------")
 		const user = req.user!;
 
-		const { data, meta } = await ScheduleServices.getMyAppointedSchedules(
+		const { data, meta } = await ScheduleService.getMyAppointedSchedules(
 			req.query,
 			user,
 		);
@@ -60,7 +61,7 @@ const createSchedule = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
 	const user = req.user!;
 
-	const result = await ScheduleServices.createSchedule(payload, user);
+	const result = await ScheduleService.createSchedule(payload, user);
 	sendResponse(res, {
 		statusCode: httpStatus.CREATED,
 		success: true,
@@ -73,7 +74,7 @@ const publishSchedule = catchAsync(async (req: Request, res: Response) => {
 	const scheduleId = req.params.scheduleId as string;
 	const user = req.user!;
 
-	const result = await ScheduleServices.publishSchedule(scheduleId, user);
+	const result = await ScheduleService.publishSchedule(scheduleId, user);
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
@@ -87,7 +88,7 @@ const updateSchedule = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
 	const user = req.user!;
 
-	const result = await ScheduleServices.updateSchedule(
+	const result = await ScheduleService.updateSchedule(
 		scheduleId,
 		payload,
 		user,
@@ -104,7 +105,7 @@ const deleteSchedule = catchAsync(async (req: Request, res: Response) => {
 	const scheduleId = req.params.scheduleId as string;
 	const user = req.user!;
 
-	const result = await ScheduleServices.deleteSchedule(scheduleId, user);
+	const result = await ScheduleService.deleteSchedule(scheduleId, user);
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,

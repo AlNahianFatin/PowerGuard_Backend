@@ -18,30 +18,30 @@ router.get(
 
 router.get("/todays-schedule", ScheduleController.getTodaysSchedules);
 
-router.get("/:scheduleId", ScheduleController.getScheduleById);
-
 router.get(
 	"/my-appointed-schedules",
 	auth(Role.OPERATOR),
 	ScheduleController.getMyAppointedSchedules,
 );
 
+router.get("/:scheduleId", ScheduleController.getScheduleById);
+
 router.post(
 	"/create-schedule",
-	auth(Role.OPERATOR),
+	auth(Role.ADMIN, Role.OPERATOR),
 	validateRequest(CreateScheduleValidationZodSchema),
 	ScheduleController.createSchedule,
 );
 
 router.patch(
 	"/publish-schedule/:scheduleId",
-	auth(Role.OPERATOR),
+	auth(Role.ADMIN, Role.OPERATOR),
 	ScheduleController.publishSchedule,
 );
 
 router.patch(
 	"/update-schedule/:scheduleId",
-	auth(Role.OPERATOR),
+	auth(Role.ADMIN, Role.OPERATOR),
 	validateRequest(UpdateScheduleValidationZodSchema),
 	ScheduleController.updateSchedule,
 );

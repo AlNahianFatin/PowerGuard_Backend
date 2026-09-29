@@ -1,13 +1,6 @@
-import {
-	addDays,
-	differenceInMinutes,
-	endOfDay,
-	isAfter,
-	isSameDay,
-	startOfDay,
-} from "date-fns";
+import { addDays, isAfter, isBefore, startOfDay } from "date-fns";
 import httpStatus from "http-status";
-import { ScheduleStatus } from "../../../generated/prisma/enums";
+import { Role, ScheduleStatus } from "../../../generated/prisma/enums";
 import type { ScheduleWhereInput } from "../../../generated/prisma/models";
 import type { IQuery } from "../../interfaces";
 import { prisma } from "../../lib/prisma";
@@ -206,7 +199,7 @@ const getTodaysSchedules = async (query: IQuery) => {
 		{
 			startDateTime: {
 				gte: startOfToday,
-				gt: now,
+				// gt: now,
 				lt: startOfTomorrow,
 			},
 		},
@@ -361,12 +354,16 @@ const getScheduleById = async (scheduleId: string) => {
 						},
 					},
 				},
-				isDeleted: false,
 			},
 		},
 	});
 
-	if (!schedule || schedule.isDeleted) {
+	if (
+		!schedule ||
+		schedule.isDeleted ||
+		!schedule.feeder ||
+		schedule.feeder.isDeleted
+	) {
 		throw new AppError(httpStatus.NOT_FOUND, "Schedule Not Found");
 	}
 
@@ -374,6 +371,7 @@ const getScheduleById = async (scheduleId: string) => {
 };
 
 const getMyAppointedSchedules = async (query: IQuery, user: RequestUser) => {
+	console.log("service reached--------------");
 	const limit = query.limit ? Number(query.limit) : 10;
 	const page = query.page ? Number(query.page) : 1;
 	const skip = (page - 1) * limit;
@@ -523,40 +521,45 @@ const createSchedule = async (
 	// if(!isSameDay(payload.startDateTime, payload.endDateTime)){
 	//     throw new AppError(httpStatus.CONFLICT, "Start Date Time And End Date Time Must Be On The Same Day")
 	// }
-	if (isAfter(payload.startDateTime, payload.endDateTime)) {
-		// 25 August =>  3:00 PM - 9:00 PM
 
+	if (payload.startDateTime < new Date()) {
 		throw new AppError(
 			httpStatus.CONFLICT,
-			"Start Date Time Cannot Be After End Date Time",
+			"Can not create a schedule in the past",
 		);
 	}
 
-	//startDateTime = 2026-08-25T13:30:00.436Z => 1:30 PM
-	const startOfTheDay = startOfDay(payload.startDateTime); // 25 August => 12:00 AM => 2026-08-25T00:00:00.436Z
-	const endOfTheDay = endOfDay(payload.endDateTime); // 26 August => 12:00 AM => 2026-08-26T00:00:00.436Z
+	if (!isBefore(payload.startDateTime, payload.endDateTime)) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			"Start Date Time Must Be Before End Date Time",
+		);
+	}
 
 	const existingScheduleOnThisDate = await prisma.schedule.findFirst({
 		where: {
 			feederId: payload.feederId,
 			isDeleted: false,
 			startDateTime: {
-				gte: payload.startDateTime,
+				lte: payload.startDateTime,
 			},
 			endDateTime: {
-				lte: payload.endDateTime,
+				gte: payload.endDateTime,
 			},
 			feeder: {
 				isDeleted: false,
 			},
-			status: ScheduleStatus.PUBLISHED,
+			OR: [
+				{ status: ScheduleStatus.PUBLISHED },
+				{ status: ScheduleStatus.COMPLETED },
+			],
 		},
 	});
 
 	if (existingScheduleOnThisDate) {
 		throw new AppError(
 			httpStatus.CONFLICT,
-			"An outage schedule for this date and time has already been published",
+			"An existing outage schedule already covers this date and time",
 		);
 	}
 
@@ -618,11 +621,38 @@ const publishSchedule = async (scheduleId: string, user: RequestUser) => {
 	});
 
 	if (!schedule || schedule.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Schedule Not Found");
+		throw new AppError(httpStatus.NOT_FOUND, "Schedule not found");
 	}
 
 	if (schedule.status === ScheduleStatus.PUBLISHED) {
-		throw new AppError(httpStatus.CONFLICT, "Schedule Is Already Published");
+		throw new AppError(httpStatus.CONFLICT, "Schedule is already published");
+	}
+
+	const existingScheduleOnThisDate = await prisma.schedule.findFirst({
+		where: {
+			feederId: schedule.feederId,
+			isDeleted: false,
+			startDateTime: {
+				lte: schedule.startDateTime,
+			},
+			endDateTime: {
+				gte: schedule.endDateTime,
+			},
+			feeder: {
+				isDeleted: false,
+			},
+			OR: [
+				{ status: ScheduleStatus.PUBLISHED },
+				{ status: ScheduleStatus.COMPLETED },
+			],
+		},
+	});
+
+	if (existingScheduleOnThisDate) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			"An existing outage schedule already covers this date and time. You may delete this schedule.",
+		);
 	}
 
 	const publishedSchedule = await prisma.schedule.update({
@@ -654,89 +684,42 @@ const updateSchedule = async (
 		throw new AppError(httpStatus.NOT_FOUND, "Schedule Not Found");
 	}
 
-	// if (schedule.status === ScheduleStatus.PUBLISHED) {
-	// 	throw new AppError(
-	// 		httpStatus.CONFLICT,
-	// 		"Schedule Once Published And Appointment Booked Cannot Be Updated",
-	// 	);
-	// }
-
-	// if (schedule.doctorId !== doctor.id) {
-	//     throw new AppError(
-	//         httpStatus.FORBIDDEN,
-	//         "You Are Not Allowed To Update This Schedule",
-	//     );
-	// }
-
-	// const updateData : IUpdateSchedulePayload = {};
-
-	// if(payload.meetingLink){
-	//     updateData.meetingLink = payload.meetingLink || schedule.meetingLink
-	// }
-
-	// payload.meetingLink = payload.meetingLink || schedule.meetingLink;
 	payload.startDateTime = payload.startDateTime || schedule.startDateTime;
 	payload.endDateTime = payload.endDateTime || schedule.endDateTime;
 
-	// 25 August => start Time  : 9:00 PM
-	// 26 August => end Time : 3:00AM
-
-	// if (!isSameDay(payload.startDateTime, payload.endDateTime)) {
-	// 	throw new AppError(
-	// 		httpStatus.CONFLICT,
-	// 		"Start Date Time And End Date Time Must Be On The Same Day",
-	// 	);
-	// }
-
-	if (isAfter(payload.startDateTime, payload.endDateTime)) {
-		// 25 August =>  3:00 PM - 9:00 PM
-
+	if (!isBefore(payload.startDateTime, payload.endDateTime)) {
 		throw new AppError(
 			httpStatus.CONFLICT,
-			"Start Date Time Cannot Be After End Date Time",
+			"Start Date Time Must Be Before End Date Time",
 		);
 	}
-
-	//startDateTime = 2026-08-25T13:30:00.436Z => 1:30 PM
-	const startOfTheDay = startOfDay(payload.startDateTime); // 25 August => 12:00 AM => 2026-08-25T00:00:00.436Z
-	const startOfNextDay = addDays(startOfTheDay, 1); // 26 August => 12:00 AM => 2026-08-26T00:00:00.436Z
 
 	const existingScheduleOnThisDate = await prisma.schedule.findFirst({
 		where: {
 			feederId: payload.feederId,
 			isDeleted: false,
 			startDateTime: {
-				gte: startOfTheDay,
-				lt: startOfNextDay,
+				lte: payload.startDateTime,
+			},
+			endDateTime: {
+				gte: payload.endDateTime,
 			},
 			feeder: {
 				isDeleted: false,
 			},
+			OR: [
+				{ status: ScheduleStatus.PUBLISHED },
+				{ status: ScheduleStatus.COMPLETED },
+			],
 		},
 	});
 
 	if (existingScheduleOnThisDate) {
 		throw new AppError(
 			httpStatus.CONFLICT,
-			"A schedule for this date and time has already been published",
+			"An existing outage schedule already covers this date and time",
 		);
 	}
-
-	// const durationInMinutes = differenceInMinutes(
-	// 	payload.endDateTime,
-	// 	payload.startDateTime,
-	// );
-
-	// const MINUTES_ALLOCATED_PER_SLOT = 20;
-
-	// const totalSlots = Math.floor(durationInMinutes / MINUTES_ALLOCATED_PER_SLOT);
-
-	// if (totalSlots < 1) {
-	// 	throw new AppError(
-	// 		httpStatus.CONFLICT,
-	// 		`Schedule Must Be At Least ${MINUTES_ALLOCATED_PER_SLOT} Minutes Long To Fit One Slot`,
-	// 	);
-	// }
 
 	const updatedSchedule = await prisma.schedule.update({
 		where: {
@@ -750,7 +733,6 @@ const updateSchedule = async (
 			endDateTime: payload.endDateTime,
 			reason: payload.reason,
 			feederId: payload.feederId,
-			operatorId: operator.id,
 		},
 		include: {
 			operator: {
@@ -768,13 +750,13 @@ const updateSchedule = async (
 };
 
 const deleteSchedule = async (scheduleId: string, user: RequestUser) => {
-	const operator = await prisma.operator.findUnique({
-		where: { userId: user.userId },
-	});
+	// const operator = await prisma.operator.findUnique({
+	// 	where: { userId: user.userId },
+	// });
 
-	if (!operator) {
-		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
-	}
+	// if (!operator) {
+	// 	throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
+	// }
 
 	const schedule = await prisma.schedule.findUnique({
 		where: {
@@ -789,19 +771,26 @@ const deleteSchedule = async (scheduleId: string, user: RequestUser) => {
 		throw new AppError(httpStatus.NOT_FOUND, "Schedule Not Found");
 	}
 
-	const deletedSchedule = await prisma.schedule.update({
+	// if (schedule.operatorId !== operator.id && user.role !== Role.ADMIN) {
+	// 	throw new AppError(
+	// 		httpStatus.UNAUTHORIZED,
+	// 		"You are not authorized to delete this outage schedule.",
+	// 	);
+	// }
+
+	await prisma.schedule.update({
 		where: { id: schedule.id },
 		data: {
 			isDeleted: true,
-			deletedBy: operator.userId,
+			deletedBy: user.userId,
 			deletedAt: new Date(),
 		},
 	});
 
-	return deletedSchedule;
+	return;
 };
 
-export const ScheduleServices = {
+export const ScheduleService = {
 	getAllSchedules,
 	getTodaysSchedules,
 	getScheduleById,

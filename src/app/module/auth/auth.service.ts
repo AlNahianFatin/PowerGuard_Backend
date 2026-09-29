@@ -572,8 +572,6 @@ const forgotPassword = async (payload: IForgotPasswordPayload) => {
 		from: config.email_sender,
 		to: isUserExist.email,
 		subject: "Forgot Password",
-		// text : `Your OTP is ${otp}`
-		// html: `<h1>Your OTP is ${otp}</h1>`
 		html,
 	});
 };
