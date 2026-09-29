@@ -1,6 +1,8 @@
 import type { UploadApiResponse } from "cloudinary";
+import httpStatus from "http-status";
 import { cloudinary } from "../../lib/cloudinary";
 import { prisma } from "../../lib/prisma";
+import { AppError } from "../../utils/AppError";
 
 const uploadProfileImage = async (buffer: Buffer, userId: string) => {
 	const currentUser = await prisma.user.findUnique({
@@ -8,10 +10,15 @@ const uploadProfileImage = async (buffer: Buffer, userId: string) => {
 			id: userId,
 		},
 		select: {
+			isDeleted: true,
 			imagePublicId: true,
 			imageUrl: true,
 		},
 	});
+
+	if(!currentUser || currentUser.isDeleted) {
+		throw new AppError(httpStatus.NOT_FOUND, "User profile not found");
+	}
 
 	const cloudinaryResult = await new Promise<UploadApiResponse>(
 		(resolve, reject) => {

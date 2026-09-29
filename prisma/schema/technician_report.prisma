@@ -1,0 +1,18 @@
+model TechnicianReport {
+  id String @id @default(uuid())
+
+  diagnosis String
+  charge    Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  isDeleted Boolean   @default(false)
+  deletedBy String?
+  user      User?     @relation(fields: [deletedBy], references: [id])
+  deletedAt DateTime?
+
+  assignments Assignment[]
+
+  @@map("technicianreports")
+}

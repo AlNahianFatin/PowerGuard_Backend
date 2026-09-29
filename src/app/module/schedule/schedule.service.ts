@@ -382,7 +382,7 @@ const getMyAppointedSchedules = async (query: IQuery, user: RequestUser) => {
 		where: { userId: user.userId },
 	});
 
-	if (!operator) {
+	if (!operator || operator.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
 	}
 
@@ -501,7 +501,7 @@ const createSchedule = async (
 		where: { userId: user.userId },
 	});
 
-	if (!operator) {
+	if (!operator || operator.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
 	}
 
@@ -606,7 +606,7 @@ const publishSchedule = async (scheduleId: string, user: RequestUser) => {
 		where: { userId: user.userId },
 	});
 
-	if (!operator) {
+	if (!operator || operator.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
 	}
 
@@ -672,7 +672,7 @@ const updateSchedule = async (
 		where: { userId: user.userId },
 	});
 
-	if (!operator) {
+	if (!operator || operator.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
 	}
 
@@ -750,13 +750,13 @@ const updateSchedule = async (
 };
 
 const deleteSchedule = async (scheduleId: string, user: RequestUser) => {
-	// const operator = await prisma.operator.findUnique({
-	// 	where: { userId: user.userId },
-	// });
+	const operator = await prisma.operator.findUnique({
+		where: { userId: user.userId },
+	});
 
-	// if (!operator) {
-	// 	throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
-	// }
+	if (!operator || operator.isDeleted) {
+		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
+	}
 
 	const schedule = await prisma.schedule.findUnique({
 		where: {

@@ -1,11 +1,10 @@
 import cron from "node-cron";
 import {
-	TechnicianVerificationStatus,
 	Role,
 	ScheduleStatus,
+	TechnicianVerificationStatus,
 } from "../../generated/prisma/enums";
 import { prisma } from "./prisma";
-import { addDays, startOfDay } from "date-fns";
 
 export const deleteUnverifiedTechnicians = async () => {
 	cron.schedule("*/10 * * * *", async () => {
@@ -31,11 +30,13 @@ export const deleteUnverifiedTechnicians = async () => {
 			console.log(
 				"Cron: Failed to delete unverified technician applications",
 				error,
+				new Date().toLocaleDateString(),
 			);
 		}
 
 		console.log(
-			"Unverified technician delete cron schedule (every 10 minutes)",
+			"Cron: Unverified technician delete scheduled (every 10 minutes): ",
+			new Date().toLocaleDateString(),
 		);
 	});
 };
@@ -99,10 +100,12 @@ export const updateTechnicianExperience = async () => {
 			console.error(
 				"Cron: Failed to update verified technician experience",
 				error,
+				new Date().toLocaleDateString(),
 			);
 		}
 		console.log(
-			"Verified technician experience cron scheduled: every day at midnight",
+			"Cron: Verified technician experience scheduled (every day at midnight): ",
+			new Date().toLocaleDateString(),
 		);
 	});
 };
@@ -129,8 +132,15 @@ export const updateCompletedSchedules = async () => {
 				);
 			}
 		} catch (error) {
-			console.error("Cron: Failed to update schedule completion.", error);
+			console.error(
+				"Cron: Failed to update schedule completion.",
+				error,
+				new Date().toLocaleDateString(),
+			);
 		}
-		console.log("Schedule status update cron scheduled: every 10 minutes");
+		console.log(
+			"Cron: Schedule status update scheduled (every 10 minutes): ",
+			new Date().toLocaleDateString(),
+		);
 	});
 };

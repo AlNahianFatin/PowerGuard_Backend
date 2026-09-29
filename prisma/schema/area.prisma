@@ -15,7 +15,7 @@ model Area {
   feederId String
   feeder   Feeder @relation(fields: [feederId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  outageReports OutageReport[]
+  serviceRequests ServiceRequest[]
 
   @@index([name])
   @@index([code])

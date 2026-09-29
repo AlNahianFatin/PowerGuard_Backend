@@ -14,7 +14,7 @@ model Customer {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  outageReports OutageReport[]
+  serviceRequests ServiceRequest[]
 
   @@index([email])
   @@index([isDeleted])

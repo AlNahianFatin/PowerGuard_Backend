@@ -6,9 +6,6 @@ model Assignment {
   reportUrl      String?
   reportPublicId String?
 
-  startedAt   DateTime?
-  completedAt DateTime?
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -17,17 +14,20 @@ model Assignment {
   user      User?     @relation(fields: [deletedBy], references: [id])
   deletedAt DateTime?
 
-  operatorId String?
+  operatorId String
   operator   Operator? @relation(fields: [operatorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  technicianId String?
+  technicianId String
   technician   Technician? @relation(fields: [technicianId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  outageReportId String
-  outageReport   OutageReport @relation(fields: [outageReportId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  serviceRequestId String         @unique
+  serviceRequest   ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   payment Payment?
 
-  @@unique([operatorId, technicianId, outageReportId], name: "unique_assignment")
+  technicianReportId String?
+  technicianReport   TechnicianReport? @relation(fields: [technicianReportId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([operatorId, technicianId, serviceRequestId], name: "unique_assignment")
   @@map("assignments")
 }

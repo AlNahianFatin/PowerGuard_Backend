@@ -26,14 +26,16 @@ model User {
 
   // notifications Notification[]
   // auditLogs     AuditLog[]
+  reviewers         Technician[]       @relation("reviewer")
   payments          Payment[]
   areas             Area[]
   distributionZones DistributionZone[]
   feeders           Feeder[]
   substations       Substation[]
   assignments       Assignment[]
-  outageReports     OutageReport[]
+  serviceRequests   ServiceRequest[]
   schedules         Schedule[]
+  technicianReports TechnicianReport[]
 
   @@unique([email])
   @@index([status])

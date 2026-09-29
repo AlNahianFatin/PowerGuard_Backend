@@ -144,7 +144,7 @@
 // }
 
 // const getSinglePrescription = async (appointmentId: string, user: RequestUser) => {
-//     const appointment = await prisma.apppointment.findUnique({
+//     const appointment = await prisma.appointment.findUnique({
 //         where: { id: appointmentId },
 //         include: {
 //             patient: { select: { id: true, name: true, userId: true } },

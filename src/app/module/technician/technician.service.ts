@@ -42,7 +42,7 @@ const applyAsTechnician = async (
 		},
 	});
 
-	if (isUserExists) {
+	if (isUserExists && !isUserExists?.isDeleted) {
 		throw new AppError(
 			httpStatus.CONFLICT,
 			"User Already Exists With This Email",
@@ -183,7 +183,7 @@ const verifyTechnicianEmail = async (
 		where: { email, role: Role.TECHNICIAN },
 	});
 
-	if (!existingUser) {
+	if (!existingUser || existingUser.isDeleted) {
 		throw new AppError(
 			httpStatus.NOT_FOUND,
 			"Technician Application Not Found. Please Apply Again.",
@@ -232,7 +232,7 @@ const approveTechnician = async (
 		include: { user: true },
 	});
 
-	if (!existingTechnician) {
+	if (!existingTechnician || existingTechnician.isDeleted) {
 		throw new AppError(
 			httpStatus.NOT_FOUND,
 			"Technician Application Not Found",
@@ -329,7 +329,7 @@ const changePassword = async (payload: IChangeTechnicianPasswordPayload) => {
 		include: { technician: true },
 	});
 
-	if (!user || !user.technician) {
+	if (!user?.technician) {
 		throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
 	}
 
@@ -408,7 +408,11 @@ const getAllTechnicians = async (query: IQuery) => {
 	const sortBy = query.sortBy ? query.sortBy : "createdAt";
 	const sortOrder = query.sortOrder ? query.sortOrder : "desc";
 
-	const andConditions: TechnicianWhereInput[] = [];
+	const andConditions: TechnicianWhereInput[] = [
+		{
+			isDeleted: false,
+		},
+	];
 
 	//Searching
 	if (query.searchTerm) {
@@ -483,7 +487,7 @@ const updateTechnicianProfile = async (
 		where: { userId: user.userId },
 	});
 
-	if (!existingTechnician) {
+	if (!existingTechnician || existingTechnician.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Technician Profile Not Found");
 	}
 
@@ -531,14 +535,6 @@ const getAvailableTechnicianByTodaysSchedule = async (query: IQuery) => {
 
 		orderBy: {
 			[sortBy]: sortOrder,
-		},
-
-		select: {
-			id: true,
-			name: true,
-			experienceYears: true,
-			bio: true,
-			createdAt: true,
 		},
 	});
 

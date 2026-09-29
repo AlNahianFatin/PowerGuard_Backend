@@ -23,15 +23,16 @@ enum ScheduleStatus {
   COMPLETED
 }
 
-enum OutageReportStatus {
+enum ServiceRequestStatus {
   PENDING
-  VERIFIED
   ASSIGNED
+  INSPECTING
+  PAYMENTPENDING
   INPROGRESS
   RESOLVED
-  FAILED
-  REJECTED
-  CANCELLED
+  FAILED // technician fails to fix
+  REJECTED // operator rejects
+  CANCELLED // customer cancels
 }
 
 enum PaymentStatus {

@@ -94,7 +94,7 @@ const createArea = async (payload: ICreateAreaPayload, user: RequestUser) => {
 		where: { id: user.userId },
 	});
 
-	if (!admin) {
+	if (!admin || admin.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Admin Profile Not Found");
 	}
 
@@ -161,7 +161,7 @@ const updateArea = async (
 		where: { id: user.userId },
 	});
 
-	if (!admin) {
+	if (!admin || admin.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Admin Profile Not Found");
 	}
 
@@ -260,7 +260,7 @@ const deleteArea = async (areaId: string, user: RequestUser) => {
 		where: { id: user.userId },
 	});
 
-	if (!admin) {
+	if (!admin || admin.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Admin Profile Not Found");
 	}
 

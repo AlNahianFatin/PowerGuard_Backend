@@ -125,7 +125,7 @@ const createZone = async (payload: ICreateZonePayload, user: RequestUser) => {
 		where: { id: user.userId },
 	});
 
-	if (!admin) {
+	if (!admin || admin.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Admin Profile Not Found");
 	}
 
@@ -190,7 +190,7 @@ const updateZone = async (
 		where: { id: user.userId },
 	});
 
-	if (!admin) {
+	if (!admin || admin.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Admin Profile Not Found");
 	}
 
@@ -326,7 +326,7 @@ const deleteZone = async (zoneId: string, user: RequestUser) => {
 		where: { id: user.userId },
 	});
 
-	if (!admin) {
+	if (!admin || admin.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Admin Profile Not Found");
 	}
 
