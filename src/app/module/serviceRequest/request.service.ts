@@ -40,48 +40,71 @@ const getAllRequests = async (query: IQuery, user: RequestUser) => {
 
 	const andConditions: ServiceRequestWhereInput[] = [];
 
-	if (user.role !== Role.ADMIN && user.role !== Role.OPERATOR) {
-		andConditions.push({ isDeleted: false });
+	if (
+		user.role !== Role.ADMIN &&
+		user.role !== Role.OPERATOR &&
+		query.isDeleted
+	) {
+		throw new AppError(
+			httpStatus.UNAUTHORIZED,
+			"You cannot view deleted service requests",
+		);
+	}
+
+	const isTrue = (value: unknown) => value === true || value === "true";
+
+	const statusFilters = [
+		{
+			value: isTrue(query.isCancelled),
+			status: ServiceRequestStatus.CANCELLED,
+		},
+		{
+			value: isTrue(query.isRejected),
+			status: ServiceRequestStatus.REJECTED,
+		},
+		{
+			value: isTrue(query.isFailed),
+			status: ServiceRequestStatus.FAILED,
+		},
+		{
+			value: isTrue(query.isResolved),
+			status: ServiceRequestStatus.RESOLVED,
+		},
+	];
+
+	const selectedStatusFilters = statusFilters.filter((filter) => filter.value);
+
+	let numOfFilters = selectedStatusFilters.length;
+
+	if (query.status) {
+		numOfFilters++;
+	}
+
+	if (isTrue(query.isDeleted)) {
+		numOfFilters++;
+	}
+
+	if (numOfFilters > 1) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"You can only filter by one service request status at a time",
+		);
+	}
+
+	if (selectedStatusFilters.length === 1) {
+		andConditions.push({
+			status: selectedStatusFilters[0].status,
+		});
 	}
 
 	if (query.status) {
 		andConditions.push({ status: query.status });
 	}
 
-	if (query.isFailed) {
-		andConditions.push({ status: ServiceRequestStatus.FAILED });
-	}
-
-	if (query.isRejected) {
-		andConditions.push({ status: ServiceRequestStatus.REJECTED });
-	}
-
-	if (query.isResolved) {
-		andConditions.push({ status: ServiceRequestStatus.RESOLVED });
-	}
-
-	if (
-		(user.role === Role.ADMIN || user.role === Role.OPERATOR) &&
-		query.isDeleted
-	) {
-		andConditions.push({ isDeleted: Boolean(query.isDeleted) });
-	}
-
-	if (
-		(user.role === Role.TECHNICIAN || user.role === Role.CUSTOMER) &&
-		query.deletedBy
-	) {
-		throw new AppError(
-			httpStatus.CONFLICT,
-			"You cannot view deleted outage requests",
-		);
-	}
-
-	if (
-		(user.role === Role.ADMIN || user.role === Role.OPERATOR) &&
-		query.deletedBy
-	) {
-		andConditions.push({ deletedBy: query.deletedBy });
+	if (isTrue(query.isDeleted)) {
+		andConditions.push({
+			isDeleted: true,
+		});
 	}
 
 	if (query.customerId) {
@@ -127,13 +150,10 @@ const getAllRequests = async (query: IQuery, user: RequestUser) => {
 						mode: "insensitive",
 					},
 				},
+
 				{
-					user: {
+					customer: {
 						name: {
-							contains: query.searchTerm,
-							mode: "insensitive",
-						},
-						email: {
 							contains: query.searchTerm,
 							mode: "insensitive",
 						},
@@ -141,11 +161,16 @@ const getAllRequests = async (query: IQuery, user: RequestUser) => {
 				},
 				{
 					customer: {
-						name: {
+						email: {
 							contains: query.searchTerm,
 							mode: "insensitive",
 						},
-						email: {
+					},
+				},
+
+				{
+					area: {
+						name: {
 							contains: query.searchTerm,
 							mode: "insensitive",
 						},
@@ -153,16 +178,13 @@ const getAllRequests = async (query: IQuery, user: RequestUser) => {
 				},
 				{
 					area: {
-						name: {
-							contains: query.searchTerm,
-							mode: "insensitive",
-						},
 						code: {
 							contains: query.searchTerm,
 							mode: "insensitive",
 						},
 					},
 				},
+
 				{
 					area: {
 						feeder: {
@@ -170,7 +192,24 @@ const getAllRequests = async (query: IQuery, user: RequestUser) => {
 								contains: query.searchTerm,
 								mode: "insensitive",
 							},
+						},
+					},
+				},
+				{
+					area: {
+						feeder: {
 							code: {
+								contains: query.searchTerm,
+								mode: "insensitive",
+							},
+						},
+					},
+				},
+
+				{
+					assignment: {
+						assignedByUser: {
+							name: {
 								contains: query.searchTerm,
 								mode: "insensitive",
 							},
@@ -179,12 +218,19 @@ const getAllRequests = async (query: IQuery, user: RequestUser) => {
 				},
 				{
 					assignment: {
-						operator: {
-							name: {
+						assignedByUser: {
+							email: {
 								contains: query.searchTerm,
 								mode: "insensitive",
 							},
-							email: {
+						},
+					},
+				},
+
+				{
+					assignment: {
+						technician: {
+							name: {
 								contains: query.searchTerm,
 								mode: "insensitive",
 							},
@@ -194,10 +240,6 @@ const getAllRequests = async (query: IQuery, user: RequestUser) => {
 				{
 					assignment: {
 						technician: {
-							name: {
-								contains: query.searchTerm,
-								mode: "insensitive",
-							},
 							email: {
 								contains: query.searchTerm,
 								mode: "insensitive",
@@ -216,7 +258,6 @@ const getAllRequests = async (query: IQuery, user: RequestUser) => {
 		orderBy: { [sortBy]: sortOrder },
 		include: {
 			customer: { select: { id: true, name: true, email: true } },
-			user: { select: { id: true, name: true, email: true } },
 			area: {
 				include: {
 					feeder: true,
@@ -224,8 +265,14 @@ const getAllRequests = async (query: IQuery, user: RequestUser) => {
 			},
 			assignment: {
 				include: {
-					operator: true,
-					customer: true,
+					assignedByUser: {
+						select: {
+							id: true,
+							name: true,
+							email: true,
+						},
+					},
+					technician: true,
 					payment: true,
 				},
 			},
@@ -252,7 +299,6 @@ const getSingleRequest = async (requestId: string, user: RequestUser) => {
 		where: { id: requestId },
 		include: {
 			customer: { select: { id: true, name: true, email: true } },
-			user: { select: { id: true, name: true, email: true } },
 			area: {
 				include: {
 					feeder: true,
@@ -260,8 +306,14 @@ const getSingleRequest = async (requestId: string, user: RequestUser) => {
 			},
 			assignment: {
 				include: {
-					operator: true,
-					customer: true,
+					assignedByUser: {
+						select: {
+							id: true,
+							name: true,
+							email: true,
+						},
+					},
+					technician: true,
 					payment: true,
 				},
 			},
@@ -269,7 +321,7 @@ const getSingleRequest = async (requestId: string, user: RequestUser) => {
 	});
 
 	if (!request || request.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Outage request Not Found");
+		throw new AppError(httpStatus.NOT_FOUND, "Service request Not Found");
 	}
 
 	return request;
@@ -292,23 +344,57 @@ const getMyRequests = async (query: IQuery, user: RequestUser) => {
 
 	const andConditions: ServiceRequestWhereInput[] = [
 		{
-			customerId: user.userId,
+			customerId: customer.id,
 		},
 		{
 			isDeleted: false,
 		},
 	];
 
+	const isTrue = (value: unknown) => value === true || value === "true";
+
+	const statusFilters = [
+		{
+			value: isTrue(query.isCancelled),
+			status: ServiceRequestStatus.CANCELLED,
+		},
+		{
+			value: isTrue(query.isRejected),
+			status: ServiceRequestStatus.REJECTED,
+		},
+		{
+			value: isTrue(query.isFailed),
+			status: ServiceRequestStatus.FAILED,
+		},
+		{
+			value: isTrue(query.isResolved),
+			status: ServiceRequestStatus.RESOLVED,
+		},
+	];
+
+	const selectedStatusFilters = statusFilters.filter((filter) => filter.value);
+
+	let numOfFilters = selectedStatusFilters.length;
+
+	if (query.status) {
+		numOfFilters++;
+	}
+
+	if (numOfFilters > 1) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"You can only filter by one service request status at a time",
+		);
+	}
+
+	if (selectedStatusFilters.length === 1) {
+		andConditions.push({
+			status: selectedStatusFilters[0].status,
+		});
+	}
+
 	if (query.status) {
 		andConditions.push({ status: query.status });
-	}
-
-	if (query.isFailed) {
-		andConditions.push({ status: ServiceRequestStatus.FAILED });
-	}
-
-	if (query.isRejected) {
-		andConditions.push({ status: ServiceRequestStatus.REJECTED });
 	}
 
 	if (query.areaId) {
@@ -351,12 +437,8 @@ const getMyRequests = async (query: IQuery, user: RequestUser) => {
 					},
 				},
 				{
-					customer: {
+					area: {
 						name: {
-							contains: query.searchTerm,
-							mode: "insensitive",
-						},
-						email: {
 							contains: query.searchTerm,
 							mode: "insensitive",
 						},
@@ -364,10 +446,6 @@ const getMyRequests = async (query: IQuery, user: RequestUser) => {
 				},
 				{
 					area: {
-						name: {
-							contains: query.searchTerm,
-							mode: "insensitive",
-						},
 						code: {
 							contains: query.searchTerm,
 							mode: "insensitive",
@@ -381,6 +459,12 @@ const getMyRequests = async (query: IQuery, user: RequestUser) => {
 								contains: query.searchTerm,
 								mode: "insensitive",
 							},
+						},
+					},
+				},
+				{
+					area: {
+						feeder: {
 							code: {
 								contains: query.searchTerm,
 								mode: "insensitive",
@@ -395,6 +479,12 @@ const getMyRequests = async (query: IQuery, user: RequestUser) => {
 								contains: query.searchTerm,
 								mode: "insensitive",
 							},
+						},
+					},
+				},
+				{
+					assignment: {
+						technician: {
 							email: {
 								contains: query.searchTerm,
 								mode: "insensitive",
@@ -413,7 +503,6 @@ const getMyRequests = async (query: IQuery, user: RequestUser) => {
 		orderBy: { [sortBy]: sortOrder },
 		include: {
 			customer: { select: { id: true, name: true, email: true } },
-			user: { select: { id: true, name: true, email: true } },
 			area: {
 				include: {
 					feeder: true,
@@ -421,8 +510,14 @@ const getMyRequests = async (query: IQuery, user: RequestUser) => {
 			},
 			assignment: {
 				include: {
-					operator: true,
-					customer: true,
+					assignedByUser: {
+						select: {
+							id: true,
+							name: true,
+							email: true,
+						},
+					},
+					technician: true,
 					payment: true,
 				},
 			},
@@ -464,16 +559,10 @@ const submitRequest = async (
 		where: {
 			id: payload.areaId,
 		},
-		include: {
-			feeder: true,
-		},
 	});
 
-	if (!area || area.feeder.isDeleted) {
-		throw new AppError(
-			httpStatus.NOT_FOUND,
-			"Area or feeder for that area not found",
-		);
+	if (!area || area.isDeleted) {
+		throw new AppError(httpStatus.NOT_FOUND, "Area not found");
 	}
 
 	const schedule = await prisma.schedule.findFirst({
@@ -497,7 +586,7 @@ const submitRequest = async (
 
 	const existingRequest = await prisma.serviceRequest.findFirst({
 		where: {
-			customerId: user.userId,
+			customerId: customer.id,
 			areaId: payload.areaId,
 			status: {
 				notIn: [
@@ -520,7 +609,7 @@ const submitRequest = async (
 	const request = await prisma.serviceRequest.create({
 		data: {
 			...payload,
-			customerId: user.userId,
+			customerId: customer.id,
 		},
 	});
 
@@ -540,6 +629,18 @@ const updateRequest = async (
 		throw new AppError(httpStatus.NOT_FOUND, "Customer Profile Not Found");
 	}
 
+	if (payload.areaId) {
+		const area = await prisma.area.findUnique({
+			where: {
+				id: payload.areaId,
+			},
+		});
+
+		if (!area || area.isDeleted) {
+			throw new AppError(httpStatus.NOT_FOUND, "Area not found");
+		}
+	}
+
 	const existingRequest = await prisma.serviceRequest.findUnique({
 		where: {
 			id: requestId,
@@ -550,7 +651,6 @@ const updateRequest = async (
 					payment: true,
 				},
 			},
-			schedule: true,
 		},
 	});
 
@@ -568,13 +668,38 @@ const updateRequest = async (
 		);
 	}
 
-	if (
-		existingRequest.status !== ServiceRequestStatus.PENDING &&
-		existingRequest.status !== ServiceRequestStatus.ASSIGNED
-	) {
+	if (existingRequest.status === ServiceRequestStatus.CANCELLED) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			"You have already cancelled this service request",
+		);
+	}
+
+	if (existingRequest.status === ServiceRequestStatus.REJECTED) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			`Your request has been rejected by an operator and cannot be updated. Rejection reason: ${existingRequest?.rejectionReason}`,
+		);
+	}
+
+	if (existingRequest.status === ServiceRequestStatus.FAILED) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			`Your service was failed. Failure note: ${existingRequest?.failureNote}`,
+		);
+	}
+
+	if (existingRequest.status === ServiceRequestStatus.RESOLVED) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			"Your service request has already been resolved",
+		);
+	}
+
+	if (existingRequest.status !== ServiceRequestStatus.PENDING) {
 		throw new AppError(
 			httpStatus.BAD_REQUEST,
-			"Your request is already being processed",
+			"Your request is already being processed and cannot be updated",
 		);
 	}
 
@@ -609,7 +734,6 @@ const cancelRequest = async (requestId: string, user: RequestUser) => {
 					payment: true,
 				},
 			},
-			schedule: true,
 		},
 	});
 
@@ -624,6 +748,34 @@ const cancelRequest = async (requestId: string, user: RequestUser) => {
 		throw new AppError(
 			httpStatus.UNAUTHORIZED,
 			"You are not authorized to update this request",
+		);
+	}
+
+	if (existingRequest.status === ServiceRequestStatus.CANCELLED) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			"You have already cancelled this service request",
+		);
+	}
+
+	if (existingRequest.status === ServiceRequestStatus.REJECTED) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			`Your request has been rejected by an operator and cannot be cancelled. Rejection reason: ${existingRequest?.rejectionReason}`,
+		);
+	}
+
+	if (existingRequest.status === ServiceRequestStatus.FAILED) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			`Your service was failed. Failure note: ${existingRequest?.failureNote}`,
+		);
+	}
+
+	if (existingRequest.status === ServiceRequestStatus.RESOLVED) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			"Your service request has already been resolved",
 		);
 	}
 
@@ -658,9 +810,18 @@ const rejectRequest = async (
 		where: { userId: user.userId },
 	});
 
-	if (!operator || operator.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
+	const admin = await prisma.user.findUnique({
+		where: {
+			id: user.userId,
+			role: Role.ADMIN,
+		},
+	});
+
+	if ((!operator || operator.isDeleted) && (!admin || admin.isDeleted)) {
+		throw new AppError(httpStatus.NOT_FOUND, "Your profile not found");
 	}
+
+	const rejectedByUserId = operator?.userId ?? admin?.id;
 
 	const existingRequest = await prisma.serviceRequest.findUnique({
 		where: {
@@ -673,7 +834,13 @@ const rejectRequest = async (
 					payment: true,
 				},
 			},
-			schedule: true,
+			rejectedByUser: {
+				select: {
+					id: true,
+					name: true,
+					email: true,
+				},
+			},
 		},
 	});
 
@@ -686,36 +853,36 @@ const rejectRequest = async (
 
 	if (existingRequest.status === ServiceRequestStatus.ASSIGNED) {
 		throw new AppError(
-			httpStatus.NOT_FOUND,
-			`The request has already been assigned to ${existingRequest.assignment?.technician?.name}`,
+			httpStatus.CONFLICT,
+			`The service request has already been assigned to ${existingRequest.assignment?.technician?.name}`,
 		);
 	}
 
 	if (existingRequest.status === ServiceRequestStatus.RESOLVED) {
 		throw new AppError(
 			httpStatus.NOT_FOUND,
-			"The request has already been resolved",
+			"The service request has already been resolved",
 		);
 	}
 
 	if (existingRequest.status === ServiceRequestStatus.FAILED) {
 		throw new AppError(
 			httpStatus.NOT_FOUND,
-			`${existingRequest.assignment?.technician?.name} has already stated that the service has been failed`,
+			`${existingRequest.assignment?.technician?.name} has already stated that the service was failed. Failure note: ${existingRequest?.failureNote}`,
 		);
 	}
 
 	if (existingRequest.status === ServiceRequestStatus.REJECTED) {
 		throw new AppError(
 			httpStatus.NOT_FOUND,
-			"The request has already been rejected",
+			`The request has already been rejected by ${existingRequest?.rejectedByUser?.name}. Rejection reason: ${existingRequest?.rejectionReason}`,
 		);
 	}
 
 	if (existingRequest.status === ServiceRequestStatus.CANCELLED) {
 		throw new AppError(
 			httpStatus.NOT_FOUND,
-			"Customer has already cancelled their service request",
+			"The customer has already cancelled their service request",
 		);
 	}
 
@@ -733,6 +900,7 @@ const rejectRequest = async (
 		data: {
 			status: ServiceRequestStatus.REJECTED,
 			rejectionReason: payload.rejectionReason,
+			rejectedBy: rejectedByUserId,
 		},
 	});
 
@@ -748,8 +916,21 @@ const assignRequest = async (
 		where: { userId: user.userId },
 	});
 
-	if (!operator || operator.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
+	const admin = await prisma.user.findUnique({
+		where: {
+			id: user.userId,
+			role: Role.ADMIN,
+		},
+	});
+
+	if ((!operator || operator.isDeleted) && (!admin || admin.isDeleted)) {
+		throw new AppError(httpStatus.NOT_FOUND, "Your profile not found");
+	}
+
+	const assignedByUserId = operator?.userId ?? admin?.id;
+
+	if (!assignedByUserId) {
+		throw new AppError(httpStatus.NOT_FOUND, "Your profile not found");
 	}
 
 	const { technicianId } = payload;
@@ -782,7 +963,6 @@ const assignRequest = async (
 					payment: true,
 				},
 			},
-			schedule: true,
 		},
 	});
 
@@ -822,7 +1002,7 @@ const assignRequest = async (
 		const assignment = await tx.assignment.create({
 			data: {
 				notes: payload?.notes,
-				operatorId: operator.id,
+				assigneeId: assignedByUserId,
 				technicianId: technician.id,
 				serviceRequestId: requestId,
 			},
@@ -864,8 +1044,27 @@ const updateRequestStatusByTechnician = async (
 			id: assignmentId,
 		},
 		include: {
-			serviceRequest: true,
+			serviceRequest: {
+				include: {
+					customer: {
+						select: {
+							id: true,
+							name: true,
+							email: true,
+						},
+					},
+				},
+			},
+			technicianReport: true,
 			payment: true,
+			technician: {
+				select: {
+					id: true,
+					name: true,
+					email: true,
+					status: true,
+				},
+			},
 		},
 	});
 
@@ -874,8 +1073,9 @@ const updateRequestStatusByTechnician = async (
 	}
 
 	if (
-		status === ServiceRequestStatus.INSPECTING &&
-		existingAssignment.serviceRequest.status !== ServiceRequestStatus.ASSIGNED
+		existingAssignment.serviceRequest.status !==
+			ServiceRequestStatus.ASSIGNED &&
+		status === ServiceRequestStatus.INSPECTING
 	) {
 		throw new AppError(
 			httpStatus.BAD_REQUEST,
@@ -884,9 +1084,10 @@ const updateRequestStatusByTechnician = async (
 	}
 
 	if (
+		existingAssignment.serviceRequest.status !==
+			ServiceRequestStatus.INPROGRESS &&
 		(status === ServiceRequestStatus.RESOLVED ||
-			status === ServiceRequestStatus.FAILED) &&
-		existingAssignment.serviceRequest.status !== ServiceRequestStatus.INPROGRESS
+			status === ServiceRequestStatus.FAILED)
 	) {
 		throw new AppError(
 			httpStatus.BAD_REQUEST,
@@ -894,70 +1095,17 @@ const updateRequestStatusByTechnician = async (
 		);
 	}
 
-	const updatedAssignment: any = await prisma.$transaction(async (tx) => {
-		const request = await tx.serviceRequest.update({
-			where: {
-				id: existingAssignment.serviceRequestId,
-			},
-			data: {
-				status,
-			},
-			include: {
-				customer: true,
-				assignment: {
-					include: {
-						technicianReport: true,
-					},
-				},
-			},
-		});
+	let uploadedPublicId: string | undefined;
+	let uploadResult: UploadApiResponse | undefined;
+	let pdfBuffer: Buffer | undefined;
+	let transactionCompleted = false;
 
-		if (status === ServiceRequestStatus.INSPECTING) {
-			await tx.serviceRequest.update({
-				where: {
-					id: existingAssignment.serviceRequestId,
-				},
-				data: {
-					inspectedAt: new Date(),
-				},
-			});
-		}
-
-		if (status === ServiceRequestStatus.RESOLVED) {
-			await tx.serviceRequest.update({
-				where: {
-					id: existingAssignment.serviceRequestId,
-				},
-				data: {
-					resolvedAt: new Date(),
-				},
-			});
-		}
-
-		if (status === ServiceRequestStatus.FAILED) {
-			await tx.serviceRequest.update({
-				where: {
-					id: existingAssignment.serviceRequestId,
-				},
-				data: {
-					failureNote: payload?.failureNote,
-				},
-			});
-		}
-
+	try {
+		// ------------------- 1. Generate PDF --------------------------
 		if (
 			status === ServiceRequestStatus.RESOLVED ||
 			status === ServiceRequestStatus.FAILED
 		) {
-			await tx.technician.update({
-				where: {
-					id: technician.id,
-				},
-				data: {
-					status: TechnicianStatus.AVAILABLE,
-				},
-			});
-
 			const pdfDocument = new PDFDocument({ margin: 50 });
 
 			const pdfChunks: Buffer[] = [];
@@ -972,104 +1120,197 @@ const updateRequestStatusByTechnician = async (
 				});
 			});
 
-			//pdf contents
-			pdfDocument.fontSize(20).text("Power Guard", { align: "center" });
-			pdfDocument.fontSize(14).text("Technician Report", { align: "center" });
+			pdfDocument.fontSize(20).text("Power Guard", {
+				align: "center",
+			});
+
+			pdfDocument.fontSize(14).text("Technician Report", {
+				align: "center",
+			});
+
 			pdfDocument.moveDown(2);
 
-			pdfDocument.fontSize(12).text(`Customer Name: ${request.customer.name}`);
+			pdfDocument.text(
+				`Service Request ID: ${existingAssignment.serviceRequestId}`,
+			);
+			pdfDocument
+				.fontSize(12)
+				.text(
+					`Customer Name: ${existingAssignment.serviceRequest.customer.name}`,
+				);
 			pdfDocument.text(`Technician Name: ${technician.name}`);
-			pdfDocument.text(`Service Request ID: ${request.id}`);
-			pdfDocument.text(`Date: ${new Date().toLocaleDateString()}`);
+			pdfDocument.text(
+				`Date: ${new Date().toLocaleTimeString()}, ${new Date().toLocaleDateString()}`,
+			);
 			pdfDocument.moveDown();
 
 			if (status === ServiceRequestStatus.RESOLVED) {
+				pdfDocument.fontSize(14).fillColor("green").text("Issue solved!", {
+					align: "center",
+				});
+
+				pdfDocument.moveDown();
+			}
+
+			if (status === ServiceRequestStatus.FAILED) {
+				pdfDocument
+					.fontSize(14)
+					.fillColor("red")
+					.text("Issue could not be solved!", {
+						align: "center",
+					});
+
+				pdfDocument.moveDown();
+			}
+
+			pdfDocument.fillColor("black").fontSize(14).text("Process: ");
+			pdfDocument
+				.fontSize(12)
+				.text(
+					`Service Request submitted -> Request approved & assigned technician (to: ${existingAssignment.technician.name}) -> Technician inspected -> ${existingAssignment.technician.name} noted issue & charged -> You paid -> ${existingAssignment.technician.name} started fixing -> ${status === ServiceRequestStatus.RESOLVED ? "Issue fixed!" : `${existingAssignment.technician.name} reported unfixable for him!`}`,
+				);
+			pdfDocument.moveDown();
+
+			if (existingAssignment?.technicianReport?.diagnosis) {
+				pdfDocument.fillColor("black").fontSize(14).text("Diagnosis: ");
+				pdfDocument
+					.fontSize(12)
+					.text(`${existingAssignment?.technicianReport?.diagnosis ?? ""}`);
+				pdfDocument.moveDown();
+			}
+
+			if (existingAssignment?.technicianReport?.charge) {
+				pdfDocument.fontSize(14).text("Charge: ");
+				pdfDocument
+					.fontSize(12)
+					.text(`${existingAssignment?.technicianReport?.charge ?? ""} Tk.`);
+				pdfDocument.moveDown();
+			}
+
+			if (status === ServiceRequestStatus.FAILED) {
+				if (existingAssignment.serviceRequest.failureNote) {
+					pdfDocument.fontSize(14).text("Failure Note: ");
+					pdfDocument
+						.fontSize(12)
+						.fillColor("red")
+						.text(`${existingAssignment.serviceRequest.failureNote ?? ""}`);
+					pdfDocument.moveDown();
+				}
+
 				pdfDocument
 					.fontSize(14)
 					.fillColor("green")
-					.text("Issue solved!", { align: "center" });
-				pdfDocument.moveDown();
-			}
-
-			if (status === ServiceRequestStatus.FAILED) {
-				//refund from bkash
-
-				pdfDocument
-					.fontSize(14)
-					.fillColor("red")
-					.text("Issue could not be solved!", { align: "center" });
-				pdfDocument.moveDown();
-			}
-
-			pdfDocument.fontSize(14).text("Diagnosis");
-			pdfDocument
-				.fontSize(12)
-				.text(`${request.assignment?.technicianReport?.diagnosis}`);
-			pdfDocument.moveDown();
-
-			pdfDocument.fontSize(14).text("Charge");
-			pdfDocument
-				.fontSize(12)
-				.text(`${request.assignment?.technicianReport?.charge}`);
-			pdfDocument.moveDown();
-
-			if (status === ServiceRequestStatus.FAILED) {
-				pdfDocument
-					.fontSize(12)
-					.fillColor("red")
-					.text(`${request.failureNote}`);
-				pdfDocument.moveDown();
-
-				pdfDocument
-					.fontSize(12)
-					.fillColor("red")
-					.text("Your account has been refunded successfully");
+					.text("Your account has been refunded successfully", {
+						align: "center",
+					});
 				pdfDocument.moveDown();
 			}
 
 			pdfDocument.end();
 
-			const pdfBuffer = await pdfReadyPromise;
+			pdfBuffer = await pdfReadyPromise;
 
-			const uploadResult = await new Promise<UploadApiResponse>(
-				(resolve, reject) => {
-					cloudinary.uploader
-						.upload_stream(
-							{ resource_type: "raw", format: "pdf" },
-							(error, result) => {
-								if (error) {
-									return reject(error);
-								}
+			// ------------------- 2. Upload to Cloudinary -----------------------
+			uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
+				cloudinary.uploader
+					.upload_stream(
+						{
+							resource_type: "raw",
+							format: "pdf",
+						},
+						(error, result) => {
+							if (error) {
+								return reject(error);
+							}
 
-								if (!result) {
-									return reject(
-										new AppError(
-											httpStatus.INTERNAL_SERVER_ERROR,
-											"No Result Returned From Cloudinary",
-										),
-									);
-								}
+							if (!result) {
+								return reject(
+									new AppError(
+										httpStatus.INTERNAL_SERVER_ERROR,
+										"No Result Returned From Cloudinary",
+									),
+								);
+							}
 
-								resolve(result);
-							},
-						)
-						.end(pdfBuffer);
-				},
-			);
+							resolve(result);
+						},
+					)
+					.end(pdfBuffer);
+			});
 
-			await tx.assignment.update({
+			uploadedPublicId = uploadResult.public_id;
+		}
+
+		// ------------------- 3. Database transaction ---------------------
+		const updatedData = await prisma.$transaction(async (tx) => {
+			const updatedRequest = await tx.serviceRequest.update({
 				where: {
-					id: request?.assignment?.id,
+					id: existingAssignment.serviceRequestId,
 				},
 				data: {
-					reportPublicId: uploadResult.public_id,
-					reportUrl: uploadResult.secure_url,
+					status,
+
+					...(status === ServiceRequestStatus.INSPECTING && {
+						inspectedAt: new Date(),
+					}),
+
+					...(status === ServiceRequestStatus.RESOLVED && {
+						resolvedAt: new Date(),
+					}),
+
+					...(status === ServiceRequestStatus.FAILED && {
+						failureNote: payload.failureNote,
+					}),
 				},
 			});
 
+			if (
+				status === ServiceRequestStatus.RESOLVED ||
+				status === ServiceRequestStatus.FAILED
+			) {
+				await tx.technician.update({
+					where: {
+						id: technician.id,
+					},
+					data: {
+						status: TechnicianStatus.AVAILABLE,
+					},
+				});
+
+				if (!uploadResult) {
+					throw new AppError(
+						httpStatus.INTERNAL_SERVER_ERROR,
+						"Technician report upload was not completed",
+					);
+				}
+
+				const updatedAssignment = await tx.assignment.update({
+					where: {
+						id: assignmentId,
+					},
+					data: {
+						reportPublicId: uploadResult.public_id,
+						reportUrl: uploadResult.secure_url,
+					},
+				});
+
+				return updatedAssignment;
+			}
+
+			return updatedRequest;
+		});
+
+		transactionCompleted = true;
+
+		// -------------------- 4. Send email ----------------------
+		if (
+			(status === ServiceRequestStatus.RESOLVED ||
+				status === ServiceRequestStatus.FAILED) &&
+			pdfBuffer
+		) {
 			await transporter.sendMail({
 				from: config.email_sender,
-				to: request.customer.email,
+				to: existingAssignment.serviceRequest.customer.email,
 				subject: "Your Service Report - Power Guard",
 				text: "Please find your report attached.",
 				attachments: [
@@ -1081,16 +1322,75 @@ const updateRequestStatusByTechnician = async (
 			});
 		}
 
-		const updatedAssignment = await tx.assignment.findUnique({
-			where: {
-				id: request?.assignment?.id,
-			},
-		});
+		return updatedData;
+	} catch (error) {
+		// ------------------------ 1. Clear cloudinary -----------------------
+		if (uploadedPublicId) {
+			try {
+				await cloudinary.uploader.destroy(uploadedPublicId, {
+					resource_type: "raw",
+				});
+			} catch (cleanupError) {
+				console.error("Failed to cleanup Cloudinary file:", cleanupError);
+			}
+		}
 
-		return updatedAssignment;
-	});
+		// ------------------------ 2. Rollback db ------------------------
+		if (transactionCompleted) {
+			try {
+				await prisma.$transaction(async (tx) => {
+					await tx.serviceRequest.update({
+						where: {
+							id: existingAssignment.serviceRequestId,
+						},
+						data: {
+							status: existingAssignment.serviceRequest.status,
 
-	return updatedAssignment;
+							...(status === ServiceRequestStatus.INSPECTING && {
+								inspectedAt: existingAssignment.serviceRequest.inspectedAt,
+							}),
+
+							...(status === ServiceRequestStatus.RESOLVED && {
+								resolvedAt: existingAssignment.serviceRequest.resolvedAt,
+							}),
+
+							...(status === ServiceRequestStatus.FAILED && {
+								failureNote: existingAssignment.serviceRequest.failureNote,
+							}),
+						},
+					});
+
+					if (
+						status === ServiceRequestStatus.RESOLVED ||
+						status === ServiceRequestStatus.FAILED
+					) {
+						await tx.technician.update({
+							where: {
+								id: technician.id,
+							},
+							data: {
+								status: existingAssignment.technician.status,
+							},
+						});
+					}
+
+					await tx.assignment.update({
+						where: {
+							id: assignmentId,
+						},
+						data: {
+							reportPublicId: existingAssignment.reportPublicId,
+							reportUrl: existingAssignment.reportUrl,
+						},
+					});
+				});
+			} catch (rollbackError) {
+				console.error("Failed to compensate database changes:", rollbackError);
+			}
+		}
+
+		throw error;
+	}
 };
 
 export const RequestService = {

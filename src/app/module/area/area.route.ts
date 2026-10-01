@@ -12,7 +12,7 @@ const router = Router();
 
 router.get(
 	"/all-areas",
-	auth(Role.ADMIN, Role.OPERATOR),
+	auth(Role.ADMIN, Role.OPERATOR, Role.TECHNICIAN, Role.CUSTOMER),
 	AreaController.getAllAreas,
 );
 

@@ -21,7 +21,6 @@ model Operator {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   schedules   Schedule[]
-  assignments Assignment[]
 
   @@index([email])
   @@map("operators")

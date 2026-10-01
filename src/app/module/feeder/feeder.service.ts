@@ -117,7 +117,6 @@ const createFeeder = async (
 	const name = payload.name.trim().toUpperCase();
 	const code = payload.code.trim().toUpperCase();
 	const description = payload.description ?? "";
-	const repairingCost = Number(payload.repairingCost);
 	const substationId = payload.substationId.trim();
 
 	const existingFeederName = await prisma.feeder.findFirst({
@@ -153,7 +152,6 @@ const createFeeder = async (
 			name,
 			code,
 			description,
-			repairingCost,
 			substationId,
 		},
 		include: {
@@ -286,10 +284,6 @@ const updateFeeder = async (
 
 				...(payload.description !== undefined && {
 					description: payload.description,
-				}),
-
-				...(payload.repairingCost && {
-					repairingCost: payload.repairingCost,
 				}),
 
 				...(payload.substationId && {

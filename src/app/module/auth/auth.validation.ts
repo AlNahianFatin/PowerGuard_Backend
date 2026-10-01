@@ -18,9 +18,10 @@ const CustomerRegistrationZodSchema = z.object({
 			/[^A-Za-z0-9]/,
 			"Password must contain at least 1 special character",
 		),
-	patient: z
+	customer: z
 		.object({
 			contactNumber: z.string().optional(),
+			address: z.string().optional(),
 		})
 		.optional(),
 });

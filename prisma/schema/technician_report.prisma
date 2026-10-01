@@ -7,10 +7,10 @@ model TechnicianReport {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  isDeleted Boolean   @default(false)
-  deletedBy String?
-  user      User?     @relation(fields: [deletedBy], references: [id])
-  deletedAt DateTime?
+  isDeleted     Boolean   @default(false)
+  deletedBy     String?
+  deletedByUser User?     @relation(fields: [deletedBy], references: [id])
+  deletedAt     DateTime?
 
   assignments Assignment[]
 

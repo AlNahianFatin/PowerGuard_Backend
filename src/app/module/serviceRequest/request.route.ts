@@ -19,12 +19,6 @@ router.get(
 );
 
 router.get(
-	"/:requestId",
-	auth(Role.ADMIN, Role.OPERATOR, Role.TECHNICIAN, Role.CUSTOMER),
-	RequestController.getSingleRequest,
-);
-
-router.get(
 	"/my-requests",
 	auth(Role.CUSTOMER),
 	RequestController.getMyRequests,
@@ -35,6 +29,12 @@ router.post(
 	auth(Role.CUSTOMER),
 	validateRequest(SubmitRequestValidationZodSchema),
 	RequestController.submitRequest,
+);
+
+router.get(
+	"/:requestId",
+	auth(Role.ADMIN, Role.OPERATOR, Role.TECHNICIAN, Role.CUSTOMER),
+	RequestController.getSingleRequest,
 );
 
 router.patch(
@@ -52,14 +52,14 @@ router.patch(
 
 router.patch(
 	"/reject-request/:requestId",
-	auth(Role.OPERATOR),
+	auth(Role.ADMIN, Role.OPERATOR),
 	validateRequest(RejectRequestValidationZodSchema),
 	RequestController.rejectRequest,
 );
 
-router.patch(
+router.post(
 	"/assign-request/:requestId",
-	auth(Role.OPERATOR),
+	auth(Role.ADMIN, Role.OPERATOR),
 	RequestController.assignRequest,
 );
 

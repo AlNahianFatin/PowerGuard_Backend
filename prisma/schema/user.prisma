@@ -26,16 +26,17 @@ model User {
 
   // notifications Notification[]
   // auditLogs     AuditLog[]
-  reviewers         Technician[]       @relation("reviewer")
-  payments          Payment[]
-  areas             Area[]
-  distributionZones DistributionZone[]
-  feeders           Feeder[]
-  substations       Substation[]
-  assignments       Assignment[]
-  serviceRequests   ServiceRequest[]
-  schedules         Schedule[]
-  technicianReports TechnicianReport[]
+  reviewers               Technician[]       @relation("reviewer")
+  payments                Payment[]
+  areas                   Area[]
+  distributionZones       DistributionZone[]
+  feeders                 Feeder[]
+  substations             Substation[]
+  deletedByUser           Assignment[]       @relation("deletion")
+  assignedByUser          Assignment[]       @relation("assignment")
+  rejectedServiceRequests ServiceRequest[]   @relation("rejection")
+  schedules               Schedule[]
+  technicianReports       TechnicianReport[]
 
   @@unique([email])
   @@index([status])

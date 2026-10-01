@@ -162,6 +162,7 @@ const verifyCustomerEmail = async (payload: IVerifyEmailPayload) => {
 					name: patientPayload.name,
 					email: patientPayload.email,
 					contactNumber: patientPayload?.customer?.contactNumber || "",
+					address: patientPayload?.customer?.address || "",
 				},
 			},
 		},

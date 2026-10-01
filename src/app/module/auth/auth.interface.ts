@@ -11,6 +11,7 @@ export interface IRegisterCustomerPayload {
 	password: string;
 	customer: {
 		contactNumber?: string;
+		address?: string;
 	};
 }
 export interface IVerifyEmailPayload {
