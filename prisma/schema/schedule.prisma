@@ -12,14 +12,14 @@ model Schedule {
 
   isDeleted     Boolean   @default(false)
   deletedBy     String?
-  deletedByUser User?     @relation(fields: [deletedBy], references: [id])
+  deletedByUser User?     @relation("deletion", fields: [deletedBy], references: [id])
   deletedAt     DateTime?
 
   feederId String
   feeder   Feeder @relation(fields: [feederId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  operatorId String
-  operator   Operator @relation(fields: [operatorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  creatorId     String
+  createdByUser User   @relation("creation", fields: [creatorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@unique([startDateTime, endDateTime, feederId], name: "unique_schedule")
   @@index([startDateTime])

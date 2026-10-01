@@ -20,7 +20,7 @@ router.get("/todays-schedule", ScheduleController.getTodaysSchedules);
 
 router.get(
 	"/my-appointed-schedules",
-	auth(Role.OPERATOR),
+	auth(Role.ADMIN, Role.OPERATOR),
 	ScheduleController.getMyAppointedSchedules,
 );
 

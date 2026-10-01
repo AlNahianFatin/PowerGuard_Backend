@@ -20,8 +20,6 @@ model Operator {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  schedules   Schedule[]
-
   @@index([email])
   @@map("operators")
 }

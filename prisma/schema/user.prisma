@@ -32,10 +32,11 @@ model User {
   distributionZones       DistributionZone[]
   feeders                 Feeder[]
   substations             Substation[]
-  deletedByUser           Assignment[]       @relation("deletion")
+  deletedAssignmentByUser Assignment[]       @relation("deletion")
   assignedByUser          Assignment[]       @relation("assignment")
   rejectedServiceRequests ServiceRequest[]   @relation("rejection")
-  schedules               Schedule[]
+  deletedScheduleByUser   Schedule[]         @relation("deletion")
+  createdByUser           Schedule[]         @relation("creation")
   technicianReports       TechnicianReport[]
 
   @@unique([email])

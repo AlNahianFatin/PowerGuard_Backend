@@ -1,6 +1,6 @@
 import { addDays, isBefore, startOfDay } from "date-fns";
 import httpStatus from "http-status";
-import { ScheduleStatus } from "../../../generated/prisma/enums";
+import { Role, ScheduleStatus } from "../../../generated/prisma/enums";
 import type { ScheduleWhereInput } from "../../../generated/prisma/models";
 import type { IQuery } from "../../interfaces";
 import { prisma } from "../../lib/prisma";
@@ -32,8 +32,8 @@ const getAllSchedules = async (query: IQuery) => {
 		},
 	];
 
-	if (query.operatorId) {
-		andConditions.push({ operatorId: query.operatorId });
+	if (query.createdByUser) {
+		andConditions.push({ createdByUser: query.createdByUser });
 	}
 
 	// if (query.email) {
@@ -119,9 +119,8 @@ const getAllSchedules = async (query: IQuery) => {
 					},
 				},
 
-				// Operator name
 				{
-					operator: {
+					createdByUser: {
 						name: {
 							contains: query.searchTerm,
 							mode: "insensitive",
@@ -131,7 +130,7 @@ const getAllSchedules = async (query: IQuery) => {
 
 				// Operator email
 				{
-					operator: {
+					createdByUser: {
 						email: {
 							contains: query.searchTerm,
 							mode: "insensitive",
@@ -285,9 +284,8 @@ const getTodaysSchedules = async (query: IQuery) => {
 					},
 				},
 
-				// Operator name
 				{
-					operator: {
+					createdByUser: {
 						name: {
 							contains: query.searchTerm,
 							mode: "insensitive",
@@ -295,9 +293,8 @@ const getTodaysSchedules = async (query: IQuery) => {
 					},
 				},
 
-				// Operator email
 				{
-					operator: {
+					createdByUser: {
 						email: {
 							contains: query.searchTerm,
 							mode: "insensitive",
@@ -338,12 +335,11 @@ const getScheduleById = async (scheduleId: string) => {
 	const schedule = await prisma.schedule.findUnique({
 		where: { id: scheduleId },
 		include: {
-			operator: {
+			createdByUser: {
 				select: {
 					id: true,
 					name: true,
 					email: true,
-					userId: true,
 				},
 			},
 			feeder: {
@@ -371,7 +367,6 @@ const getScheduleById = async (scheduleId: string) => {
 };
 
 const getMyAppointedSchedules = async (query: IQuery, user: RequestUser) => {
-	console.log("service reached--------------");
 	const limit = query.limit ? Number(query.limit) : 10;
 	const page = query.page ? Number(query.page) : 1;
 	const skip = (page - 1) * limit;
@@ -382,13 +377,26 @@ const getMyAppointedSchedules = async (query: IQuery, user: RequestUser) => {
 		where: { userId: user.userId },
 	});
 
-	if (!operator || operator.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
+	const admin = await prisma.user.findUnique({
+		where: {
+			id: user.userId,
+			role: Role.ADMIN,
+		},
+	});
+
+	if ((!operator || operator.isDeleted) && (!admin || admin.isDeleted)) {
+		throw new AppError(httpStatus.NOT_FOUND, "Your Profile Not Found");
+	}
+
+	const creatorId = operator?.userId ?? admin?.id;
+
+	if (!creatorId) {
+		throw new AppError(httpStatus.NOT_FOUND, "Your Profile Not Found");
 	}
 
 	const andConditions: ScheduleWhereInput[] = [
 		{
-			operatorId: operator.id,
+			creatorId,
 		},
 		{
 			isDeleted: false,
@@ -501,8 +509,21 @@ const createSchedule = async (
 		where: { userId: user.userId },
 	});
 
-	if (!operator || operator.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
+	const admin = await prisma.user.findUnique({
+		where: {
+			id: user.userId,
+			role: Role.ADMIN,
+		},
+	});
+
+	if ((!operator || operator.isDeleted) && (!admin || admin.isDeleted)) {
+		throw new AppError(httpStatus.NOT_FOUND, "Your profile not found");
+	}
+
+	const creatorId = operator?.userId ?? admin?.id;
+
+	if (!creatorId) {
+		throw new AppError(httpStatus.NOT_FOUND, "Your profile not found");
 	}
 
 	const feeder = await prisma.feeder.findUnique({
@@ -585,14 +606,14 @@ const createSchedule = async (
 			endDateTime: payload.endDateTime,
 			reason: payload.reason,
 			feederId: payload.feederId,
-			operatorId: operator.id,
+			creatorId,
 		},
 		include: {
-			operator: {
+			createdByUser: {
 				select: {
+					id: true,
 					name: true,
 					email: true,
-					contactNumber: true,
 				},
 			},
 		},
@@ -606,14 +627,20 @@ const publishSchedule = async (scheduleId: string, user: RequestUser) => {
 		where: { userId: user.userId },
 	});
 
-	if (!operator || operator.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
+	const admin = await prisma.user.findUnique({
+		where: {
+			id: user.userId,
+			role: Role.ADMIN,
+		},
+	});
+
+	if ((!operator || operator.isDeleted) && (!admin || admin.isDeleted)) {
+		throw new AppError(httpStatus.NOT_FOUND, "Your Profile Not Found");
 	}
 
 	const schedule = await prisma.schedule.findUnique({
 		where: {
 			id: scheduleId,
-			operatorId: operator.id,
 			feeder: {
 				isDeleted: false,
 			},
@@ -672,12 +699,19 @@ const updateSchedule = async (
 		where: { userId: user.userId },
 	});
 
-	if (!operator || operator.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
+	const admin = await prisma.user.findUnique({
+		where: {
+			id: user.userId,
+			Role: Role.ADMIN,
+		},
+	});
+
+	if ((!operator || operator.isDeleted) && (!admin || admin.isDeleted)) {
+		throw new AppError(httpStatus.NOT_FOUND, "Your profile not found");
 	}
 
 	const schedule = await prisma.schedule.findUnique({
-		where: { id: scheduleId, operatorId: operator.id },
+		where: { id: scheduleId },
 	});
 
 	if (!schedule || schedule.isDeleted) {
@@ -735,11 +769,11 @@ const updateSchedule = async (
 			feederId: payload.feederId,
 		},
 		include: {
-			operator: {
+			createdByUser: {
 				select: {
+					id: true,
 					name: true,
 					email: true,
-					contactNumber: true,
 				},
 			},
 			feeder: true,
@@ -754,8 +788,15 @@ const deleteSchedule = async (scheduleId: string, user: RequestUser) => {
 		where: { userId: user.userId },
 	});
 
-	if (!operator || operator.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Operator Profile Not Found");
+	const admin = await prisma.user.findUnique({
+		where: {
+			id: user.userId,
+			role: Role.ADMIN,
+		},
+	});
+
+	if ((!operator || operator.isDeleted) && (!admin || admin.isDeleted)) {
+		throw new AppError(httpStatus.NOT_FOUND, "Your profile not found");
 	}
 
 	const schedule = await prisma.schedule.findUnique({
