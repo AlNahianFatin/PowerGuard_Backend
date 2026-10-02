@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const CreateReportValidationZodSchema = z.object({
+export const SubmitReportValidationZodSchema = z.object({
 	diagnosis: z
 		.string("Must include a valid report diagnosis")
 		.min(1, "Report diagnosis is required")

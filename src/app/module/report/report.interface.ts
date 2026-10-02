@@ -1,4 +1,4 @@
-export interface ICreateReportPayload {
+export interface ISubmitReportPayload {
 	diagnosis: string;
 	charge: string;
 }

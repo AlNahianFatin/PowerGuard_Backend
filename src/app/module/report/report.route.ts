@@ -4,7 +4,7 @@ import { auth } from "../../middleware/checkAuth";
 import { validateRequest } from "../../middleware/validateRequest";
 import { ReportController } from "./report.controller";
 import {
-	CreateReportValidationZodSchema,
+	SubmitReportValidationZodSchema,
 	UpdateReportValidationZodSchema,
 } from "./report.validation";
 
@@ -29,9 +29,9 @@ router.get(
 );
 
 router.post(
-	"/create-report/:assignmentId",
+	"/submit-report/:assignmentId",
 	auth(Role.TECHNICIAN),
-	validateRequest(CreateReportValidationZodSchema),
+	validateRequest(SubmitReportValidationZodSchema),
 	ReportController.submitReport,
 );
 
@@ -40,12 +40,6 @@ router.patch(
 	auth(Role.TECHNICIAN),
 	validateRequest(UpdateReportValidationZodSchema),
 	ReportController.updateReport,
-);
-
-router.delete(
-	"/delete-report/:reportId",
-	auth(Role.TECHNICIAN),
-	ReportController.deleteReport,
 );
 
 export const ReportRoutes = router;

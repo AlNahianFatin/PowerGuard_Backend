@@ -5,7 +5,7 @@ import { prisma } from "../../lib/prisma";
 import type { RequestUser } from "../../middleware/checkAuth";
 import { AppError } from "../../utils/AppError";
 import type {
-	ICreateReportPayload,
+	ISubmitReportPayload,
 	IUpdateReportPayload,
 } from "./report.interface";
 import { Role, ServiceRequestStatus } from "../../../generated/prisma/enums";
@@ -638,7 +638,7 @@ const getSingleReport = async (reportId: string) => {
 
 const submitReport = async (
 	assignmentId: string,
-	payload: ICreateReportPayload,
+	payload: ISubmitReportPayload,
 	user: RequestUser,
 ) => {
 	const technician = await prisma.technician.findUnique({
@@ -655,11 +655,19 @@ const submitReport = async (
 		},
 		include: {
 			technicianReport: true,
+			serviceRequest: true,
 		},
 	});
 
 	if (!existingAssignment || existingAssignment.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Assignment not found");
+	}
+
+	if (existingAssignment.technicianId !== technician.id) {
+		throw new AppError(
+			httpStatus.UNAUTHORIZED,
+			"You are not authorized to submit report other than yours",
+		);
 	}
 
 	if (existingAssignment.technicianReport) {
@@ -669,8 +677,17 @@ const submitReport = async (
 		);
 	}
 
+	if (
+		existingAssignment.serviceRequest.status !== ServiceRequestStatus.INSPECTING
+	) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"You can submit report only while inspecting the issue",
+		);
+	}
+
 	const diagnosis = payload?.diagnosis?.trim();
-	const charge = Number(payload?.charge?.trim());
+	const charge = Number(payload?.charge);
 
 	const report = await prisma.$transaction(async (tx) => {
 		const report = await tx.technicianReport.create({
@@ -732,14 +749,18 @@ const updateReport = async (
 	}
 
 	const diagnosis = payload.diagnosis?.trim();
-	const charge = Number(payload.charge?.trim());
+	const charge = Number(payload.charge);
 
 	const existingReport = await prisma.technicianReport.findUnique({
 		where: {
 			id: reportId,
 		},
 		include: {
-			assignment: true,
+			assignment: {
+				include: {
+					serviceRequest: true,
+				},
+			},
 		},
 	});
 
@@ -751,6 +772,46 @@ const updateReport = async (
 		throw new AppError(
 			httpStatus.UNAUTHORIZED,
 			"You are not authorized to update report other than yours",
+		);
+	}
+
+	if (
+		existingReport.assignment.serviceRequest.status ===
+		ServiceRequestStatus.PENDING
+	) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"The service request has not even been assigned yet!",
+		);
+	}
+
+	if (
+		existingReport.assignment.serviceRequest.status ===
+		ServiceRequestStatus.CANCELLED
+	) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"The customer has cancelled the service request",
+		);
+	}
+
+	if (
+		existingReport.assignment.serviceRequest.status ===
+		ServiceRequestStatus.REJECTED
+	) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"The service request has been rejected by authority",
+		);
+	}
+
+	if (
+		existingReport.assignment.serviceRequest.status ===
+		ServiceRequestStatus.ASSIGNED
+	) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			`Please update service request status to '${ServiceRequestStatus.INSPECTING}' first`,
 		);
 	}
 
@@ -789,53 +850,10 @@ const updateReport = async (
 	return updatedReport;
 };
 
-const deleteReport = async (reportId: string, user: RequestUser) => {
-	const technician = await prisma.technician.findUnique({
-		where: { userId: user.userId },
-	});
-
-	if (!technician || technician.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Technician Profile Not Found");
-	}
-
-	const existingReport = await prisma.technicianReport.findUnique({
-		where: {
-			id: reportId,
-		},
-		include: {
-			assignment: true,
-		},
-	});
-
-	if (!existingReport || existingReport.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Technician report not found");
-	}
-
-	if (technician.id !== existingReport.assignment?.technicianId) {
-		throw new AppError(
-			httpStatus.UNAUTHORIZED,
-			"You are not authorized to delete report other than yours",
-		);
-	}
-
-	await prisma.technicianReport.update({
-		where: {
-			id: existingReport.id,
-		},
-		data: {
-			isDeleted: true,
-			deletedBy: technician.id,
-		},
-	});
-
-	return null;
-};
-
 export const ReportService = {
 	getAllReports,
 	getMyReports,
 	getSingleReport,
 	submitReport,
 	updateReport,
-	deleteReport,
 };

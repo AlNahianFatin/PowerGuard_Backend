@@ -16,7 +16,7 @@ import { AssignmentRoutes } from "./app/module/assignment/assignment.route";
 import { AuthRoutes } from "./app/module/auth/auth.route";
 import { TechnicianRoutes } from "./app/module/technician/technician.route";
 // import { PaymentRoutes } from "./app/module/payment/payment.route";
-import { ReportRoutes } from "./app/module/repoort/report.route";
+import { ReportRoutes } from "./app/module/report/report.route";
 import { ScheduleRoutes } from "./app/module/schedule/schedule.route";
 import { UserRoutes } from "./app/module/user/user.route";
 import { ZoneRoutes } from "./app/module/zone/zone.route";

@@ -73,25 +73,10 @@ const updateReport = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-const deleteReport = catchAsync(async (req: Request, res: Response) => {
-	const reportId = req.params.reportId as string;
-	const user = req.user!;
-
-	await ReportService.deleteReport(reportId, user);
-
-	sendResponse(res, {
-		statusCode: httpStatus.OK,
-		success: true,
-		message: "Technician report deleted successfully",
-		data: null,
-	});
-});
-
 export const ReportController = {
 	getAllReports,
 	getMyReports,
 	getSingleReport,
 	submitReport,
 	updateReport,
-	deleteReport,
 };
