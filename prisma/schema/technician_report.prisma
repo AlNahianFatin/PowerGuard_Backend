@@ -12,7 +12,8 @@ model TechnicianReport {
   deletedByUser User?     @relation(fields: [deletedBy], references: [id])
   deletedAt     DateTime?
 
-  assignments Assignment[]
+  assignmentId String?     @unique
+  assignment   Assignment? @relation(fields: [assignmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("technicianreports")
 }

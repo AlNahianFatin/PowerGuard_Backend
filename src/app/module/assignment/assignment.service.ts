@@ -74,7 +74,11 @@ const getAllAssignments = async (query: IQuery, user: RequestUser) => {
 	}
 
 	if (query.technicianReportId) {
-		andConditions.push({ technicianReportId: query.technicianReportId });
+		andConditions.push({
+			technicianReport: {
+				id: query.technicianReportId,
+			},
+		});
 	}
 
 	if (query.searchTerm) {

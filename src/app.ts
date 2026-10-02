@@ -16,14 +16,14 @@ import { AssignmentRoutes } from "./app/module/assignment/assignment.route";
 import { AuthRoutes } from "./app/module/auth/auth.route";
 import { TechnicianRoutes } from "./app/module/technician/technician.route";
 // import { PaymentRoutes } from "./app/module/payment/payment.route";
-// import { PrescriptionRoutes } from "./app/module/prescription/prescription.route";
+import { ReportRoutes } from "./app/module/repoort/report.route";
 import { ScheduleRoutes } from "./app/module/schedule/schedule.route";
 import { UserRoutes } from "./app/module/user/user.route";
 import { ZoneRoutes } from "./app/module/zone/zone.route";
 import { SubstationRoutes } from "./app/module/substation/substation.route";
 import { FeederRoutes } from "./app/module/feeder/feeder.route";
 import { AreaRoutes } from "./app/module/area/area.route";
-import { RequestRoutes } from "./app/module/serviceRequest/request.route";
+import { RequestRoutes } from "./app/module/request/request.route";
 
 const app: Application = express();
 
@@ -48,7 +48,7 @@ app.use("/api/v1/request", RequestRoutes);
 app.use("/api/v1/technician", TechnicianRoutes);
 app.use("/api/v1/schedule", ScheduleRoutes);
 // app.use("/api/v1/payment", PaymentRoutes);
-// app.use("/api/v1/prescription", PrescriptionRoutes);
+app.use("/api/v1/report", ReportRoutes);
 app.use("/api/v1/zone", ZoneRoutes);
 app.use("/api/v1/substation", SubstationRoutes);
 app.use("/api/v1/feeder", FeederRoutes);
