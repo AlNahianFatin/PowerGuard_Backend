@@ -897,6 +897,35 @@ const updateAssignment = async (
 	}
 
 	const updatedAssignment = await prisma.$transaction(async (tx) => {
+		if (payload.technicianId) {
+			await tx.serviceRequest.update({
+				where: {
+					id: existingAssignment.serviceRequestId,
+				},
+				data: {
+					status: ServiceRequestStatus.ASSIGNED,
+				},
+			});
+
+			await tx.technician.update({
+				where: {
+					id: existingAssignment.technicianId,
+				},
+				data: {
+					status: TechnicianStatus.AVAILABLE,
+				},
+			});
+
+			await tx.technician.update({
+				where: {
+					id: payload.technicianId,
+				},
+				data: {
+					status: TechnicianStatus.ASSIGNED,
+				},
+			});
+		}
+
 		const updatedAssignment = await tx.assignment.update({
 			where: {
 				id: existingAssignment.id,
@@ -910,15 +939,6 @@ const updateAssignment = async (
 					technicianId: payload.technicianId,
 					assigneeId: assignedByUserId,
 				}),
-			},
-		});
-
-		await tx.technician.update({
-			where: {
-				id: payload.technicianId,
-			},
-			data: {
-				status: TechnicianStatus.ASSIGNED,
 			},
 		});
 
