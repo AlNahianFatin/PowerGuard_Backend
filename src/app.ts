@@ -12,7 +12,7 @@ import { getBkashIdToken } from "./app/lib/bkash";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { notFound } from "./app/middleware/notFound";
 // import { AnalyticsRoutes } from "./app/module/analytics/analytics.route";
-// import { AppointmentRoutes } from "./app/module/appointment/appointment.route";
+import { AssignmentRoutes } from "./app/module/assignment/assignment.route";
 import { AuthRoutes } from "./app/module/auth/auth.route";
 import { TechnicianRoutes } from "./app/module/technician/technician.route";
 // import { PaymentRoutes } from "./app/module/payment/payment.route";
@@ -43,7 +43,7 @@ app.use(cookieParser());
 
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/user", UserRoutes);
-// app.use("/api/v1/appointment", AppointmentRoutes);
+app.use("/api/v1/assignment", AssignmentRoutes);
 app.use("/api/v1/request", RequestRoutes);
 app.use("/api/v1/technician", TechnicianRoutes);
 app.use("/api/v1/schedule", ScheduleRoutes);

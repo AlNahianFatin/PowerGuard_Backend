@@ -8,6 +8,7 @@ const getAllRequests = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user!;
 
 	const { data, meta } = await RequestService.getAllRequests(req.query, user);
+	
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
@@ -19,9 +20,9 @@ const getAllRequests = catchAsync(async (req: Request, res: Response) => {
 
 const getSingleRequest = catchAsync(async (req: Request, res: Response) => {
 	const requestId = req.params.requestId as string;
-	const user = req.user!;
 
-	const result = await RequestService.getSingleRequest(requestId, user);
+	const result = await RequestService.getSingleRequest(requestId);
+	
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
@@ -34,6 +35,7 @@ const getMyRequests = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user!;
 
 	const { data, meta } = await RequestService.getMyRequests(req.query, user);
+	
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
@@ -55,35 +57,6 @@ const submitRequest = catchAsync(async (req: Request, res: Response) => {
 		data: result,
 	});
 });
-
-// const payAppointment = catchAsync(async (req: Request, res: Response) => {
-// 	const payload = req.body;
-// 	const user = req.user!;
-
-// 	const result = await AppointmentServices.payAppointment(payload, user);
-// 	sendResponse(res, {
-// 		statusCode: httpStatus.OK,
-// 		success: true,
-// 		message: "Appointment Payment Initiated Successfully",
-// 		data: result,
-// 	});
-// });
-
-// const bookAppointmentCallback = catchAsync(
-// 	async (req: Request, res: Response) => {
-// 		const { redirectUrl } = await AppointmentServices.bookAppointmentCallback(
-// 			req.query,
-// 		);
-
-// 		res.redirect(redirectUrl);
-// 		// sendResponse(res, {
-// 		//     statusCode: httpStatus.OK,
-// 		//     success: true,
-// 		//     message: "User profile fetched successfully",
-// 		//     data: result,
-// 		// });
-// 	},
-// );
 
 const updateRequest = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
@@ -112,59 +85,19 @@ const cancelRequest = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-const rejectRequest = catchAsync(
-	async (req: Request, res: Response) => {
-		const requestId = req.params.requestId as string;
-		const payload = req.body;
-		const user = req.user!;
-
-		const result = await RequestService.rejectRequest(
-			requestId,
-			payload,
-			user,
-		);
-		sendResponse(res, {
-			statusCode: httpStatus.OK,
-			success: true,
-			message: "Service request rejected successfully",
-			data: result,
-		});
-	},
-);
-
-const assignRequest = catchAsync(async (req: Request, res: Response) => {
-	const payload = req.body;
+const rejectRequest = catchAsync(async (req: Request, res: Response) => {
 	const requestId = req.params.requestId as string;
+	const payload = req.body;
 	const user = req.user!;
 
-	const result = await RequestService.assignRequest(payload, requestId, user);
+	const result = await RequestService.rejectRequest(requestId, payload, user);
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
-		message: `Service request assigned to ${result.technician?.name} successfully`,
+		message: "Service request rejected successfully",
 		data: result,
 	});
 });
-
-const updateRequestStatusByTechnician = catchAsync(
-	async (req: Request, res: Response) => {
-		const requestId = req.params.requestId as string;
-		const payload = req.body;
-		const user = req.user!;
-
-		const result = await RequestService.updateRequestStatusByTechnician(
-			requestId,
-			payload,
-			user,
-		);
-		sendResponse(res, {
-			statusCode: httpStatus.OK,
-			success: true,
-			message: "Service request status updated successfully",
-			data: result,
-		});
-	},
-);
 
 export const RequestController = {
 	getAllRequests,
@@ -174,6 +107,4 @@ export const RequestController = {
 	updateRequest,
 	cancelRequest,
 	rejectRequest,
-	assignRequest,
-	updateRequestStatusByTechnician,
 };

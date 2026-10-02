@@ -6,7 +6,6 @@ import { RequestController } from "./request.controller";
 import {
 	RejectRequestValidationZodSchema,
 	SubmitRequestValidationZodSchema,
-	UpdateRequestStatusValidationZodSchema,
 	UpdateRequestValidationZodSchema,
 } from "./request.validation";
 
@@ -56,42 +55,5 @@ router.patch(
 	validateRequest(RejectRequestValidationZodSchema),
 	RequestController.rejectRequest,
 );
-
-router.post(
-	"/assign-request/:requestId",
-	auth(Role.ADMIN, Role.OPERATOR),
-	RequestController.assignRequest,
-);
-
-router.patch(
-	"/update-request-status-technician/:requestId",
-	auth(Role.TECHNICIAN),
-	validateRequest(UpdateRequestStatusValidationZodSchema),
-	RequestController.updateRequestStatusByTechnician,
-);
-
-// router.post(
-// 	"/pay-appointment",
-// 	auth(Role.CUSTOMER),
-// 	ReportController.payAppointment,
-// );
-
-// router.post(
-// 	"/cancel-appointment",
-// 	auth(Role.CUSTOMER, Role.ADMIN, Role.SUPER_ADMIN),
-// 	ReportController.cancelAppointment,
-// );
-
-// //outage report callback url
-// router.get(
-// 	"/book-appointment/payment/callback",
-// 	ReportController.bookAppointmentCallback,
-// );
-
-// router.get(
-// 	"/doctor-appointments",
-// 	auth(Role.DOCTOR),
-// 	ReportController.getDoctorAppointments,
-// );
 
 export const RequestRoutes = router;

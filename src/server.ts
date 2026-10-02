@@ -10,9 +10,9 @@ import { prisma } from "./app/lib/prisma";
 import { redisClient } from "./app/lib/redis";
 import {
 	seedTesterAdmin,
+	seedTesterCustomer,
 	seedTesterOperator,
 	seedTesterTechnician,
-	seedTesterCustomer,
 } from "./app/utils/seed";
 
 const PORT = config.port;

@@ -31,12 +31,14 @@ export const deleteUnverifiedTechnicians = async () => {
 				"Cron: Failed to delete unverified technician applications",
 				error,
 				new Date().toLocaleDateString(),
+				new Date().toLocaleTimeString(),
 			);
 		}
 
 		console.log(
 			"Cron: Unverified technician delete scheduled (every 10 minutes): ",
 			new Date().toLocaleDateString(),
+			new Date().toLocaleTimeString(),
 		);
 	});
 };
@@ -101,11 +103,13 @@ export const updateTechnicianExperience = async () => {
 				"Cron: Failed to update verified technician experience",
 				error,
 				new Date().toLocaleDateString(),
+				new Date().toLocaleTimeString(),
 			);
 		}
 		console.log(
 			"Cron: Verified technician experience scheduled (every day at midnight): ",
 			new Date().toLocaleDateString(),
+			new Date().toLocaleTimeString(),
 		);
 	});
 };
@@ -136,11 +140,13 @@ export const updateCompletedSchedules = async () => {
 				"Cron: Failed to update schedule completion.",
 				error,
 				new Date().toLocaleDateString(),
+				new Date().toLocaleTimeString(),
 			);
 		}
 		console.log(
 			"Cron: Schedule status update scheduled (every 10 minutes): ",
 			new Date().toLocaleDateString(),
+			new Date().toLocaleTimeString(),
 		);
 	});
 };
