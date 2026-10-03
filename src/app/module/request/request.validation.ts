@@ -26,6 +26,10 @@ export const UpdateRequestValidationZodSchema = z.object({
 	areaId: z.string("Must include an area ID").optional(),
 });
 
+export const CancelRequestValidationZodSchema = z.object({
+	requestId: z.string("Must include a valid service request ID"),
+});
+
 export const RejectRequestValidationZodSchema = z.object({
 	rejectionReason: z
 		.string("Must include a valid rejection reason")

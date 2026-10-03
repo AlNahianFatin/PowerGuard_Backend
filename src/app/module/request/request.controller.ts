@@ -8,7 +8,7 @@ const getAllRequests = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user!;
 
 	const { data, meta } = await RequestService.getAllRequests(req.query, user);
-	
+
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
@@ -22,7 +22,7 @@ const getSingleRequest = catchAsync(async (req: Request, res: Response) => {
 	const requestId = req.params.requestId as string;
 
 	const result = await RequestService.getSingleRequest(requestId);
-	
+
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
@@ -35,7 +35,7 @@ const getMyRequests = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user!;
 
 	const { data, meta } = await RequestService.getMyRequests(req.query, user);
-	
+
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,

@@ -43,8 +43,8 @@ router.patch(
 	RequestController.updateRequest,
 );
 
-router.patch(
-	"/cancel-request/:requestId",
+router.post(
+	"/cancel-request",
 	auth(Role.CUSTOMER),
 	RequestController.cancelRequest,
 );

@@ -27,7 +27,6 @@ model User {
   // notifications Notification[]
   // auditLogs     AuditLog[]
   reviewers               Technician[]       @relation("reviewer")
-  payments                Payment[]
   areas                   Area[]
   distributionZones       DistributionZone[]
   feeders                 Feeder[]

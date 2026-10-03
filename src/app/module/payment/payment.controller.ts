@@ -1,48 +1,78 @@
-// import type { Request, Response } from "express";
-// import httpStatus from "http-status";
-// import { catchAsync } from "../../utils/catchAsync";
-// import { sendResponse } from "../../utils/sendResponse";
-// import { PaymentServices } from "./payment.service";
+import type { Request, Response } from "express";
+import httpStatus from "http-status";
+import { catchAsync } from "../../utils/catchAsync";
+import { sendResponse } from "../../utils/sendResponse";
+import { PaymentService } from "./payment.service";
 
-// const getMyPayments = catchAsync(async (req: Request, res: Response) => {
-//     const user = req.user!;
+const getAllPayments = catchAsync(async (req: Request, res: Response) => {
+	const { data, meta } = await PaymentService.getAllPayments(req.query);
+	
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Payments Retrieved Successfully",
+		data,
+		meta,
+	});
+});
 
-//     const { data, meta } = await PaymentServices.getMyPayments(req.query, user);
-//     sendResponse(res, {
-//         statusCode: httpStatus.OK,
-//         success: true,
-//         message: "Payments Retrieved Successfully",
-//         data,
-//         meta,
-//     });
-// });
+const getMyPayments = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user!;
 
-// const getAllPayments = catchAsync(async (req: Request, res: Response) => {
-//     const { data, meta } = await PaymentServices.getAllPayments(req.query);
-//     sendResponse(res, {
-//         statusCode: httpStatus.OK,
-//         success: true,
-//         message: "Payments Retrieved Successfully",
-//         data,
-//         meta,
-//     });
-// });
+	const { data, meta } = await PaymentService.getMyPayments(req.query, user);
+	
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Payments Retrieved Successfully",
+		data,
+		meta,
+	});
+});
 
-// const getSinglePayment = catchAsync(async (req: Request, res: Response) => {
-//     const paymentId = req.params.paymentId as string;
-//     const user = req.user!;
+const getSinglePayment = catchAsync(async (req: Request, res: Response) => {
+	const paymentId = req.params.paymentId as string;
+	const user = req.user!;
 
-//     const result = await PaymentServices.getSinglePayment(paymentId, user);
-//     sendResponse(res, {
-//         statusCode: httpStatus.OK,
-//         success: true,
-//         message: "Payment Retrieved Successfully",
-//         data: result,
-//     });
-// });
+	const result = await PaymentService.getSinglePayment(paymentId, user);
+	
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Payment Retrieved Successfully",
+		data: result,
+	});
+});
 
-// export const PaymentController = {
-//     getMyPayments,
-//     getAllPayments,
-//     getSinglePayment,
-// };
+const payServiceRequest = catchAsync(async (req: Request, res: Response) => {
+	const paymentId = req.params.paymentId as string;
+	const user = req.user!;
+
+	const result = await PaymentService.getSinglePayment(paymentId, user);
+	
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Payment Retrieved Successfully",
+		data: result,
+	});
+});
+
+const payServiceRequestCallback = catchAsync(
+	async (req: Request, res: Response) => {
+		const { redirectUrl } = await PaymentService.payServiceRequestCallback(
+			req.query,
+		);
+
+		res.redirect(redirectUrl);
+	},
+);
+
+export const PaymentController = {
+	getAllPayments,
+	getMyPayments,
+	getSinglePayment,
+	// proceedToPay,
+	payServiceRequest,
+	payServiceRequestCallback,
+};

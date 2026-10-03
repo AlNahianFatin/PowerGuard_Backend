@@ -16,7 +16,7 @@ const uploadProfileImage = async (buffer: Buffer, userId: string) => {
 		},
 	});
 
-	if(!currentUser || currentUser.isDeleted) {
+	if (!currentUser || currentUser.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "User profile not found");
 	}
 

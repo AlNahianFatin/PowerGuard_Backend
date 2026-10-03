@@ -4,21 +4,21 @@ import {
 	ServiceRequestStatus,
 	TechnicianStatus,
 } from "../../../generated/prisma/enums";
-import { AssignmentWhereInput } from "../../../generated/prisma/models";
-import {
+import type { AssignmentWhereInput } from "../../../generated/prisma/models";
+import type {
 	IAssignTechnicianPayload,
 	IUpdateAssignmentPayload,
 	IUpdateAssignmentStatusPayload,
 } from "./assignment.interface";
 import { cloudinary } from "../../lib/cloudinary";
 import config from "../../config";
-import { IQuery } from "../../interfaces";
+import type { IQuery } from "../../interfaces";
 import { getBkashIdToken } from "../../lib/bkash";
 import { transporter } from "../../lib/nodemailer";
 import { prisma } from "../../lib/prisma";
 import type { RequestUser } from "../../middleware/checkAuth";
 import { AppError } from "../../utils/AppError";
-import { UploadApiResponse } from "cloudinary";
+import type { UploadApiResponse } from "cloudinary";
 import httpStatus from "http-status";
 import PDFDocument from "pdfkit";
 
@@ -1248,6 +1248,13 @@ const updateAssignmentStatusByTechnician = async (
 				status === ServiceRequestStatus.RESOLVED ||
 				status === ServiceRequestStatus.FAILED
 			) {
+				if (!uploadResult) {
+					throw new AppError(
+						httpStatus.INTERNAL_SERVER_ERROR,
+						"Technician report upload was not completed",
+					);
+				}
+
 				await tx.technician.update({
 					where: {
 						id: technician.id,
@@ -1256,13 +1263,6 @@ const updateAssignmentStatusByTechnician = async (
 						status: TechnicianStatus.AVAILABLE,
 					},
 				});
-
-				if (!uploadResult) {
-					throw new AppError(
-						httpStatus.INTERNAL_SERVER_ERROR,
-						"Technician report upload was not completed",
-					);
-				}
 
 				const updatedAssignment = await tx.assignment.update({
 					where: {
@@ -1274,15 +1274,105 @@ const updateAssignmentStatusByTechnician = async (
 					},
 				});
 
-				return updatedAssignment;
+				return {
+					serviceRequest: updatedRequest,
+					assignment: updatedAssignment,
+				};
 			}
 
-			return updatedRequest;
+			return {
+				serviceRequest: updatedRequest,
+				assignment: null,
+			};
 		});
 
 		transactionCompleted = true;
 
-		// -------------------- 4. Send email ----------------------
+		// -------------------- 4. Refund ----------------------
+		let refundedPayment = null;
+
+		if (status === ServiceRequestStatus.FAILED) {
+			if (!existingAssignment.payment) {
+				throw new AppError(
+					httpStatus.BAD_REQUEST,
+					"No payment found for this assignment",
+				);
+			}
+
+			const payment = existingAssignment.payment;
+
+			if (!payment.bkashPaymentId || !payment.bkashTrxId) {
+				throw new AppError(
+					httpStatus.BAD_REQUEST,
+					"Required bKash payment information is missing",
+				);
+			}
+
+			const bkashIdToken = await getBkashIdToken();
+
+			if (!bkashIdToken) {
+				throw new AppError(
+					httpStatus.BAD_GATEWAY,
+					"No Bkash Access Token Found!",
+				);
+			}
+
+			const bkashRefundPaymentResponse = await fetch(
+				`${config.bkash_base_url}/tokenized/checkout/payment/refund`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Accept: "application/json",
+						Authorization: bkashIdToken,
+						"X-App-Key": config.bkash_app_key,
+					},
+					body: JSON.stringify({
+						paymentID: existingAssignment.payment?.bkashPaymentId,
+						trxID: existingAssignment.payment?.bkashTrxId,
+						amount: existingAssignment.payment?.amount.toString(),
+						sku: "Service request failed",
+						reason: "Technician failed to solve issue",
+					}),
+				},
+			);
+
+			const bkashRefundPaymentResult = await bkashRefundPaymentResponse.json();
+
+			if (
+				!bkashRefundPaymentResponse.ok ||
+				!bkashRefundPaymentResult.refundTrxID
+			) {
+				throw new AppError(
+					httpStatus.BAD_GATEWAY,
+					bkashRefundPaymentResult.statusMessage || "bKash refund failed",
+				);
+			}
+
+			refundedPayment = await prisma.$transaction(async (tx) => {
+				const updatedPayment = await tx.payment.update({
+					where: {
+						assignmentId: existingAssignment.id,
+					},
+					data: {
+						refundTrxId: bkashRefundPaymentResult.refundTrxID,
+						refundedAt: bkashRefundPaymentResult.completedTime,
+						refundAmount: bkashRefundPaymentResult.amount,
+						refundReason: "Technician failed to solve issue",
+						status: PaymentStatus.CANCELLED,
+						gatewayResponse: bkashRefundPaymentResult,
+					},
+				});
+
+				return tx.payment.findUnique({
+					where: {
+						id: updatedPayment.id,
+					},
+				});
+			});
+		}
+
+		// -------------------- 5. Send email ----------------------
 		if (
 			(status === ServiceRequestStatus.RESOLVED ||
 				status === ServiceRequestStatus.FAILED) &&

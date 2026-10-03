@@ -732,7 +732,7 @@ const cancelRequest = async (requestId: string, user: RequestUser) => {
 	if (existingRequest.customerId !== customer.id) {
 		throw new AppError(
 			httpStatus.UNAUTHORIZED,
-			"You are not authorized to update this request",
+			"You are not authorized to cancel this request",
 		);
 	}
 

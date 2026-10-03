@@ -10,7 +10,10 @@ export interface IUpdateRequestPayload {
 	areaId?: string;
 }
 
+export interface ICancelRequestPayload {
+	requestId: string;
+}
+
 export interface IRejectRequestPayload {
 	rejectionReason: string;
-	// status: AppointmentStatus
 }

@@ -1,22 +1,44 @@
-// import { Router } from "express";
-// import { Role } from "../../../generated/prisma/enums";
-// import { auth } from "../../middleware/checkAuth";
-// import { PaymentController } from "./payment.controller";
+import { Router } from "express";
+import { Role } from "../../../generated/prisma/enums";
+import { auth } from "../../middleware/checkAuth";
+import { PaymentController } from "./payment.controller";
 
-// const router = Router();
+const router = Router();
 
-// router.get("/my-payments", auth(Role.PATIENT), PaymentController.getMyPayments);
+router.get(
+	"/all-payments",
+	auth(Role.ADMIN, Role.OPERATOR),
+	PaymentController.getAllPayments,
+);
 
-// router.get(
-//     "/all-payments",
-//     auth(Role.ADMIN, Role.SUPER_ADMIN),
-//     PaymentController.getAllPayments,
+router.get(
+	"/my-payments",
+	auth(Role.TECHNICIAN, Role.CUSTOMER),
+	PaymentController.getMyPayments,
+);
+
+router.get(
+	"/:paymentId",
+	auth(Role.ADMIN, Role.OPERATOR, Role.TECHNICIAN, Role.CUSTOMER),
+	PaymentController.getSinglePayment,
+);
+
+// router.post(
+// 	"/proceed-to-pay",
+// 	auth(Role.CUSTOMER),
+// 	PaymentController.proceedToPay,
 // );
 
-// router.get(
-//     "/:paymentId",
-//     auth(Role.PATIENT, Role.ADMIN, Role.SUPER_ADMIN),
-//     PaymentController.getSinglePayment,
-// );
+router.post(
+	"/pay-service-request",
+	auth(Role.CUSTOMER),
+	PaymentController.payServiceRequest,
+);
 
-// export const PaymentRoutes = router;
+//pay service request callback url
+router.get(
+	"/pay-service-request/callback",
+	PaymentController.payServiceRequestCallback,
+);
+
+export const PaymentRoutes = router;
