@@ -2,16 +2,14 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, {
 	type Application,
-	type NextFunction,
 	type Request,
 	type Response,
 } from "express";
 import httpStatus from "http-status";
 import config from "./app/config";
-import { getBkashIdToken } from "./app/lib/bkash";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { notFound } from "./app/middleware/notFound";
-// import { AnalyticsRoutes } from "./app/module/analytics/analytics.route";
+import { AnalyticsRoutes } from "./app/module/analytics/analytics.route";
 import { AssignmentRoutes } from "./app/module/assignment/assignment.route";
 import { AuthRoutes } from "./app/module/auth/auth.route";
 import { TechnicianRoutes } from "./app/module/technician/technician.route";
@@ -53,24 +51,7 @@ app.use("/api/v1/zone", ZoneRoutes);
 app.use("/api/v1/substation", SubstationRoutes);
 app.use("/api/v1/feeder", FeederRoutes);
 app.use("/api/v1/area", AreaRoutes);
-// app.use("/api/v1/analytics", AnalyticsRoutes);
-
-// app.get("/test", async (req: Request, res: Response, next: NextFunction) => {
-// 	try {
-// 		const grantIdTokenResult = await getBkashIdToken();
-
-// 		console.log(grantIdTokenResult);
-
-// 		res.status(httpStatus.OK).json({
-// 			success: true,
-// 			message: "Welcome to Power Guard Backend",
-// 			data: null,
-// 		});
-// 	} catch (error) {
-// 		console.log(error);
-// 		next(error);
-// 	}
-// });
+app.use("/api/v1/analytics", AnalyticsRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {

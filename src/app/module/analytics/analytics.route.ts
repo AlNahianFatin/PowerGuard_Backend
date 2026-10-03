@@ -1,26 +1,32 @@
-// import { Router } from "express";
-// import { Role } from "../../../generated/prisma/enums";
-// import { auth } from "../../middleware/checkAuth";
-// import { AnalyticsController } from "./analytics.controller";
+import { Router } from "express";
+import { Role } from "../../../generated/prisma/enums";
+import { auth } from "../../middleware/checkAuth";
+import { AnalyticsController } from "./analytics.controller";
 
-// const router = Router();
+const router = Router();
 
-// router.get(
-//     "/patient-analytics",
-//     auth(Role.PATIENT),
-//     AnalyticsController.getPatientAnalytics,
-// );
+router.get(
+    "/admin-analytics",
+    auth(Role.ADMIN),
+    AnalyticsController.getAdminAnalytics,
+);
 
-// router.get(
-//     "/doctor-analytics",
-//     auth(Role.DOCTOR),
-//     AnalyticsController.getDoctorAnalytics,
-// );
+router.get(
+    "/operator-analytics",
+    auth(Role.OPERATOR),
+    AnalyticsController.getOperatorAnalytics,
+);
 
-// router.get(
-//     "/admin-analytics",
-//     auth(Role.ADMIN, Role.SUPER_ADMIN),
-//     AnalyticsController.getAdminAnalytics,
-// );
+router.get(
+    "/technician-analytics",
+    auth(Role.TECHNICIAN),
+    AnalyticsController.getTechnicianAnalytics,
+);
 
-// export const AnalyticsRoutes = router;
+router.get(
+    "/customer-analytics",
+    auth(Role.CUSTOMER),
+    AnalyticsController.getCustomerAnalytics,
+);
+
+export const AnalyticsRoutes = router;

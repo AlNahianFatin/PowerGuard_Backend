@@ -1321,7 +1321,7 @@ const payServiceRequestCallback = async (query: Record<string, any>) => {
 					bkashPaymentId: paymentId,
 				},
 				data: {
-					status: PaymentStatus.CANCELLED,
+					status: PaymentStatus.FAILED,
 					gatewayResponse: executedPaymentResult,
 				},
 			});

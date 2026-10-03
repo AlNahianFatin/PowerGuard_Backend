@@ -1,238 +1,464 @@
-// import httpStatus from "http-status"
-// import { AppointmentStatus, DoctorVerificationStatus, PaymentStatus, ScheduleStatus } from "../../../generated/prisma/enums"
-// import { prisma } from "../../lib/prisma"
-// import { RequestUser } from "../../middleware/checkAuth"
-// import { AppError } from "../../utils/AppError"
+import httpStatus from "http-status"
+import { PaymentStatus, Role, ScheduleStatus, ServiceRequestStatus, TechnicianVerificationStatus } from "../../../generated/prisma/enums"
+import { prisma } from "../../lib/prisma"
+import { RequestUser } from "../../middleware/checkAuth"
+import { AppError } from "../../utils/AppError"
 
-// const getAdminAnalytics = async () => {
+const getAdminAnalytics = async () => {
+    const totalAdmins = await prisma.user.count({
+        where: {
+            role: Role.ADMIN,
+            isDeleted: false,
+        }
+    })
 
-//     //total doctors
+    const totalOperators = await prisma.operator.count({
+        where: {
+            isDeleted: false,
+        }
+    })
 
-//     const totalDoctors = await prisma.doctor.count({
-//         where : {
-//             isDeleted : false,
-//         }
-//     })
+    const totalTechnicians = await prisma.technician.count({
+        where: {
+            isDeleted: false,
+        }
+    })
 
-//     const totalPendingDoctorApplications = await prisma.doctor.count({
-//         where: {
-//             isDeleted: false,
-//             verificationStatus : DoctorVerificationStatus.PENDING
-//         }
-//     })
+    const totalPendingTechnicianApplications = await prisma.technician.count({
+        where: {
+            isDeleted: false,
+            verificationStatus: TechnicianVerificationStatus.PENDING
+        }
+    })
 
-//     const totalApprovedDoctors = await prisma.doctor.count({
-//         where: {
-//             isDeleted: false,
-//             verificationStatus: DoctorVerificationStatus.APPROVED,
-//         },
-//     });
-//     const totalRejectedDoctors = await prisma.doctor.count({
-//         where: {
-//             isDeleted: false,
-//             verificationStatus: DoctorVerificationStatus.REJECTED,
-//         },
-//     });
+    const totalApprovedTechnicians = await prisma.technician.count({
+        where: {
+            isDeleted: false,
+            verificationStatus: TechnicianVerificationStatus.APPROVED,
+        },
+    });
 
-//     const totalPatients = await prisma.patient.count({
-//         where: { isDeleted: false },
-//     });
+    const totalRejectedTechnicians = await prisma.technician.count({
+        where: {
+            isDeleted: false,
+            verificationStatus: TechnicianVerificationStatus.REJECTED,
+        },
+    });
 
-//     const totalAppointments = await prisma.apppointment.count();
+    const totalCustomers = await prisma.customer.count({
+        where: { isDeleted: false },
+    });
 
-//     const totalCompletedAppointments = await prisma.apppointment.count({
-//         where: { status: AppointmentStatus.COMPLETED },
-//     });
+    const totalAssignments = await prisma.assignment.count({
+        where: {
+            isDeleted: false,
+        }
+    });
 
-//     const totalCancelledAppointments = await prisma.apppointment.count({
-//         where: { status: AppointmentStatus.CANCELLED },
-//     });
+    const totalOngoingAssignments = await prisma.assignment.count({
+        where: {
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.ASSIGNED || ServiceRequestStatus.INSPECTING || ServiceRequestStatus.PAYMENTPENDING || ServiceRequestStatus.INPROGRESS
+            }
+        }
+    });
 
-//     const totalRefundResult = await prisma.payment.aggregate({
-//         where: {
-//             status: PaymentStatus.PAID
-//         },
-//         _sum: {
-//             amount: true
-//         }
-//     })
+    const totalCancelledAssignments = await prisma.assignment.count({
+        where: {
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.CANCELLED
+            }
+        }
+    });
 
-//     const totalRefunded = totalRefundResult._sum.amount?.toNumber() || 0
+    const totalRejectedAssignments = await prisma.assignment.count({
+        where: {
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.REJECTED
+            }
+        }
+    });
 
-//     const totalRevenueResult = await prisma.payment.aggregate({
-//         where : {
-//             status : PaymentStatus.PAID
-//         },
-//         _sum : {
-//             amount : true
-//         }
-//     })
+    const totalResolvedAssignments = await prisma.assignment.count({
+        where: {
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.RESOLVED
+            }
+        }
+    });
 
-//     const totalRevenue = (totalRevenueResult._sum.amount?.toNumber() || 0) - totalRefunded
+    const totalFailedAssignments = await prisma.assignment.count({
+        where: {
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.FAILED
+            }
+        }
+    });
 
-//     return {
-//         totalDoctors,
-//         totalPendingDoctorApplications,
-//         totalApprovedDoctors,
-//         totalRejectedDoctors,
-//         totalPatients,
-//         totalAppointments,
-//         totalCompletedAppointments,
-//         totalCancelledAppointments,
-//         totalRevenue,
-//         totalRefunded
-//     }
+    const totalRefundResult = await prisma.payment.aggregate({
+        where: {
+            status: PaymentStatus.PAID
+        },
+        _sum: {
+            amount: true
+        }
+    })
 
-// }
-// const getPatientAnalytics = async (user : RequestUser) => {
+    const totalRefunded = totalRefundResult._sum.amount?.toNumber() || 0
 
-//     const patient = await prisma.patient.findUnique({
-//         where: { userId: user.userId },
-//     });
+    const totalRevenueResult = await prisma.payment.aggregate({
+        where: {
+            status: PaymentStatus.PAID
+        },
+        _sum: {
+            amount: true
+        }
+    })
 
-//     if (!patient) {
-//         throw new AppError(httpStatus.NOT_FOUND, "Patient Profile Not Found");
-//     }
+    const totalRevenue = (totalRevenueResult._sum.amount?.toNumber() || 0) - totalRefunded
 
-//     const totalAppointments = await prisma.apppointment.count({
-//         where: { patientId: patient.id },
-//     });
+    return {
+        totalAdmins,
+        totalOperators,
+        totalTechnicians,
+        totalPendingTechnicianApplications,
+        totalApprovedTechnicians,
+        totalRejectedTechnicians,
+        totalCustomers,
+        totalAssignments,
+        totalOngoingAssignments,
+        totalCancelledAssignments,
+        totalRejectedAssignments,
+        totalFailedAssignments,
+        totalResolvedAssignments,
+        totalRevenue,
+        totalRefunded
+    }
 
-//     const upcomingAppointments = await prisma.apppointment.count({
-//         where: { patientId: patient.id, status: AppointmentStatus.CONFIRMED },
-//     });
+}
 
-//     const completedAppointments = await prisma.apppointment.count({
-//         where: { patientId: patient.id, status: AppointmentStatus.COMPLETED },
-//     });
+const getOperatorAnalytics = async (user: RequestUser) => {
+    const operator = await prisma.operator.findUnique({
+        where: {
+            userId: user.userId,
+            isDeleted: false
+        }
+    });
 
-//     const cancelledAppointments = await prisma.apppointment.count({
-//         where: { patientId: patient.id, status: AppointmentStatus.CANCELLED },
-//     });
+    if (!operator || operator.isDeleted) {
+        throw new AppError(httpStatus.NOT_FOUND, "Operator profile not found");
+    }
 
-//     const totalAmountSpentResult = await prisma.payment.aggregate({
-//         where: {
-//             appointment: {
-//                 patientId: patient.id,
-//             },
-//             status: PaymentStatus.PAID,
-//         },
-//         _sum: {
-//             amount: true,
-//         },
-//     });
+    const publishedSchedules = await prisma.schedule.count({
+        where: {
+            creatorId: operator.id,
+            isDeleted: false,
+            status: ScheduleStatus.PUBLISHED,
+        },
+    });
 
-//     const totalAmountSpent = totalAmountSpentResult._sum.amount?.toNumber() || 0;
+    const assignedAssignments = await prisma.assignment.count({
+        where: {
+            assigneeId: operator.id,
+            isDeleted: false,
+        },
+    });
 
-//     const totalRefundedResult = await prisma.payment.aggregate({
-//         where: {
-//             appointment: {
-//                 patientId: patient.id,
-//             },
-//             status: PaymentStatus.REFUNDED,
-//         },
-//         _sum: {
-//             amount: true,
-//         },
-//     });
+    const totalTechnicians = await prisma.technician.count({
+        where: {
+            isDeleted: false,
+        }
+    })
 
-//     const totalRefunded = totalRefundedResult._sum.amount?.toNumber() || 0;
+    const totalPendingTechnicianApplications = await prisma.technician.count({
+        where: {
+            isDeleted: false,
+            verificationStatus: TechnicianVerificationStatus.PENDING
+        }
+    })
 
-//     return {
-//         totalAppointments,
-//         upcomingAppointments,
-//         completedAppointments,
-//         cancelledAppointments,
-//         totalAmountSpent,
-//         totalRefunded
-//     }
+    const totalApprovedTechnicians = await prisma.technician.count({
+        where: {
+            isDeleted: false,
+            verificationStatus: TechnicianVerificationStatus.APPROVED,
+        },
+    });
 
-// }
-// const getDoctorAnalytics = async (user : RequestUser) => {
-//     const doctor = await prisma.doctor.findUnique({
-//         where: { userId: user.userId },
-//     });
+    const totalRejectedTechnicians = await prisma.technician.count({
+        where: {
+            isDeleted: false,
+            verificationStatus: TechnicianVerificationStatus.REJECTED,
+        },
+    });
 
-//     if (!doctor) {
-//         throw new AppError(httpStatus.NOT_FOUND, "Doctor Profile Not Found");
-//     }
+    const totalCustomers = await prisma.customer.count({
+        where: { isDeleted: false },
+    });
 
-//     const totalSchedules = await prisma.schedule.count({
-//         where: { doctorId: doctor.id, isDeleted: false },
-//     });
+    const totalAssignments = await prisma.assignment.count({
+        where: {
+            isDeleted: false,
+        }
+    });
 
-//     const publishedSchedules = await prisma.schedule.count({
-//         where: {
-//             doctorId: doctor.id,
-//             isDeleted: false,
-//             status: ScheduleStatus.PUBLISHED,
-//         },
-//     });
+    const totalOngoingAssignments = await prisma.assignment.count({
+        where: {
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.ASSIGNED || ServiceRequestStatus.INSPECTING || ServiceRequestStatus.PAYMENTPENDING || ServiceRequestStatus.INPROGRESS
+            }
+        }
+    });
 
-//     const totalAppointments = await prisma.apppointment.count({
-//         where: { doctorId: doctor.id },
-//     });
+    const totalCancelledAssignments = await prisma.assignment.count({
+        where: {
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.CANCELLED
+            }
+        }
+    });
 
-//     const upcomingAppointments = await prisma.apppointment.count({
-//         where: { doctorId: doctor.id, status: AppointmentStatus.CONFIRMED },
-//     });
+    const totalRejectedAssignments = await prisma.assignment.count({
+        where: {
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.REJECTED
+            }
+        }
+    });
 
-//     const ongoingAppointments = await prisma.apppointment.count({
-//         where: { doctorId: doctor.id, status: AppointmentStatus.ONGOING },
-//     });
+    const totalResolvedAssignments = await prisma.assignment.count({
+        where: {
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.RESOLVED
+            }
+        }
+    });
 
-//     const completedAppointments = await prisma.apppointment.count({
-//         where: { doctorId: doctor.id, status: AppointmentStatus.COMPLETED },
-//     });
+    const totalFailedAssignments = await prisma.assignment.count({
+        where: {
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.FAILED
+            }
+        }
+    });
 
-//     const cancelledAppointments = await prisma.apppointment.count({
-//         where: { doctorId: doctor.id, status: AppointmentStatus.CANCELLED },
-//     });
+    return {
+        publishedSchedules,
+        assignedAssignments,
+        totalTechnicians,
+        totalPendingTechnicianApplications,
+        totalApprovedTechnicians,
+        totalRejectedTechnicians,
+        totalCustomers,
+        totalAssignments,
+        totalOngoingAssignments,
+        totalCancelledAssignments,
+        totalRejectedAssignments,
+        totalFailedAssignments,
+        totalResolvedAssignments,
+    }
 
-//     const totalDoctorRefundedResult = await prisma.payment.aggregate({
-//         where: {
-//             appointment: {
-//                 doctorId: doctor.id,
-//             },
-//             status: PaymentStatus.REFUNDED,
-//         },
-//         _sum: {
-//             amount: true,
-//         },
-//     });
+}
 
-//     const totalDoctorRefunded = totalDoctorRefundedResult._sum.amount?.toNumber() || 0;
+const getTechnicianAnalytics = async (user: RequestUser) => {
+    const technician = await prisma.technician.findUnique({
+        where: {
+            userId: user.userId
+        },
+    });
 
-//     const totalDoctorEarningsResult = await prisma.payment.aggregate({
-//         where: {
-//             appointment: {
-//                 doctorId: doctor.id,
-//             },
-//             status: PaymentStatus.PAID,
-//         },
-//         _sum: {
-//             amount: true,
-//         },
-//     });
+    if (!technician || technician.isDeleted) {
+        throw new AppError(httpStatus.NOT_FOUND, "Technician Profile Not Found");
+    }
 
-//     const totalDoctorEarnings = (totalDoctorEarningsResult._sum.amount?.toNumber() || 0) - totalDoctorRefunded;
+    const totalAssignments = await prisma.assignment.count({
+        where: {
+            technicianId: technician.id,
+            isDeleted: false
+        },
+    });
 
-//     return {
-//         totalSchedules,
-//         publishedSchedules,
-//         totalAppointments,
-//         upcomingAppointments,
-//         ongoingAppointments,
-//         completedAppointments,
-//         cancelledAppointments,
-//         totalDoctorEarnings,
-//         totalDoctorRefunded
-//     }
+    const totalCancelledAssignments = await prisma.assignment.count({
+        where: {
+            technicianId: technician.id,
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.CANCELLED
+            }
+        }
+    });
 
-// }
+    const totalRejectedAssignments = await prisma.assignment.count({
+        where: {
+            technicianId: technician.id,
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.REJECTED
+            }
+        }
+    });
 
-// export const AnalyticsServices = {
-//     getAdminAnalytics,
-//     getPatientAnalytics,
-//     getDoctorAnalytics
-// }
+    const totalResolvedAssignments = await prisma.assignment.count({
+        where: {
+            technicianId: technician.id,
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.RESOLVED
+            }
+        }
+    });
+
+    const totalFailedAssignments = await prisma.assignment.count({
+        where: {
+            technicianId: technician.id,
+            isDeleted: false,
+            serviceRequest: {
+                status: ServiceRequestStatus.FAILED
+            }
+        }
+    });
+
+    const totalTechnicianRefundedResult = await prisma.payment.aggregate({
+        where: {
+            assignment: {
+                technicianId: technician.id,
+                serviceRequest: {
+                    status: ServiceRequestStatus.FAILED
+                }
+            },
+        },
+        _sum: {
+            amount: true,
+        },
+    });
+
+    const totalTechnicianRefunded = totalTechnicianRefundedResult._sum.amount?.toNumber() || 0;
+
+    const totalTechnicianEarningsResult = await prisma.payment.aggregate({
+        where: {
+            assignment: {
+                technicianId: technician.id,
+            },
+            status: PaymentStatus.PAID,
+        },
+        _sum: {
+            amount: true,
+        },
+    });
+
+    const totalTechnicianEarnings = (totalTechnicianEarningsResult._sum.amount?.toNumber() || 0) - totalTechnicianRefunded;
+
+    return {
+        totalAssignments,
+        totalCancelledAssignments,
+        totalRejectedAssignments,
+        totalResolvedAssignments,
+        totalFailedAssignments,
+        totalTechnicianRefunded,
+        totalTechnicianEarnings,
+    }
+
+}
+
+const getCustomerAnalytics = async (user: RequestUser) => {
+
+    const customer = await prisma.customer.findUnique({
+        where: {
+            userId: user.userId
+        },
+    });
+
+    if (!customer) {
+        throw new AppError(httpStatus.NOT_FOUND, "Customer Profile Not Found");
+    }
+
+    const totalServiceRequests = await prisma.serviceRequest.count({
+        where: {
+            customerId: customer.id,
+            isDeleted: false,
+        },
+    });
+
+    const cancelledServiceRequests = await prisma.serviceRequest.count({
+        where: {
+            customerId: customer.id,
+            isDeleted: false,
+            status: ServiceRequestStatus.CANCELLED
+        },
+    });
+
+    const rejectedServiceRequests = await prisma.serviceRequest.count({
+        where: {
+            customerId: customer.id,
+            isDeleted: false,
+            status: ServiceRequestStatus.REJECTED
+        },
+    });
+
+    const failedServiceRequests = await prisma.serviceRequest.count({
+        where: {
+            customerId: customer.id,
+            isDeleted: false,
+            status: ServiceRequestStatus.FAILED
+        },
+    });
+
+    const resolvedServiceRequests = await prisma.serviceRequest.count({
+        where: {
+            customerId: customer.id,
+            isDeleted: false,
+            status: ServiceRequestStatus.RESOLVED
+        },
+    });
+
+    const totalAmountSpentResult = await prisma.payment.aggregate({
+        where: {
+            customerId: customer.id,
+            status: PaymentStatus.PAID,
+        },
+        _sum: {
+            amount: true,
+        },
+    });
+
+    const totalAmountSpent = totalAmountSpentResult._sum.amount?.toNumber() || 0;
+
+    const totalRefundedResult = await prisma.payment.aggregate({
+        where: {
+            customerId: customer.id,
+            status: PaymentStatus.REFUNDED,
+        },
+        _sum: {
+            amount: true,
+        },
+    });
+
+    const totalRefunded = totalRefundedResult._sum.amount?.toNumber() || 0;
+
+    return {
+        totalServiceRequests,
+        cancelledServiceRequests,
+        rejectedServiceRequests,
+        failedServiceRequests,
+        resolvedServiceRequests,
+        totalAmountSpent,
+        totalRefunded
+    }
+
+}
+
+export const AnalyticsService = {
+    getAdminAnalytics,
+    getOperatorAnalytics,
+    getTechnicianAnalytics,
+    getCustomerAnalytics
+}

@@ -1,45 +1,62 @@
-// import type { Request, Response } from "express";
-// import httpStatus from "http-status";
-// import { catchAsync } from "../../utils/catchAsync";
-// import { sendResponse } from "../../utils/sendResponse";
-// import { AnalyticsServices } from "./analytics.service";
+import type { Request, Response } from "express";
+import httpStatus from "http-status";
+import { catchAsync } from "../../utils/catchAsync";
+import { sendResponse } from "../../utils/sendResponse";
+import { AnalyticsService } from "./analytics.service";
 
-// const getPatientAnalytics = catchAsync(async (req: Request, res: Response) => {
-//     const user = req.user!;
+const getAdminAnalytics = catchAsync(async (req: Request, res: Response) => {
+    const result = await AnalyticsService.getAdminAnalytics();
 
-//     const result = await AnalyticsServices.getPatientAnalytics(user);
-//     sendResponse(res, {
-//         statusCode: httpStatus.OK,
-//         success: true,
-//         message: "Patient Analytics Retrieved Successfully",
-//         data: result,
-//     });
-// });
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Admin Analytics Retrieved Successfully",
+        data: result,
+    });
+});
 
-// const getDoctorAnalytics = catchAsync(async (req: Request, res: Response) => {
-//     const user = req.user!;
+const getOperatorAnalytics = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user!;
 
-//     const result = await AnalyticsServices.getDoctorAnalytics(user);
-//     sendResponse(res, {
-//         statusCode: httpStatus.OK,
-//         success: true,
-//         message: "Doctor Analytics Retrieved Successfully",
-//         data: result,
-//     });
-// });
+    const result = await AnalyticsService.getOperatorAnalytics(user);
 
-// const getAdminAnalytics = catchAsync(async (req: Request, res: Response) => {
-//     const result = await AnalyticsServices.getAdminAnalytics();
-//     sendResponse(res, {
-//         statusCode: httpStatus.OK,
-//         success: true,
-//         message: "Admin Analytics Retrieved Successfully",
-//         data: result,
-//     });
-// });
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Operator Analytics Retrieved Successfully",
+        data: result,
+    });
+});
 
-// export const AnalyticsController = {
-//     getPatientAnalytics,
-//     getDoctorAnalytics,
-//     getAdminAnalytics,
-// };
+const getTechnicianAnalytics = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user!;
+
+    const result = await AnalyticsService.getTechnicianAnalytics(user);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Technician Analytics Retrieved Successfully",
+        data: result,
+    });
+});
+
+const getCustomerAnalytics = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user!;
+
+    const result = await AnalyticsService.getCustomerAnalytics(user);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Customer Analytics Retrieved Successfully",
+        data: result,
+    });
+});
+
+export const AnalyticsController = {
+    getAdminAnalytics,
+    getOperatorAnalytics,
+    getTechnicianAnalytics,
+    getCustomerAnalytics
+};
