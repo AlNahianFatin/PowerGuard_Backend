@@ -972,10 +972,10 @@ const deleteAssignment = async (assignmentId: string, user: RequestUser) => {
 
 	if (
 		existingAssignment.serviceRequest.status !==
-		ServiceRequestStatus.RESOLVED &&
+			ServiceRequestStatus.RESOLVED &&
 		existingAssignment.serviceRequest.status !== ServiceRequestStatus.FAILED &&
 		existingAssignment.serviceRequest.status !==
-		ServiceRequestStatus.REJECTED &&
+			ServiceRequestStatus.REJECTED &&
 		existingAssignment.serviceRequest.status !== ServiceRequestStatus.CANCELLED
 	) {
 		throw new AppError(
@@ -1054,7 +1054,7 @@ const updateAssignmentStatusByTechnician = async (
 
 	if (
 		existingAssignment.serviceRequest.status !==
-		ServiceRequestStatus.ASSIGNED &&
+			ServiceRequestStatus.ASSIGNED &&
 		status === ServiceRequestStatus.INSPECTING
 	) {
 		throw new AppError(
@@ -1065,7 +1065,7 @@ const updateAssignmentStatusByTechnician = async (
 
 	if (
 		existingAssignment.serviceRequest.status !==
-		ServiceRequestStatus.INPROGRESS &&
+			ServiceRequestStatus.INPROGRESS &&
 		(status === ServiceRequestStatus.RESOLVED ||
 			status === ServiceRequestStatus.FAILED)
 	) {

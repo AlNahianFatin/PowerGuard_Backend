@@ -6,6 +6,18 @@ import { UserController } from "./user.controller";
 
 const router = Router();
 
+router.get(
+	"/all-users",
+	auth(Role.ADMIN, Role.OPERATOR),
+	UserController.getAllUsers,
+);
+
+router.get(
+	"/:userId",
+	auth(Role.ADMIN, Role.OPERATOR, Role.TECHNICIAN, Role.CUSTOMER),
+	UserController.getSingleUser,
+);
+
 router.patch(
 	"/profile-image",
 	auth(Role.ADMIN, Role.OPERATOR, Role.TECHNICIAN, Role.CUSTOMER),

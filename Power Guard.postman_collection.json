@@ -1,0 +1,2870 @@
+{
+  "info": {
+    "_postman_id": "ef7546c7-193d-4b4b-916a-3ef4bb7bf595",
+    "name": "Power Guard",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48953828",
+    "_collection_link": "https://go.postman.co/collection/48953828-ef7546c7-193d-4b4b-916a-3ef4bb7bf595?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Credential Login as ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();\n\nif (res && res.data && res.data.accessToken) {\n    pm.collectionVariables.set(\"accessToken\", res.data.accessToken);\n    pm.collectionVariables.set(\"refreshToken\", res.data.refreshToken || \"\");\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"testeradmin@powergurard.com\",\n    \"password\": \"Tester@admin12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Expected: **200** with `data: { accessToken, refreshToken }` (also set as cookies).\n\nOther outcomes:\n- unknown email → 404\n- `status: BLOCKED` → 403\n- deleted account → 404\n- Google-only account (no password set) → 400\n- wrong password → 401"
+          },
+          "response": []
+        },
+        {
+          "name": "Credential Login as OPERATOR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();\n\nif (res && res.data && res.data.accessToken) {\n    pm.collectionVariables.set(\"accessToken\", res.data.accessToken);\n    pm.collectionVariables.set(\"refreshToken\", res.data.refreshToken || \"\");\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"testeroperator@powergurard.com\",\n    \"password\": \"Tester@operator12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Expected: **200** with `data: { accessToken, refreshToken }` (also set as cookies).\n\nOther outcomes:\n- unknown email → 404\n- `status: BLOCKED` → 403\n- deleted account → 404\n- Google-only account (no password set) → 400\n- wrong password → 401"
+          },
+          "response": []
+        },
+        {
+          "name": "Credential Login as TECHNICIAN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();\n\nif (res && res.data && res.data.accessToken) {\n    pm.collectionVariables.set(\"accessToken\", res.data.accessToken);\n    pm.collectionVariables.set(\"refreshToken\", res.data.refreshToken || \"\");\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"testertechnician@powergurard.com\",\n    \"password\": \"Tester@technician12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Expected: **200** with `data: { accessToken, refreshToken }` (also set as cookies).\n\nOther outcomes:\n- unknown email → 404\n- `status: BLOCKED` → 403\n- deleted account → 404\n- Google-only account (no password set) → 400\n- wrong password → 401"
+          },
+          "response": []
+        },
+        {
+          "name": "Credential Login as CUSTOMER",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();\n\nif (res && res.data && res.data.accessToken) {\n    pm.collectionVariables.set(\"accessToken\", res.data.accessToken);\n    pm.collectionVariables.set(\"refreshToken\", res.data.refreshToken || \"\");\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"testercustomer@powergurard.com\",\n    \"password\": \"Tester@customer12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Expected: **200** with `data: { accessToken, refreshToken }` (also set as cookies).\n\nOther outcomes:\n- unknown email → 404\n- `status: BLOCKED` → 403\n- deleted account → 404\n- Google-only account (no password set) → 400\n- wrong password → 401"
+          },
+          "response": []
+        },
+        {
+          "name": "Register Customer",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Al Nahian Fatin\",\n    \"email\": \"fatinnahian@gmail.com\",\n    \"password\": \"aA!11223344\",\n    \"customer\": {\n        \"contactNumber\": \"01700000000\",\n        \"address\": \"Uttara North, Dhaka North, Dhaka, Bangladesh\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Expected: **201**. Creates a `User` (`role: PATIENT`, `emailVerified: false`) and sends a 6-digit OTP to the given email (valid for a limited time). No tokens are issued yet — call **Verify Email** next with the OTP to receive `accessToken`/`refreshToken`.\n\n`patient` is optional; only `contactNumber` is accepted on it at registration time."
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();\n\nif (res && res.data && res.data.accessToken) {\n    pm.collectionVariables.set(\"accessToken\", res.data.accessToken);\n    pm.collectionVariables.set(\"refreshToken\", res.data.refreshToken || \"\");\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"fatinnahian@gmail.com\",\n    \"otp\": \"600988\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "verify-email"
+              ]
+            },
+            "description": "Expected: **201**. Confirms the OTP sent by **Register Patient**, marks the user verified, and returns `data: { accessToken, refreshToken, user, patient }` (also set as `accessToken`/`refreshToken` cookies). The test script saves both tokens as collection variables."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Expected: **200** with the logged-in user's profile. Requires `accessToken` (cookie or `Authorization: Bearer` header) — any authenticated role (ADMIN, DOCTOR, PATIENT, SUPER_ADMIN) may call this."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();\n\nif (res && res.data && res.data.accessToken) {\n    pm.collectionVariables.set(\"accessToken\", res.data.accessToken);\n    pm.collectionVariables.set(\"refreshToken\", res.data.refreshToken || \"\");\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh-token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh-token"
+              ]
+            },
+            "description": "Expected: **200** with a new `data: { accessToken, refreshToken }` pair. Reads the `refreshToken` cookie set by login/register — Postman's cookie jar sends it automatically after a successful login in this same session, so no body is needed."
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"fatinnahian@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "Expected: **200**. Sends a 6-digit OTP to the given email for use with **Reset Password**."
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"fatinnahian@gmail.com\",\n    \"newPassword\": \"aA!11223344\",\n    \"otp\": \"101024\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            },
+            "description": "Expected: **200**. Verifies the OTP sent by **Forgot Password** and updates the account's password."
+          },
+          "response": []
+        }
+      ],
+      "description": "All seven credential-auth endpoints under `/api/v1/auth`. `Get Me` is gated by `auth(ADMIN, DOCTOR, PATIENT, SUPER_ADMIN)` — every role passes, so the gate really just means \"authenticated\". Password rule enforced by Zod on register/login/reset: min 8 chars, at least one lowercase, one uppercase, one digit, one special character."
+    },
+    {
+      "name": "Auth - Google",
+      "item": [
+        {
+          "name": "Google Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();\n\nif (res && res.data && res.data.accessToken) {\n    pm.collectionVariables.set(\"accessToken\", res.data.accessToken);\n    pm.collectionVariables.set(\"refreshToken\", res.data.refreshToken || \"\");\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"idToken\": \"<google-id-token-from-frontend-sign-in>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/google",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "google"
+              ]
+            },
+            "description": "Expected: **200**, returning the app's own `accessToken`/`refreshToken` (body + cookies).\n\nResolution order: (1) known `googleId` (matched by the stable `sub` claim), (2) an existing account with the same email gets linked (`googleId` set, `emailVerified` forced true; an existing password is preserved), (3) otherwise a new `PATIENT` user + `Patient` row is provisioned.\n\n`idToken` must be a real Google ID token verified against `GOOGLE_CLIENT_ID` — see `GOOGLE-LOGIN-TESTING.md` in the repo for how to obtain one for manual testing."
+          },
+          "response": []
+        }
+      ],
+      "description": "ID-token verification only. The frontend runs Google Sign-In, gets an ID token, and POSTs it here; the server verifies it and issues its own JWTs. Google is never involved again after this call."
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Get All Users (Admin, Operator)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/all-users?role=ADMIN",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "all-users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                },
+                {
+                  "key": "name",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "email",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "role",
+                  "value": "ADMIN"
+                },
+                {
+                  "key": "status",
+                  "value": "6732bac1-c2fc-4943-9d4d-e71202b32b3c",
+                  "disabled": true
+                },
+                {
+                  "key": "authProvider",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "emailVerified",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "testeradmin@powergurard.com",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By Id (Logged In)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/9b93f11e-dd34-42f2-8a71-028115e23a60",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "9b93f11e-dd34-42f2-8a71-028115e23a60"
+              ]
+            },
+            "description": "Expected: **200**, or **404**. DOCTOR/ADMIN/SUPER_ADMIN. Includes the owning doctor (subset of fields) and booked appointments with patients."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Profile Image",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "profileImage",
+                  "type": "file",
+                  "src": [
+                    "/F:/Fatin/IMG_20191205_175941-01_(1).jpg"
+                  ]
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/profile-image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "profile-image"
+              ]
+            },
+            "description": "Expected: **200**. Any authenticated role. Uploads `profileImage` to Cloudinary, updates `user.imageUrl`/`imagePublicId`, and deletes the previous image from Cloudinary if one existed. Update the `src` path to a real image file on your machine before sending."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Technician",
+      "item": [
+        {
+          "name": "Apply As Technician",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "resume",
+                  "type": "file",
+                  "src": [
+                    "/F:/Fatin/Higher_secondary_marksheet.pdf"
+                  ]
+                },
+                {
+                  "key": "additionalFiles",
+                  "type": "file",
+                  "src": [
+                    "/F:/Fatin/Al Nahian Fatin Resume.pdf",
+                    "/F:/Fatin/Al Nahian Fatin Resume.pdf"
+                  ]
+                },
+                {
+                  "key": "data",
+                  "value": "{\n    \"user\": {\n        \"name\": \"Shanjidul Gadha\",\n        \"email\": \"fatinnahian@gmail.com\"\n    },\n    \"technician\": {\n        \"address\": \"123 Medical Plaza, Suite 400, New York, NY\",\n        \"experienceYears\": 12,\n        \"bio\": \"Dedicated cardiologist with over a decade of experience specializing in non-invasive cardiovascular imaging and preventative heart care.\",\n        \"contactNumber\": \"+1-555-0199\"\n    }\n}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/technician/apply-as-technician",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "technician",
+                "apply-as-technician"
+              ]
+            },
+            "description": "Expected: **200**. `multipart/form-data`: `resume` (single file), `additionalFiles` (up to 10 files), and `data` — a **JSON string** (not a nested form field) matching `ApplyAsDoctorValidationZodSchema`. Creates a `User` (`role: DOCTOR`, random temp password, `needPasswordChange: true`) + `Doctor` row (`verificationStatus: PENDING`), uploads files to Cloudinary, and emails a 6-digit OTP (1 hour TTL) to the doctor's email for **Verify Doctor Email**."
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Technician Email",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"fatinnahian@gmail.com\",\n    \"otp\": \"843974\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/technician/apply-as-technician/verify-email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "technician",
+                "apply-as-technician",
+                "verify-email"
+              ]
+            },
+            "description": "Expected: **200**. Confirms the OTP emailed by **Apply As Doctor** and sets `user.emailVerified: true`. The application still needs admin approval (see **Approve Doctor**) before the doctor can log in and use doctor-only endpoints."
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Technician",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"technicianId\": \"96eb68a6-588d-4c28-8298-5a7dfa1a9eb3\",\n    \"verificationStatus\": \"APPROVED\",\n    \"rejectionReason\": \"NOT NOW\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/technician/approve-technician",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "technician",
+                "approve-technician"
+              ]
+            },
+            "description": "Expected: **200**. ADMIN/SUPER_ADMIN only. `verificationStatus` is `\"APPROVED\"` or `\"REJECTED\"`; `rejectionReason` is required when rejecting. Requires the doctor to have already verified their email. Emails the doctor an approval/rejection notice."
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password (For the 1st time)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"fatinnahian@gmail.com\",\r\n    \"password\": \"aA!11234\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/technician/change-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "technician",
+                "change-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Technicians (Admin, Operator)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/technician/all-technicians",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "technician",
+                "all-technicians"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "sh",
+                  "disabled": true
+                },
+                {
+                  "key": "email",
+                  "value": "shan",
+                  "disabled": true
+                },
+                {
+                  "key": "verificationStatus",
+                  "value": "PENDING",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only. Every doctor regardless of verification status, with the linked `user` (password omitted)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Technician Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"address\": \"456 New Clinic Road, Suite 12, Dhaka\",\n    \"bio\": \"Updated bio describing focus areas and patient philosophy.\",\n    \"contactNumber\": \"+1-555-0110\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/technician/update-my-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "technician",
+                "update-my-profile"
+              ]
+            },
+            "description": "Expected: **200**. DOCTOR only, updates the caller's own `Doctor` row. All fields optional."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Available Technicians Today",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/technician/available-today",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "technician",
+                "available-today"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated. No auth. `APPROVED`, non-deleted doctors that have at least one `PUBLISHED` schedule today which hasn't started yet and still has open slots. Each doctor includes their matching schedules for today."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Technician Profile (Public)",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/technician/public/96eb68a6-588d-4c28-8298-5a7dfa1a9eb3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "technician",
+                "public",
+                "96eb68a6-588d-4c28-8298-5a7dfa1a9eb3"
+              ]
+            },
+            "description": "Expected: **200**, or **404** if the doctor doesn't exist / isn't `APPROVED` / is deleted. No auth. Replace `{{doctorId}}` (or the path segment) with a real doctor id — grab one from **Get All Doctors (Public)**."
+          },
+          "response": []
+        }
+      ],
+      "description": "All `/api/v1/doctor` endpoints: the apply → verify-email → admin-approve onboarding flow, the admin/self-service management endpoints, and the unauthenticated public discovery endpoints (`/public/...`) patients use before logging in."
+    },
+    {
+      "name": "Schedule",
+      "item": [
+        {
+          "name": "Get All Schedules (Admin, Operator)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedule/all-schedules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedule",
+                "all-schedules"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                },
+                {
+                  "key": "createdByUser",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "DRAFT",
+                  "disabled": true
+                },
+                {
+                  "key": "feederCode",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "areaCode",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "dfgegerg",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Today's Schedules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedule/todays-schedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedule",
+                "todays-schedule"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "feederCode",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "areaCode",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated, or **400** if `doctorId` is missing from the query. PATIENT only. Today's `PUBLISHED`, not-yet-started schedules with open slots, for the given `doctorId`."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Schedule By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedule/8c6befe6-6143-4f72-bc35-51aa0e14d9cb",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedule",
+                "8c6befe6-6143-4f72-bc35-51aa0e14d9cb"
+              ]
+            },
+            "description": "Expected: **200**, or **404**. DOCTOR/ADMIN/SUPER_ADMIN. Includes the owning doctor (subset of fields) and booked appointments with patients."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Schedules (Admin, Operator)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedule/my-appointed-schedules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedule",
+                "my-appointed-schedules"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "PUBLISHED",
+                  "disabled": true
+                },
+                {
+                  "key": "feederCode",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "areaCode",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated. DOCTOR only — the caller's own schedules, with booked appointments/patients included."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Schedule (Admin, Operator)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"startDateTime\": \"2026-10-01T20:31:00.000Z\",\n    \"endDateTime\": \"2026-10-01T23:00:00.000Z\",\n    \"reason\": \"Transformer busted\",\n    \"feederId\": \"c4692cf1-3a1b-4455-8bcc-d15efe867f57\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedule/create-schedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedule",
+                "create-schedule"
+              ]
+            },
+            "description": "Expected: **201**. DOCTOR only. `startDateTime`/`endDateTime` must fall on the same calendar day and the doctor may only have one schedule per day. Total slots are computed as `duration / 20 minutes`; `availableSlots` starts equal to `totalSlots`. Created as `status: DRAFT` — publish it separately."
+          },
+          "response": []
+        },
+        {
+          "name": "Publish Schedule (Admin, Operator)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/schedule/publish-schedule/6c3c7c52-37f9-4a7a-be6e-3617809d27dc",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "schedule",
+                "publish-schedule",
+                "6c3c7c52-37f9-4a7a-be6e-3617809d27dc"
+              ]
+            },
+            "description": "Expected: **200**. DOCTOR only, on their own schedule. Flips `status` from `DRAFT` to `PUBLISHED`, making it visible/bookable to patients. Fails with 409 if already published."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Schedule (Admin, Operator)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"startDateTime\": \"2026-08-28T10:00:00.000Z\",\n    \"endDateTime\": \"2026-08-28T14:00:00.000Z\",\n    \"reason\": \"Fuse expired\",\n    \"feederId\": \"4621da9d-e78f-4144-908b-ed6f413b8667\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedule/update-schedule/804b5733-84c7-4822-8a2f-75b21f9974df",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedule",
+                "update-schedule",
+                "804b5733-84c7-4822-8a2f-75b21f9974df"
+              ]
+            },
+            "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Schedule (Admin, Operator)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedule/8d6d2600-07fa-4017-98df-aaa7dd82a44f",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedule",
+                "8d6d2600-07fa-4017-98df-aaa7dd82a44f"
+              ]
+            },
+            "description": "Expected: **200**. DOCTOR only, on their own schedule. Soft-deletes (`isDeleted: true`). Fails with 409 if it's `PUBLISHED` and already has bookings."
+          },
+          "response": []
+        }
+      ],
+      "description": "All `/api/v1/schedule` endpoints covering the doctor's create → publish → manage lifecycle, admin oversight, and the patient-facing today's-schedule lookup."
+    },
+    {
+      "name": "Distribution Zone",
+      "item": [
+        {
+          "name": "All Distribution Zones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/zone/all-distribution-zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zone",
+                "all-distribution-zones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Distribution Zone by Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/zone/distribution-zone/0489dd9f-c63e-4607-9892-211d7ce10586",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zone",
+                "distribution-zone",
+                "0489dd9f-c63e-4607-9892-211d7ce10586"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Distribution Zone",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Dhaka North\",\r\n    \"code\": \"dn-123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/zone/create-distribution-zone",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zone",
+                "create-distribution-zone"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Distribution Zone",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Dhaka North\",\r\n    \"code\": \"DN-123\",\r\n    \"description\": \"Government Dhaka North Distribution Zone\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/zone/update-distribution-zone/0489dd9f-c63e-4607-9892-211d7ce10586",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zone",
+                "update-distribution-zone",
+                "0489dd9f-c63e-4607-9892-211d7ce10586"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Distribution Zone",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/zone/delete-distribution-zone/0489dd9f-c63e-4607-9892-211d7ce10586",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "zone",
+                "delete-distribution-zone",
+                "0489dd9f-c63e-4607-9892-211d7ce10586"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Substation",
+      "item": [
+        {
+          "name": "All Substations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/substation/all-substations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "substation",
+                "all-substations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Substation by Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/substation/substation/0489dd9f-c63e-4607-9892-211d7ce10586",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "substation",
+                "substation",
+                "0489dd9f-c63e-4607-9892-211d7ce10586"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Substation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Dhaka North-1\",\r\n    \"code\": \"dn-2\",\r\n    \"description\": \"Government Dhaka North Substation\",\r\n    \"zoneId\": \"371532ff-49fa-4658-aefe-e30a31dd77fe\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/substation/create-substation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "substation",
+                "create-substation"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Substation",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Dhaka North-1\",\r\n    \"code\": \"DN-1\",\r\n    \"description\": \"Government Dhaka North Substation\",\r\n    \"zoneId\": \"0489dd9f-c63e-4607-9892-211d7ce10586\",\r\n\t\"feederIds\": []\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/substation/update-substation/1bce198a-85b5-4ee0-8b9a-b64c8bf298cd",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "substation",
+                "update-substation",
+                "1bce198a-85b5-4ee0-8b9a-b64c8bf298cd"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Substation",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/substation/delete-substation/3ab8eb65-54a5-4ce5-86e5-df9c2b807464",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "substation",
+                "delete-substation",
+                "3ab8eb65-54a5-4ce5-86e5-df9c2b807464"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Feeder",
+      "item": [
+        {
+          "name": "All Feeders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/feeder/all-feeders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feeder",
+                "all-feeders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Feeder by Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/feeder/feeder/0489dd9f-c63e-4607-9892-211d7ce10586",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feeder",
+                "feeder",
+                "0489dd9f-c63e-4607-9892-211d7ce10586"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Feeder",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Dhaka nORTH-2\",\r\n    \"code\": \"dn-2\",\r\n    \"description\": \"Government Dhaka North Substation-1\",\r\n    \"substationId\": \"21ae9a7b-3642-42e3-b368-262f83cd2cb6\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feeder/create-feeder",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feeder",
+                "create-feeder"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Feeder",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Dhaka North-2\",\r\n    \"code\": \"DN-2\",\r\n    \"description\": \"Government Dhaka North Substation\",\r\n    \"substationId\": \"1bce198a-85b5-4ee0-8b9a-b64c8bf298cd\",\r\n\t\"areaIds\": [\"04cd07d9-14bb-4749-8022-a7368bc1d70c\"]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feeder/update-feeder/8be9d3b3-49dd-44a1-b2f3-4a75b741dcac",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feeder",
+                "update-feeder",
+                "8be9d3b3-49dd-44a1-b2f3-4a75b741dcac"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Feeder",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/feeder/delete-feeder/3ab8eb65-54a5-4ce5-86e5-df9c2b807464",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feeder",
+                "delete-feeder",
+                "3ab8eb65-54a5-4ce5-86e5-df9c2b807464"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Area",
+      "item": [
+        {
+          "name": "All Areas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/area/all-areas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "area",
+                "all-areas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Area by Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/area/area/0489dd9f-c63e-4607-9892-211d7ce10586",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "area",
+                "area",
+                "0489dd9f-c63e-4607-9892-211d7ce10586"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Area",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Uttara North\",\r\n    \"code\": \"un-123\",\r\n    \"description\": \"Government Dhaka North Kuril\",\r\n    \"feederId\": \"c4692cf1-3a1b-4455-8bcc-d15efe867f57\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/area/create-area",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "area",
+                "create-area"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Area",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Dhaka North-1\",\r\n    \"code\": \"DN-1\",\r\n    \"description\": \"Government Dhaka North Substation\",\r\n    \"feederId\": \"0489dd9f-c63e-4607-9892-211d7ce10586\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/area/update-area/1bce198a-85b5-4ee0-8b9a-b64c8bf298cd",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "area",
+                "update-area",
+                "1bce198a-85b5-4ee0-8b9a-b64c8bf298cd"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Area",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/area/delete-area/3ab8eb65-54a5-4ce5-86e5-df9c2b807464",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "area",
+                "delete-area",
+                "3ab8eb65-54a5-4ce5-86e5-df9c2b807464"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service Request",
+      "item": [
+        {
+          "name": "Get All Requests (Admin, Operator, Technician)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/request/all-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "request",
+                "all-requests"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "disabled": true
+                },
+                {
+                  "key": "isCancelled",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "isRejected",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "isFailed",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "isResolved",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "isDeleted",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "customerId",
+                  "value": "d6cdd9ab-1888-48ef-8e7a-94bf005866ff",
+                  "disabled": true
+                },
+                {
+                  "key": "areaId",
+                  "value": "6732bac1-c2fc-4943-9d4d-e71202b32b3c",
+                  "disabled": true
+                },
+                {
+                  "key": "areaCode",
+                  "value": "UN-12",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "ustomer 1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Request By Id (Logged In)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/request/86b07850-2d1e-45ab-8b8f-c1de1c1e105c",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "request",
+                "86b07850-2d1e-45ab-8b8f-c1de1c1e105c"
+              ]
+            },
+            "description": "Expected: **200**, or **404**. DOCTOR/ADMIN/SUPER_ADMIN. Includes the owning doctor (subset of fields) and booked appointments with patients."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Requests (Customer)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/request/my-requests?isCancelled=true&searchTerm=un",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "request",
+                "my-requests"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "disabled": true
+                },
+                {
+                  "key": "isCancelled",
+                  "value": "true"
+                },
+                {
+                  "key": "isRejected",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "isFailed",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "isResolved",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "areaId",
+                  "value": "6732bac1-c2fc-4943-9d4d-e71202b32b3c",
+                  "disabled": true
+                },
+                {
+                  "key": "areaCode",
+                  "value": "UN-12",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "un"
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Request (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"No electricity no vote\",\r\n    \"areaId\": \"6732bac1-c2fc-4943-9d4d-e71202b32b3c\",\r\n    \"description\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/request/submit-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "request",
+                "submit-request"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Request (Customer)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"No electricity, no vote 2\",\n    \"description\": \"Mah vote, mah rules\",\n    \"areaId\": \"6732bac1-c2fc-4943-9d4d-e71202b32b3c\"\n}\n\n// service request status: PENDING -> ok ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/request/update-request/5cb305e5-d687-4d2d-811f-df21ce6bc8f9",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "request",
+                "update-request",
+                "5cb305e5-d687-4d2d-811f-df21ce6bc8f9"
+              ]
+            },
+            "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Request (Customer)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "// service request status: PENDING, ASSIGNED -> ok (for only notes)",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/request/cancel-request/5d6204de-c414-42bc-ae80-a9d7eea12a92",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "request",
+                "cancel-request",
+                "5d6204de-c414-42bc-ae80-a9d7eea12a92"
+              ]
+            },
+            "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Request (Admin, Operator)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"rejectionReason\": \"My life, my rules\"\n}\n\n// service request status: PENDING -> ok ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/request/reject-request/5d6204de-c414-42bc-ae80-a9d7eea12a92",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "request",
+                "reject-request",
+                "5d6204de-c414-42bc-ae80-a9d7eea12a92"
+              ]
+            },
+            "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Assignment",
+      "item": [
+        {
+          "name": "Get All Assignments (Admin, Operator)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assignment/all-assignments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assignment",
+                "all-assignments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                },
+                {
+                  "key": "isDeleted",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "deletedBy",
+                  "value": "d6cdd9ab-1888-48ef-8e7a-94bf005866ff",
+                  "disabled": true
+                },
+                {
+                  "key": "assigneeId",
+                  "value": "6732bac1-c2fc-4943-9d4d-e71202b32b3c",
+                  "disabled": true
+                },
+                {
+                  "key": "technicianId",
+                  "value": "asf",
+                  "disabled": true
+                },
+                {
+                  "key": "serviceRequestId",
+                  "value": "adfvw",
+                  "disabled": true
+                },
+                {
+                  "key": "technicianReportId",
+                  "value": "wgfwr",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "please",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Assignment By Id (Logged In)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assignment/032d399a-e0f7-469d-af89-a4e49144a418",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assignment",
+                "032d399a-e0f7-469d-af89-a4e49144a418"
+              ]
+            },
+            "description": "Expected: **200**, or **404**. DOCTOR/ADMIN/SUPER_ADMIN. Includes the owning doctor (subset of fields) and booked appointments with patients."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Assignments (Admin, Operator, Technician)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assignment/my-assignments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assignment",
+                "my-assignments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "un",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Technician (Admin, Operator)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"technicianId\": \"16ac0478-4a52-4e3f-9dd2-be1ae98e0076\",\n    \"notes\": \"Please do it\"\n}\n\n// service request status: PENDING -> ok",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/assignment/assign-technician/5cb305e5-d687-4d2d-811f-df21ce6bc8f9",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assignment",
+                "assign-technician",
+                "5cb305e5-d687-4d2d-811f-df21ce6bc8f9"
+              ]
+            },
+            "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Assignment (Admin, Operator)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"technicianId\": \"16ac0478-4a52-4e3f-9dd2-be1ae98e0076\",\n    \"notes\": \"Please do it\"\n}\n\n// service request status: PENDING, ASSIGNED, INSPECTING, PAYMENTPENDING, INPROGRESS -> ok (for only notes)\n// service request status: PENDING, ASSIGNED -> ok (for technicianId)",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/assignment/update-assignment/032d399a-e0f7-469d-af89-a4e49144a418",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assignment",
+                "update-assignment",
+                "032d399a-e0f7-469d-af89-a4e49144a418"
+              ]
+            },
+            "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Assignment (Admin, Operator)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "// service request status: All except CANCELLED, REJECTED, FAILED, RESOLVED -> ok ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/assignment/delete-assignment/032d399a-e0f7-469d-af89-a4e49144a418",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assignment",
+                "delete-assignment",
+                "032d399a-e0f7-469d-af89-a4e49144a418"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Technician Update Assignment Status (Technician)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"RESOLVED\",\n    \"failureNote\": \"All quiet on the western front\"\n}\n// ASSIGNED -> INSPECTING\n// INPROGRESS -> RESOLVED / FAILED",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/assignment/update-assignment-status-technician/2df93ce9-49d1-4a75-823c-8547c989e75a",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assignment",
+                "update-assignment-status-technician",
+                "2df93ce9-49d1-4a75-823c-8547c989e75a"
+              ]
+            },
+            "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Technician Report",
+      "item": [
+        {
+          "name": "Get All Reports (Admin, Operator)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/report/all-reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "report",
+                "all-reports"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                },
+                {
+                  "key": "isDeleted",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "deletedBy",
+                  "value": "d6cdd9ab-1888-48ef-8e7a-94bf005866ff",
+                  "disabled": true
+                },
+                {
+                  "key": "technicianId",
+                  "value": "asf",
+                  "disabled": true
+                },
+                {
+                  "key": "customerId",
+                  "value": "6732bac1-c2fc-4943-9d4d-e71202b32b3c",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "please",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Report By Id (Logged In)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/report/f5dea822-21e0-4c95-9836-2eea186a8e8f",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "report",
+                "f5dea822-21e0-4c95-9836-2eea186a8e8f"
+              ]
+            },
+            "description": "Expected: **200**, or **404**. DOCTOR/ADMIN/SUPER_ADMIN. Includes the owning doctor (subset of fields) and booked appointments with patients."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Reports (Technician, Customer)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/report/my-reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "report",
+                "my-reports"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                },
+                {
+                  "key": "technicianId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "customerId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "un",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Report (Technician)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"diagnosis\": \"Wire cut out from transformer\",\n    \"charge\": \"2000\"\n}\n\n// service request status: INSPECTING -> ok",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/report/submit-report/2df93ce9-49d1-4a75-823c-8547c989e75a",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "report",
+                "submit-report",
+                "2df93ce9-49d1-4a75-823c-8547c989e75a"
+              ]
+            },
+            "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Report (Technician)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"diagnosis\": \"Wire cut out fixed\",\n    \"charge\": \"2000\"\n}\n\n// service request status: INSPECTING, PAYMENTPENDING, INPROGRESS, RESOLVED, FAILED -> ok",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/report/update-report/63fa08e5-ab71-4d88-89fe-8f87664e4855",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "report",
+                "update-report",
+                "63fa08e5-ab71-4d88-89fe-8f87664e4855"
+              ]
+            },
+            "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payment",
+      "item": [
+        {
+          "name": "Get All Payments (Admin, Operator)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payment/all-payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment",
+                "all-payments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "merchantInvoiceNumber",
+                  "value": "d6cdd9ab-1888-48ef-8e7a-94bf005866ff",
+                  "disabled": true
+                },
+                {
+                  "key": "bkashPaymentId",
+                  "value": "asf",
+                  "disabled": true
+                },
+                {
+                  "key": "bkashTrxId",
+                  "value": "6732bac1-c2fc-4943-9d4d-e71202b32b3c",
+                  "disabled": true
+                },
+                {
+                  "key": "payerReference",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "refundTrxId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "refundReason",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "assignmentId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "assigneeId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "assigneeName",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "assigneeEmail",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "technicianId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "technicianName",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "technicianEmail",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "customerId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "customerName",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "customerEmail",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "please",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Payment By Id (Logged In)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payment/f5dea822-21e0-4c95-9836-2eea186a8e8f",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment",
+                "f5dea822-21e0-4c95-9836-2eea186a8e8f"
+              ]
+            },
+            "description": "Expected: **200**, or **404**. DOCTOR/ADMIN/SUPER_ADMIN. Includes the owning doctor (subset of fields) and booked appointments with patients."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Payments (Technician, Customer)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payment/my-payments?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment",
+                "my-payments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "merchantInvoiceNumber",
+                  "value": "d6cdd9ab-1888-48ef-8e7a-94bf005866ff",
+                  "disabled": true
+                },
+                {
+                  "key": "bkashPaymentId",
+                  "value": "asf",
+                  "disabled": true
+                },
+                {
+                  "key": "bkashTrxId",
+                  "value": "6732bac1-c2fc-4943-9d4d-e71202b32b3c",
+                  "disabled": true
+                },
+                {
+                  "key": "payerReference",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "refundTrxId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "refundReason",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "assignmentId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "assigneeId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "assigneeName",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "assigneeEmail",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "technicianId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "technicianName",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "technicianEmail",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "customerId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "customerName",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "customerEmail",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "please",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Pay Service Request (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"requestId\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payment/pay-service-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment",
+                "pay-service-request"
+              ]
+            },
+            "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Get Admin Analytics",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/analytics/admin-analytics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "admin-analytics"
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Operator Analytics",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/analytics/operator-analytics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "operator-analytics"
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Technician Analytics",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/analytics/technician-analytics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "technician-analytics"
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer Analytics",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/analytics/customer-analytics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "customer-analytics"
+              ]
+            },
+            "description": "Expected: **200**, paginated. ADMIN/SUPER_ADMIN only — every schedule across all doctors."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "accessToken",
+      "secret": true
+    },
+    {
+      "key": "refreshToken",
+      "secret": true
+    }
+  ]
+}

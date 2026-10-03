@@ -174,7 +174,7 @@ const getAllPayments = async (query: IQuery) => {
 				{
 					payerReference: {
 						contains: query.searchTerm,
-						mode: "default",
+						mode: "insensitive",
 					},
 				},
 				{
@@ -186,7 +186,7 @@ const getAllPayments = async (query: IQuery) => {
 				{
 					refundReason: {
 						contains: query.searchTerm,
-						mode: "default",
+						mode: "insensitive",
 					},
 				},
 				{
@@ -377,7 +377,7 @@ const getAllPayments = async (query: IQuery) => {
 					id: true,
 					name: true,
 					email: true,
-				}
+				},
 			},
 			assignment: {
 				include: {
@@ -640,7 +640,7 @@ const getMyPayments = async (query: IQuery, user: RequestUser) => {
 				{
 					payerReference: {
 						contains: query.searchTerm,
-						mode: "default",
+						mode: "insensitive",
 					},
 				},
 				{
@@ -652,7 +652,7 @@ const getMyPayments = async (query: IQuery, user: RequestUser) => {
 				{
 					refundReason: {
 						contains: query.searchTerm,
-						mode: "default",
+						mode: "insensitive",
 					},
 				},
 
@@ -835,7 +835,7 @@ const getMyPayments = async (query: IQuery, user: RequestUser) => {
 					id: true,
 					name: true,
 					email: true,
-				}
+				},
 			},
 			assignment: {
 				include: {
@@ -912,7 +912,7 @@ const getSinglePayment = async (paymentId: string, user: RequestUser) => {
 					id: true,
 					name: true,
 					email: true,
-				}
+				},
 			},
 			assignment: {
 				include: {
@@ -1078,7 +1078,7 @@ const payServiceRequest = async (
 	const { requestId } = payload;
 
 	if (!requestId) {
-		throw new AppError(httpStatus.BAD_REQUEST, "Request ID is missing")
+		throw new AppError(httpStatus.BAD_REQUEST, "Request ID is missing");
 	}
 
 	const existingServiceRequest = await prisma.serviceRequest.findFirst({
