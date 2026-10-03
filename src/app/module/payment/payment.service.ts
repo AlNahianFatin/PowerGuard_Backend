@@ -372,7 +372,13 @@ const getAllPayments = async (query: IQuery) => {
 		skip,
 		orderBy: { [sortBy]: sortOrder },
 		include: {
-			user: true,
+			customer: {
+				select: {
+					id: true,
+					name: true,
+					email: true,
+				}
+			},
 			assignment: {
 				include: {
 					assignedByUser: {
@@ -389,11 +395,7 @@ const getAllPayments = async (query: IQuery) => {
 							email: true,
 						},
 					},
-					serviceRequest: {
-						include: {
-							customer: true,
-						},
-					},
+					serviceRequest: true,
 					technicianReport: true,
 				},
 			},
@@ -828,7 +830,13 @@ const getMyPayments = async (query: IQuery, user: RequestUser) => {
 		skip,
 		orderBy: { [sortBy]: sortOrder },
 		include: {
-			user: true,
+			customer: {
+				select: {
+					id: true,
+					name: true,
+					email: true,
+				}
+			},
 			assignment: {
 				include: {
 					assignedByUser: {
@@ -845,11 +853,7 @@ const getMyPayments = async (query: IQuery, user: RequestUser) => {
 							email: true,
 						},
 					},
-					serviceRequest: {
-						include: {
-							customer: true,
-						},
-					},
+					serviceRequest: true,
 					technicianReport: true,
 				},
 			},
@@ -903,7 +907,13 @@ const getSinglePayment = async (paymentId: string, user: RequestUser) => {
 			id: paymentId,
 		},
 		include: {
-			user: true,
+			customer: {
+				select: {
+					id: true,
+					name: true,
+					email: true,
+				}
+			},
 			assignment: {
 				include: {
 					...(requestedUser.role !== Role.CUSTOMER && {
@@ -915,20 +925,16 @@ const getSinglePayment = async (paymentId: string, user: RequestUser) => {
 							},
 						},
 					}),
-				},
-				technician: {
-					select: {
-						id: true,
-						name: true,
-						email: true,
+					technician: {
+						select: {
+							id: true,
+							name: true,
+							email: true,
+						},
 					},
+					serviceRequest: true,
+					technicianReport: true,
 				},
-				serviceRequest: {
-					include: {
-						customer: true,
-					},
-				},
-				technicianReport: true,
 			},
 		},
 	});
@@ -1070,6 +1076,10 @@ const payServiceRequest = async (
 	}
 
 	const { requestId } = payload;
+
+	if (!requestId) {
+		throw new AppError(httpStatus.BAD_REQUEST, "Request ID is missing")
+	}
 
 	const existingServiceRequest = await prisma.serviceRequest.findFirst({
 		where: {
