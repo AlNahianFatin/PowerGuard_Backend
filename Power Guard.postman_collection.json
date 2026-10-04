@@ -179,6 +179,55 @@
           "response": []
         },
         {
+          "name": "Credential Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "",
+                  "if (res && res.data && res.data.accessToken) {",
+                  "    pm.collectionVariables.set(\"accessToken\", res.data.accessToken);",
+                  "    pm.collectionVariables.set(\"refreshToken\", res.data.refreshToken || \"\");",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"fatinnahian@gmail.com\",\n    \"password\": \"aA!11223344\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Expected: **200** with `data: { accessToken, refreshToken }` (also set as cookies).\n\nOther outcomes:\n- unknown email → 404\n- `status: BLOCKED` → 403\n- deleted account → 404\n- Google-only account (no password set) → 400\n- wrong password → 401"
+          },
+          "response": []
+        },
+        {
           "name": "Register Customer",
           "request": {
             "auth": {
@@ -230,7 +279,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"fatinnahian@gmail.com\",\n    \"otp\": \"600988\"\n}",
+              "raw": "{\n    \"email\": \"fatinnahian@gmail.com\",\n    \"otp\": \"581564\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -563,17 +612,12 @@
                 {
                   "key": "resume",
                   "type": "file",
-                  "src": [
-                    "/F:/Fatin/Higher_secondary_marksheet.pdf"
-                  ]
+                  "src": "/E:/Fatin/Al Nahian Fatin Resume.pdf"
                 },
                 {
                   "key": "additionalFiles",
                   "type": "file",
-                  "src": [
-                    "/F:/Fatin/Al Nahian Fatin Resume.pdf",
-                    "/F:/Fatin/Al Nahian Fatin Resume.pdf"
-                  ]
+                  "value": null
                 },
                 {
                   "key": "data",
@@ -606,7 +650,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"fatinnahian@gmail.com\",\n    \"otp\": \"843974\"\n}",
+              "raw": "{\n    \"email\": \"fatinnahian@gmail.com\",\n    \"otp\": \"846231\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -635,7 +679,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"technicianId\": \"96eb68a6-588d-4c28-8298-5a7dfa1a9eb3\",\n    \"verificationStatus\": \"APPROVED\",\n    \"rejectionReason\": \"NOT NOW\"\n}",
+              "raw": "{\n    \"technicianId\": \"e6d7dfe1-b97a-4334-a68e-94396435f92d\",\n    \"verificationStatus\": \"APPROVED\",\n    \"rejectionReason\": \"NOT NOW\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1071,7 +1115,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"startDateTime\": \"2026-10-01T20:31:00.000Z\",\n    \"endDateTime\": \"2026-10-01T23:00:00.000Z\",\n    \"reason\": \"Transformer busted\",\n    \"feederId\": \"c4692cf1-3a1b-4455-8bcc-d15efe867f57\"\n}",
+              "raw": "{\n    \"startDateTime\": \"2026-10-03T06:38:00.000Z\",\n    \"endDateTime\": \"2026-10-03T23:00:00.000Z\",\n    \"reason\": \"Transformer busted\",\n    \"feederId\": \"c4692cf1-3a1b-4455-8bcc-d15efe867f57\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1107,18 +1151,14 @@
               }
             },
             "url": {
-              "raw": "http://localhost:5000/api/v1/schedule/publish-schedule/6c3c7c52-37f9-4a7a-be6e-3617809d27dc",
-              "protocol": "http",
+              "raw": "{{baseUrl}}/schedule/publish-schedule/37ff346b-c537-410d-9572-951c25a1e6f8",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "5000",
               "path": [
-                "api",
-                "v1",
                 "schedule",
                 "publish-schedule",
-                "6c3c7c52-37f9-4a7a-be6e-3617809d27dc"
+                "37ff346b-c537-410d-9572-951c25a1e6f8"
               ]
             },
             "description": "Expected: **200**. DOCTOR only, on their own schedule. Flips `status` from `DRAFT` to `PUBLISHED`, making it visible/bookable to patients. Fails with 409 if already published."
@@ -1759,7 +1799,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/request/my-requests?isCancelled=true&searchTerm=un",
+              "raw": "{{baseUrl}}/request/my-requests?status=PENDING",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1790,12 +1830,12 @@
                 },
                 {
                   "key": "status",
-                  "value": "PENDING",
-                  "disabled": true
+                  "value": "PENDING"
                 },
                 {
                   "key": "isCancelled",
-                  "value": "true"
+                  "value": "true",
+                  "disabled": true
                 },
                 {
                   "key": "isRejected",
@@ -1824,7 +1864,8 @@
                 },
                 {
                   "key": "searchTerm",
-                  "value": "un"
+                  "value": "un",
+                  "disabled": true
                 }
               ]
             },
@@ -1839,7 +1880,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"title\": \"No electricity no vote\",\r\n    \"areaId\": \"6732bac1-c2fc-4943-9d4d-e71202b32b3c\",\r\n    \"description\": \"\"\r\n}",
+              "raw": "{\r\n    \"title\": \"No electricity no vote\",\r\n    \"areaId\": \"6732bac1-c2fc-4943-9d4d-e71202b32b3c\",\r\n    \"description\": \"Give me electricity\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1895,7 +1936,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "// service request status: PENDING, ASSIGNED -> ok (for only notes)",
+              "raw": "// service request status: PENDING, ASSIGNED -> ok",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2107,14 +2148,14 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/assignment/assign-technician/5cb305e5-d687-4d2d-811f-df21ce6bc8f9",
+              "raw": "{{baseUrl}}/assignment/assign-technician/30f111d2-5ec2-4005-be08-87eb2e131d78",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "assignment",
                 "assign-technician",
-                "5cb305e5-d687-4d2d-811f-df21ce6bc8f9"
+                "30f111d2-5ec2-4005-be08-87eb2e131d78"
               ]
             },
             "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
@@ -2185,7 +2226,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"status\": \"RESOLVED\",\n    \"failureNote\": \"All quiet on the western front\"\n}\n// ASSIGNED -> INSPECTING\n// INPROGRESS -> RESOLVED / FAILED",
+              "raw": "{\n    \"status\": \"INSPECTING\",\n    \"failureNote\": \"All quiet on the western front\"\n}\n// ASSIGNED -> INSPECTING\n// INPROGRESS -> RESOLVED / FAILED",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2193,14 +2234,14 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/assignment/update-assignment-status-technician/2df93ce9-49d1-4a75-823c-8547c989e75a",
+              "raw": "{{baseUrl}}/assignment/update-assignment-status-technician/f447f6de-a1b6-4543-ad2e-0cd2d1ea4fef",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "assignment",
                 "update-assignment-status-technician",
-                "2df93ce9-49d1-4a75-823c-8547c989e75a"
+                "f447f6de-a1b6-4543-ad2e-0cd2d1ea4fef"
               ]
             },
             "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
@@ -2368,14 +2409,14 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/report/submit-report/2df93ce9-49d1-4a75-823c-8547c989e75a",
+              "raw": "{{baseUrl}}/report/submit-report/f447f6de-a1b6-4543-ad2e-0cd2d1ea4fef",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "report",
                 "submit-report",
-                "2df93ce9-49d1-4a75-823c-8547c989e75a"
+                "f447f6de-a1b6-4543-ad2e-0cd2d1ea4fef"
               ]
             },
             "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
@@ -2700,7 +2741,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"requestId\": \"\"\n}",
+              "raw": "{\n    \"requestId\": \"30f111d2-5ec2-4005-be08-87eb2e131d78\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
