@@ -15,7 +15,6 @@ model Customer {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   serviceRequests ServiceRequest[]
-  payments        Payment[]
 
   @@index([email])
   @@index([isDeleted])

@@ -27,8 +27,5 @@ model Payment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  customerId String?
-  customer   Customer? @relation(fields: [customerId], references: [id])
-
   @@map("payments")
 }

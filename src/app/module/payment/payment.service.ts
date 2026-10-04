@@ -128,24 +128,36 @@ const getAllPayments = async (query: IQuery) => {
 
 	if (query.customerId) {
 		andConditions.push({
-			customer: {
-				id: query.customerId,
+			assignment: {
+				serviceRequest: {
+					customer: {
+						id: query.customerId,
+					},
+				},
 			},
 		});
 	}
 
 	if (query.customerName) {
 		andConditions.push({
-			customer: {
-				name: query.customerName,
+			assignment: {
+				serviceRequest: {
+					customer: {
+						name: query.customerName,
+					},
+				},
 			},
 		});
 	}
 
 	if (query.customerEmail) {
 		andConditions.push({
-			customer: {
-				email: query.customerEmail,
+			assignment: {
+				serviceRequest: {
+					customer: {
+						email: query.customerEmail,
+					},
+				},
 			},
 		});
 	}
@@ -187,22 +199,6 @@ const getAllPayments = async (query: IQuery) => {
 					refundReason: {
 						contains: query.searchTerm,
 						mode: "insensitive",
-					},
-				},
-				{
-					customer: {
-						name: {
-							contains: query.searchTerm,
-							mode: "insensitive",
-						},
-					},
-				},
-				{
-					customer: {
-						email: {
-							contains: query.searchTerm,
-							mode: "insensitive",
-						},
 					},
 				},
 
@@ -304,6 +300,31 @@ const getAllPayments = async (query: IQuery) => {
 							failureNote: {
 								contains: query.searchTerm,
 								mode: "insensitive",
+							},
+						},
+					},
+				},
+
+				{
+					assignment: {
+						serviceRequest: {
+							customer: {
+								name: {
+									contains: query.searchTerm,
+									mode: "insensitive",
+								},
+							},
+						},
+					},
+				},
+				{
+					assignment: {
+						serviceRequest: {
+							customer: {
+								email: {
+									contains: query.searchTerm,
+									mode: "insensitive",
+								},
 							},
 						},
 					},
@@ -563,24 +584,36 @@ const getMyPayments = async (query: IQuery, user: RequestUser) => {
 
 		if (query.customerId) {
 			andConditions.push({
-				customer: {
-					id: query.customerId,
+				assignment: {
+					serviceRequest: {
+						customer: {
+							id: query.customerId,
+						},
+					},
 				},
 			});
 		}
 
 		if (query.customerName) {
 			andConditions.push({
-				customer: {
-					name: query.customerName,
+				assignment: {
+					serviceRequest: {
+						customer: {
+							name: query.customerName,
+						},
+					},
 				},
 			});
 		}
 
 		if (query.customerEmail) {
 			andConditions.push({
-				customer: {
-					email: query.customerEmail,
+				assignment: {
+					serviceRequest: {
+						customer: {
+							email: query.customerEmail,
+						},
+					},
 				},
 			});
 		}
@@ -748,20 +781,28 @@ const getMyPayments = async (query: IQuery, user: RequestUser) => {
 
 				{
 					...(requestedUser.role === Role.TECHNICIAN && {
-						customer: {
-							name: {
-								contains: query.searchTerm,
-								mode: "insensitive",
+						assignment: {
+							serviceRequest: {
+								customer: {
+									name: {
+										contains: query.searchTerm,
+										mode: "insensitive",
+									},
+								},
 							},
 						},
 					}),
 				},
 				{
 					...(requestedUser.role === Role.TECHNICIAN && {
-						customer: {
-							email: {
-								contains: query.searchTerm,
-								mode: "insensitive",
+						assignment: {
+							serviceRequest: {
+								customer: {
+									email: {
+										contains: query.searchTerm,
+										mode: "insensitive",
+									},
+								},
 							},
 						},
 					}),
@@ -945,7 +986,7 @@ const getSinglePayment = async (paymentId: string, user: RequestUser) => {
 
 	if (
 		requestedUser.role === Role.CUSTOMER &&
-		payment.customerId !== requestedUser.customer?.id
+		payment.assignment.serviceRequest.customerId !== requestedUser.customer?.id
 	) {
 		throw new AppError(
 			httpStatus.FORBIDDEN,
