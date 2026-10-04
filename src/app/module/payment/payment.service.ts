@@ -956,111 +956,6 @@ const getSinglePayment = async (paymentId: string, user: RequestUser) => {
 	return payment;
 };
 
-// const proceedToPay = async (requestId: string, user: RequestUser) => {
-// 	const customer = await prisma.customer.findUnique({
-// 		where: {
-// 			userId: user.userId,
-// 		},
-// 	});
-
-// 	if (!customer || customer.isDeleted) {
-// 		throw new AppError(httpStatus.NOT_FOUND, "Customer profile not found");
-// 	}
-
-// 	const existingServiceRequest = await prisma.serviceRequest.findFirst({
-// 		where: {
-// 			id: requestId,
-// 			customerId: customer.id,
-// 		},
-// 		include: {
-// 			assignment: {
-// 				include: {
-// 					technicianReport: true,
-// 					payment: true,
-// 				},
-// 			},
-// 		},
-// 	});
-
-// 	if (!existingServiceRequest || existingServiceRequest.isDeleted) {
-// 		throw new AppError(httpStatus.NOT_FOUND, "Service request not found");
-// 	}
-
-// 	if (existingServiceRequest.status !== ServiceRequestStatus.PAYMENTPENDING) {
-// 		throw new AppError(
-// 			httpStatus.BAD_REQUEST,
-// 			"This service request is not waiting for payment",
-// 		);
-// 	}
-
-// 	if (
-// 		!existingServiceRequest.assignment ||
-// 		existingServiceRequest.assignment.isDeleted ||
-// 		existingServiceRequest.assignment.id
-// 	) {
-// 		throw new AppError(
-// 			httpStatus.NOT_FOUND,
-// 			"The technician assignment corresponding to this service request not found",
-// 		);
-// 	}
-
-// 	const technicianReport = existingServiceRequest.assignment?.technicianReport;
-
-// 	if (!technicianReport) {
-// 		throw new AppError(
-// 			httpStatus.BAD_REQUEST,
-// 			"Technician report has not been submitted yet",
-// 		);
-// 	}
-
-// 	const amount = technicianReport.charge.toString();
-
-// 	const bkashIdToken = await getBkashIdToken();
-
-// 	if (!bkashIdToken) {
-// 		throw new AppError(httpStatus.BAD_GATEWAY, "No Bkash Access Token Found!");
-// 	}
-
-// 	const bkashCreatePaymentResponse = await fetch(
-// 		`${config.bkash_base_url}/tokenized/checkout/create`,
-// 		{
-// 			method: "POST",
-// 			headers: {
-// 				"Content-Type": "application/json",
-// 				Accept: "application/json",
-// 				Authorization: bkashIdToken,
-// 				"X-App-Key": config.bkash_app_key,
-// 			},
-// 			body: JSON.stringify({
-// 				mode: "0011",
-
-// 				payerReference: user.email,
-// 				callbackURL: `${config.bkash_callback_url}/appointment/book-appointment/payment/callback`,
-// 				amount: amount,
-// 				currency: "BDT",
-// 				intent: "sale",
-// 				merchantInvoiceNumber: existingServiceRequest.id,
-// 			}),
-// 		},
-// 	);
-
-// 	const bkashCreatePaymentResult = await bkashCreatePaymentResponse.json();
-
-// 	await prisma.payment.create({
-// 		data: {
-// 			amount,
-// 			merchantInvoiceNumber: existingServiceRequest.id,
-// 			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-// 			// biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: <explanation>
-// 			assignmentId: existingServiceRequest.assignment?.id!,
-// 		},
-// 	});
-
-// 	return {
-// 		paymentUrl: bkashCreatePaymentResult.bkashURL,
-// 	};
-// };
-
 const payServiceRequest = async (
 	payload: IPayRequestPayload,
 	user: RequestUser,
@@ -1090,7 +985,6 @@ const payServiceRequest = async (
 			assignment: {
 				include: {
 					technicianReport: true,
-					payment: true,
 				},
 			},
 		},
@@ -1110,30 +1004,11 @@ const payServiceRequest = async (
 	if (
 		!existingServiceRequest.assignment ||
 		existingServiceRequest.assignment.isDeleted ||
-		existingServiceRequest.assignment.id
+		!existingServiceRequest.assignment.id
 	) {
 		throw new AppError(
 			httpStatus.NOT_FOUND,
 			"The technician assignment corresponding to this service request not found",
-		);
-	}
-
-	if (
-		!existingServiceRequest.assignment.payment ||
-		existingServiceRequest.assignment.payment.id
-	) {
-		throw new AppError(
-			httpStatus.NOT_FOUND,
-			"The payment request corresponding to this service request not found",
-		);
-	}
-
-	if (
-		existingServiceRequest.assignment?.payment?.status !== PaymentStatus.PENDING
-	) {
-		throw new AppError(
-			httpStatus.BAD_REQUEST,
-			"This service request is not waiting for payment",
 		);
 	}
 
@@ -1204,23 +1079,59 @@ const payServiceRequest = async (
 
 const payServiceRequestCallback = async (query: Record<string, any>) => {
 	const paymentId = query.paymentID;
+	const status = query.status;
 
 	if (!paymentId) {
 		throw new AppError(httpStatus.BAD_REQUEST, "Payment Id Missing");
 	}
 
-	const status = query.status;
-
 	if (!status) {
 		throw new AppError(httpStatus.BAD_REQUEST, "Payment Status is Missing");
+	}
+
+	if (status === "failure") {
+		await prisma.payment.update({
+			where: {
+				bkashPaymentId: paymentId,
+			},
+			data: {
+				status: PaymentStatus.FAILED,
+				gatewayResponse: query,
+			},
+		});
+
+		return {
+			redirectUrl: `${config.frontend_url}/dashboard/my-service-requests?status=failure`,
+		};
+	}
+
+	if (status === "cancel") {
+		await prisma.payment.update({
+			where: {
+				bkashPaymentId: paymentId,
+			},
+			data: {
+				status: PaymentStatus.FAILED,
+				gatewayResponse: query,
+			},
+		});
+
+		return {
+			redirectUrl: `${config.frontend_url}/dashboard/my-service-requests?status=cancel`,
+		};
+	}
+
+	if (status !== "success") {
+		return {
+			redirectUrl: `${config.frontend_url}/dashboard/my-service-requests?status=failure`,
+		};
 	}
 
 	const bkashIdToken = await getBkashIdToken();
 
 	if (!bkashIdToken) {
-		throw new AppError(httpStatus.BAD_GATEWAY, "No Bkash Access Token Found!");
+		throw new AppError(httpStatus.BAD_GATEWAY, "No bKash Access Token Found!");
 	}
-
 	const executedPaymentResponse = await fetch(
 		`${config.bkash_base_url}/tokenized/checkout/execute`,
 		{
@@ -1231,7 +1142,6 @@ const payServiceRequestCallback = async (query: Record<string, any>) => {
 				Authorization: bkashIdToken,
 				"X-App-Key": config.bkash_app_key,
 			},
-
 			body: JSON.stringify({
 				paymentID: paymentId,
 			}),
@@ -1240,101 +1150,86 @@ const payServiceRequestCallback = async (query: Record<string, any>) => {
 
 	const executedPaymentResult = await executedPaymentResponse.json();
 
+	if (
+		executedPaymentResult.statusCode !== "0000" ||
+		!executedPaymentResult.trxID
+	) {
+		await prisma.payment.update({
+			where: {
+				bkashPaymentId: paymentId,
+			},
+			data: {
+				status: PaymentStatus.FAILED,
+				gatewayResponse: executedPaymentResult,
+			},
+		});
+
+		return {
+			redirectUrl: `${config.frontend_url}/dashboard/my-service-requests?status=failure`,
+		};
+	}
+
 	const transactionResult = await prisma.$transaction(async (tx) => {
-		if (status === "success") {
-			const request = await tx.serviceRequest.findUnique({
-				where: {
-					id: executedPaymentResult.merchantInvoiceNumber,
-				},
-				include: {
-					customer: {
-						select: {
-							id: true,
-							name: true,
-							email: true,
-						},
+		const request = await tx.serviceRequest.findUnique({
+			where: {
+				id: executedPaymentResult.merchantInvoiceNumber,
+			},
+			include: {
+				customer: {
+					select: {
+						id: true,
+						name: true,
+						email: true,
 					},
-					assignment: {
-						include: {
-							technician: {
-								select: {
-									id: true,
-									name: true,
-									email: true,
-								},
+				},
+				assignment: {
+					include: {
+						technician: {
+							select: {
+								id: true,
+								name: true,
+								email: true,
 							},
-							technicianReport: true,
 						},
-					},
-					area: {
-						include: {
-							feeder: true,
-						},
+						technicianReport: true,
 					},
 				},
-			});
+				area: {
+					include: {
+						feeder: true,
+					},
+				},
+			},
+		});
 
-			if (!request) {
-				throw new AppError(httpStatus.NOT_FOUND, "Service request not found!");
-			}
-
-			await tx.payment.update({
-				where: {
-					bkashPaymentId: paymentId,
-				},
-				data: {
-					status: PaymentStatus.PAID,
-					bkashTrxId: executedPaymentResult.trxID,
-					paidAt: executedPaymentResult.paymentExecuteTime,
-					gatewayResponse: executedPaymentResult,
-				},
-			});
-
-			await tx.serviceRequest.update({
-				where: {
-					id: request.id,
-				},
-				data: {
-					status: ServiceRequestStatus.INPROGRESS,
-				},
-			});
-
-			return {
-				redirectUrl: `${config.frontend_url}/dashboard/my-appointments?status=success`,
-			};
-		} else if (status === "failure") {
-			await tx.payment.update({
-				where: {
-					bkashPaymentId: paymentId,
-				},
-				data: {
-					status: PaymentStatus.FAILED,
-					gatewayResponse: executedPaymentResult,
-				},
-			});
-			return {
-				redirectUrl: `${config.frontend_url}/dashboard/my-appointments?status=failure`,
-			};
-		} else if (status === "cancel") {
-			await tx.payment.update({
-				where: {
-					bkashPaymentId: paymentId,
-				},
-				data: {
-					status: PaymentStatus.FAILED,
-					gatewayResponse: executedPaymentResult,
-				},
-			});
-			return {
-				executedPaymentResult,
-				redirectUrl: `${config.frontend_url}/dashboard/my-appointments?status=cancel`,
-			};
-		} else {
-			return {
-				executedPaymentResult,
-				redirectUrl: `${config.frontend_url}/dashboard/my-appointments?error=payment-failed`,
-			};
+		if (!request) {
+			throw new AppError(httpStatus.NOT_FOUND, "Service request not found!");
 		}
+
+		await tx.payment.update({
+			where: {
+				bkashPaymentId: paymentId,
+			},
+			data: {
+				status: PaymentStatus.PAID,
+				bkashTrxId: executedPaymentResult.trxID,
+				paidAt: new Date(),
+				gatewayResponse: executedPaymentResult,
+			},
+		});
+
+		await tx.serviceRequest.update({
+			where: {
+				id: request.id,
+			},
+			data: {
+				status: ServiceRequestStatus.INPROGRESS,
+			},
+		});
+
+		return {
+			redirectUrl: `${config.frontend_url}/dashboard/my-service-requests?status=success`,
+		};
 	});
 
 	return transactionResult;
@@ -1344,7 +1239,6 @@ export const PaymentService = {
 	getAllPayments,
 	getMyPayments,
 	getSinglePayment,
-	// proceedToPay,
 	payServiceRequest,
 	payServiceRequestCallback,
 };

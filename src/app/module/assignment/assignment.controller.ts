@@ -106,7 +106,7 @@ const deleteAssignment = catchAsync(async (req: Request, res: Response) => {
 
 const updateAssignmentStatusByTechnician = catchAsync(
 	async (req: Request, res: Response) => {
-		const assignmentId = req.params.requestId as string;
+		const assignmentId = req.params.assignmentId as string;
 		const payload = req.body;
 		const user = req.user!;
 

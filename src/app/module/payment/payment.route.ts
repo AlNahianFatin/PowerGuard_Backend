@@ -23,12 +23,6 @@ router.get(
 	PaymentController.getSinglePayment,
 );
 
-// router.post(
-// 	"/proceed-to-pay",
-// 	auth(Role.CUSTOMER),
-// 	PaymentController.proceedToPay,
-// );
-
 router.post(
 	"/pay-service-request",
 	auth(Role.CUSTOMER),

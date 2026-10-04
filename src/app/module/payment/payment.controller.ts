@@ -72,7 +72,6 @@ export const PaymentController = {
 	getAllPayments,
 	getMyPayments,
 	getSinglePayment,
-	// proceedToPay,
 	payServiceRequest,
 	payServiceRequestCallback,
 };
