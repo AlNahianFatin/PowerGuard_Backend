@@ -143,20 +143,6 @@ const getAvailableTechnicianByTodaysSchedule = catchAsync(
 	},
 );
 
-// const getAllDoctorsListPublic = catchAsync(async (req: Request, res: Response) => {
-
-// 	const { data, meta } = await DoctorServices.getAllDoctorsListPublic(
-// 		req.query
-// 	);
-// 	sendResponse(res, {
-// 		statusCode: httpStatus.OK,
-// 		success: true,
-// 		message: "Doctors Retrieved Successfully",
-// 		data,
-// 		meta,
-// 	});
-// });
-
 const getSingleTechnicianPublicProfile = catchAsync(
 	async (req: Request, res: Response) => {
 		const technicianId = req.params.technicianId as string;
@@ -180,6 +166,5 @@ export const TechnicianController = {
 	getAllTechnicians,
 	updateTechnicianProfile,
 	getAvailableTechnicianByTodaysSchedule,
-	// getAllDoctorsListPublic,
 	getSingleTechnicianPublicProfile,
 };

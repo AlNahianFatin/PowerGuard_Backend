@@ -5,15 +5,14 @@ import { auth } from "../../middleware/checkAuth";
 import { validateRequest } from "../../middleware/validateRequest";
 import { TechnicianController } from "./technician.controller";
 import {
-	UpdateTechnicianProfileValidationZodSchema,
 	ChangeTechnicianPasswordValidationZodSchema,
+	UpdateTechnicianProfileValidationZodSchema,
 } from "./technician.validation";
 
 const router = Router();
 
 router.post(
 	"/apply-as-technician",
-	// validateRequest(UserValidation.ResetPasswordZodSchema),
 	upload.fields([
 		{
 			name: "resume",
