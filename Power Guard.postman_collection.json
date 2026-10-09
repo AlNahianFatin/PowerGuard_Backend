@@ -184,17 +184,10 @@
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "const res = pm.response.json();",
-                  "",
-                  "if (res && res.data && res.data.accessToken) {",
-                  "    pm.collectionVariables.set(\"accessToken\", res.data.accessToken);",
-                  "    pm.collectionVariables.set(\"refreshToken\", res.data.refreshToken || \"\");",
-                  "}"
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "const res = pm.response.json();\n\nif (res && res.data && res.data.accessToken) {\n    pm.collectionVariables.set(\"accessToken\", res.data.accessToken);\n    pm.collectionVariables.set(\"refreshToken\", res.data.refreshToken || \"\");\n}"
+                ]
               }
             }
           ],
@@ -279,7 +272,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"fatinnahian@gmail.com\",\n    \"otp\": \"581564\"\n}",
+              "raw": "{\n    \"email\": \"fatinnahian@gmail.com\",\n    \"otp\": \"697832\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -414,8 +407,7 @@
           },
           "response": []
         }
-      ],
-      "description": "All seven credential-auth endpoints under `/api/v1/auth`. `Get Me` is gated by `auth(ADMIN, DOCTOR, PATIENT, SUPER_ADMIN)` — every role passes, so the gate really just means \"authenticated\". Password rule enforced by Zod on register/login/reset: min 8 chars, at least one lowercase, one uppercase, one digit, one special character."
+      ]
     },
     {
       "name": "Auth - Google",
@@ -601,9 +593,6 @@
         {
           "name": "Apply As Technician",
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
             "method": "POST",
             "header": [],
             "body": {
@@ -612,16 +601,18 @@
                 {
                   "key": "resume",
                   "type": "file",
-                  "src": "/E:/Fatin/Al Nahian Fatin Resume.pdf"
+                  "src": [
+                    "/E:/P/Git/git-cheat-sheet-education.pdf"
+                  ]
                 },
                 {
                   "key": "additionalFiles",
-                  "type": "file",
-                  "value": null
+                  "value": "",
+                  "type": "text"
                 },
                 {
                   "key": "data",
-                  "value": "{\n    \"user\": {\n        \"name\": \"Shanjidul Gadha\",\n        \"email\": \"fatinnahian@gmail.com\"\n    },\n    \"technician\": {\n        \"address\": \"123 Medical Plaza, Suite 400, New York, NY\",\n        \"experienceYears\": 12,\n        \"bio\": \"Dedicated cardiologist with over a decade of experience specializing in non-invasive cardiovascular imaging and preventative heart care.\",\n        \"contactNumber\": \"+1-555-0199\"\n    }\n}",
+                  "value": "{\n    \"user\": {\n        \"name\": \"Shanjidul Islam\",\n        \"email\": \"fatinnahian@gmail.com\"\n    },\n    \"technician\": {\n        \"address\": \"123 Medical Plaza, Suite 400, New York, NY\",\n        \"experienceYears\": 4,\n        \"bio\": \"Dedicated technician\",\n        \"contactNumber\": \"+1-555-0199\"\n    }\n}",
                   "type": "text"
                 }
               ]
@@ -635,8 +626,7 @@
                 "technician",
                 "apply-as-technician"
               ]
-            },
-            "description": "Expected: **200**. `multipart/form-data`: `resume` (single file), `additionalFiles` (up to 10 files), and `data` — a **JSON string** (not a nested form field) matching `ApplyAsDoctorValidationZodSchema`. Creates a `User` (`role: DOCTOR`, random temp password, `needPasswordChange: true`) + `Doctor` row (`verificationStatus: PENDING`), uploads files to Cloudinary, and emails a 6-digit OTP (1 hour TTL) to the doctor's email for **Verify Doctor Email**."
+            }
           },
           "response": []
         },
@@ -650,7 +640,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"fatinnahian@gmail.com\",\n    \"otp\": \"846231\"\n}",
+              "raw": "{\n    \"email\": \"fatinnahian@gmail.com\",\n    \"otp\": \"894122\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -679,7 +669,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"technicianId\": \"e6d7dfe1-b97a-4334-a68e-94396435f92d\",\n    \"verificationStatus\": \"APPROVED\",\n    \"rejectionReason\": \"NOT NOW\"\n}",
+              "raw": "{\n    \"technicianId\": \"8e362013-620b-47a0-8847-3735ce64a0f6\",\n    \"verificationStatus\": \"APPROVED\",\n    \"rejectionReason\": \"NOT NOW\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -895,8 +885,7 @@
           },
           "response": []
         }
-      ],
-      "description": "All `/api/v1/doctor` endpoints: the apply → verify-email → admin-approve onboarding flow, the admin/self-service management endpoints, and the unauthenticated public discovery endpoints (`/public/...`) patients use before logging in."
+      ]
     },
     {
       "name": "Schedule",
@@ -1115,7 +1104,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"startDateTime\": \"2026-10-03T06:38:00.000Z\",\n    \"endDateTime\": \"2026-10-03T23:00:00.000Z\",\n    \"reason\": \"Transformer busted\",\n    \"feederId\": \"c4692cf1-3a1b-4455-8bcc-d15efe867f57\"\n}",
+              "raw": "{\n    \"startDateTime\": \"2026-10-09T10:04:00.000Z\",\n    \"endDateTime\": \"2026-10-09T23:00:00.000Z\",\n    \"reason\": \"Transformer busted\",\n    \"feederId\": \"c4692cf1-3a1b-4455-8bcc-d15efe867f57\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1151,14 +1140,14 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/schedule/publish-schedule/37ff346b-c537-410d-9572-951c25a1e6f8",
+              "raw": "{{baseUrl}}/schedule/publish-schedule/8797e5d5-6676-4956-85b7-52e8f9b62847",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "schedule",
                 "publish-schedule",
-                "37ff346b-c537-410d-9572-951c25a1e6f8"
+                "8797e5d5-6676-4956-85b7-52e8f9b62847"
               ]
             },
             "description": "Expected: **200**. DOCTOR only, on their own schedule. Flips `status` from `DRAFT` to `PUBLISHED`, making it visible/bookable to patients. Fails with 409 if already published."
@@ -1172,7 +1161,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"startDateTime\": \"2026-08-28T10:00:00.000Z\",\n    \"endDateTime\": \"2026-08-28T14:00:00.000Z\",\n    \"reason\": \"Fuse expired\",\n    \"feederId\": \"4621da9d-e78f-4144-908b-ed6f413b8667\"\n}",
+              "raw": "{\n    \"startDateTime\": \"2026-10-09T10:04:00.000Z\",\n    \"endDateTime\": \"2026-10-09T10:05:00.000Z\",\n    \"reason\": \"Fuse expired\",\n    \"feederId\": \"4621da9d-e78f-4144-908b-ed6f413b8667\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1180,14 +1169,14 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/schedule/update-schedule/804b5733-84c7-4822-8a2f-75b21f9974df",
+              "raw": "{{baseUrl}}/schedule/update-schedule/8797e5d5-6676-4956-85b7-52e8f9b62847",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "schedule",
                 "update-schedule",
-                "804b5733-84c7-4822-8a2f-75b21f9974df"
+                "8797e5d5-6676-4956-85b7-52e8f9b62847"
               ]
             },
             "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
@@ -1200,21 +1189,20 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/schedule/8d6d2600-07fa-4017-98df-aaa7dd82a44f",
+              "raw": "{{baseUrl}}/schedule/8797e5d5-6676-4956-85b7-52e8f9b62847",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "schedule",
-                "8d6d2600-07fa-4017-98df-aaa7dd82a44f"
+                "8797e5d5-6676-4956-85b7-52e8f9b62847"
               ]
             },
             "description": "Expected: **200**. DOCTOR only, on their own schedule. Soft-deletes (`isDeleted: true`). Fails with 409 if it's `PUBLISHED` and already has bookings."
           },
           "response": []
         }
-      ],
-      "description": "All `/api/v1/schedule` endpoints covering the doctor's create → publish → manage lifecycle, admin oversight, and the patient-facing today's-schedule lookup."
+      ]
     },
     {
       "name": "Distribution Zone",
@@ -1973,14 +1961,14 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/request/reject-request/5d6204de-c414-42bc-ae80-a9d7eea12a92",
+              "raw": "{{baseUrl}}/request/reject-request/79acda11-7225-42aa-bc10-d5ba932337d1",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "request",
                 "reject-request",
-                "5d6204de-c414-42bc-ae80-a9d7eea12a92"
+                "79acda11-7225-42aa-bc10-d5ba932337d1"
               ]
             },
             "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
@@ -2148,14 +2136,14 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/assignment/assign-technician/30f111d2-5ec2-4005-be08-87eb2e131d78",
+              "raw": "{{baseUrl}}/assignment/assign-technician/79acda11-7225-42aa-bc10-d5ba932337d1",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "assignment",
                 "assign-technician",
-                "30f111d2-5ec2-4005-be08-87eb2e131d78"
+                "79acda11-7225-42aa-bc10-d5ba932337d1"
               ]
             },
             "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
@@ -2226,7 +2214,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"status\": \"INSPECTING\",\n    \"failureNote\": \"All quiet on the western front\"\n}\n// ASSIGNED -> INSPECTING\n// INPROGRESS -> RESOLVED / FAILED",
+              "raw": "{\n    \"status\": \"RESOLVED\",\n    \"failureNote\": \"All quiet on the western front\"\n}\n// ASSIGNED -> INSPECTING\n// INPROGRESS -> RESOLVED / FAILED",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2234,14 +2222,14 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/assignment/update-assignment-status-technician/f447f6de-a1b6-4543-ad2e-0cd2d1ea4fef",
+              "raw": "{{baseUrl}}/assignment/update-assignment-status-technician/23cbbe57-dadc-4d61-aa89-5fc803935641",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "assignment",
                 "update-assignment-status-technician",
-                "f447f6de-a1b6-4543-ad2e-0cd2d1ea4fef"
+                "23cbbe57-dadc-4d61-aa89-5fc803935641"
               ]
             },
             "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
@@ -2409,14 +2397,14 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/report/submit-report/f447f6de-a1b6-4543-ad2e-0cd2d1ea4fef",
+              "raw": "{{baseUrl}}/report/submit-report/23cbbe57-dadc-4d61-aa89-5fc803935641",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "report",
                 "submit-report",
-                "f447f6de-a1b6-4543-ad2e-0cd2d1ea4fef"
+                "23cbbe57-dadc-4d61-aa89-5fc803935641"
               ]
             },
             "description": "Expected: **200**. DOCTOR only, on their own `DRAFT` schedule (or a `PUBLISHED` one with zero bookings so far). All fields optional; omitted fields keep their current value. Recomputes `totalSlots`/`availableSlots`."
@@ -2613,7 +2601,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payment/my-payments?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+              "raw": "{{baseUrl}}/payment/my-payments",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2624,19 +2612,23 @@
               "query": [
                 {
                   "key": "page",
-                  "value": "1"
+                  "value": "1",
+                  "disabled": true
                 },
                 {
                   "key": "limit",
-                  "value": "10"
+                  "value": "10",
+                  "disabled": true
                 },
                 {
                   "key": "sortBy",
-                  "value": "createdAt"
+                  "value": "createdAt",
+                  "disabled": true
                 },
                 {
                   "key": "sortOrder",
-                  "value": "desc"
+                  "value": "desc",
+                  "disabled": true
                 },
                 {
                   "key": "status",
@@ -2741,7 +2733,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"requestId\": \"30f111d2-5ec2-4005-be08-87eb2e131d78\"\n}",
+              "raw": "{\n    \"requestId\": \"79acda11-7225-42aa-bc10-d5ba932337d1\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
