@@ -1349,6 +1349,21 @@ const updateAssignmentStatusByTechnician = async (
 				);
 			}
 
+			const completedTime = bkashRefundPaymentResult.completedTime;
+
+			const normalizedTime = completedTime
+				.replace(/:(\d{3}) GMT([+-]\d{4})$/, ".$1 GMT$2")
+				.replace(/ GMT([+-]\d{2})(\d{2})$/, "$1:$2");
+
+			const refundedAt = new Date(normalizedTime);
+
+			if (Number.isNaN(refundedAt.getTime())) {
+				throw new AppError(
+					httpStatus.BAD_GATEWAY,
+					`Invalid bKash refund completion time: ${completedTime}`,
+				);
+			}
+
 			refundedPayment = await prisma.$transaction(async (tx) => {
 				return tx.payment.update({
 					where: {
@@ -1356,7 +1371,7 @@ const updateAssignmentStatusByTechnician = async (
 					},
 					data: {
 						refundTrxId: bkashRefundPaymentResult.refundTrxID,
-						refundedAt: bkashRefundPaymentResult.completedTime,
+						refundedAt: refundedAt,
 						refundAmount: bkashRefundPaymentResult.amount,
 						refundReason: "Technician failed to solve issue",
 						status: PaymentStatus.REFUNDED,

@@ -393,13 +393,6 @@ const getAllPayments = async (query: IQuery) => {
 		skip,
 		orderBy: { [sortBy]: sortOrder },
 		include: {
-			customer: {
-				select: {
-					id: true,
-					name: true,
-					email: true,
-				},
-			},
 			assignment: {
 				include: {
 					assignedByUser: {
@@ -416,7 +409,17 @@ const getAllPayments = async (query: IQuery) => {
 							email: true,
 						},
 					},
-					serviceRequest: true,
+					serviceRequest: {
+						include: {
+							customer: {
+								select: {
+									id: true,
+									name: true,
+									email: true,
+								},
+							},
+						},
+					},
 					technicianReport: true,
 				},
 			},
@@ -871,13 +874,6 @@ const getMyPayments = async (query: IQuery, user: RequestUser) => {
 		skip,
 		orderBy: { [sortBy]: sortOrder },
 		include: {
-			customer: {
-				select: {
-					id: true,
-					name: true,
-					email: true,
-				},
-			},
 			assignment: {
 				include: {
 					assignedByUser: {
@@ -894,7 +890,17 @@ const getMyPayments = async (query: IQuery, user: RequestUser) => {
 							email: true,
 						},
 					},
-					serviceRequest: true,
+					serviceRequest: {
+						include: {
+							customer: {
+								select: {
+									id: true,
+									name: true,
+									email: true,
+								},
+							},
+						},
+					},
 					technicianReport: true,
 				},
 			},
@@ -948,13 +954,6 @@ const getSinglePayment = async (paymentId: string, user: RequestUser) => {
 			id: paymentId,
 		},
 		include: {
-			customer: {
-				select: {
-					id: true,
-					name: true,
-					email: true,
-				},
-			},
 			assignment: {
 				include: {
 					...(requestedUser.role !== Role.CUSTOMER && {
@@ -973,7 +972,17 @@ const getSinglePayment = async (paymentId: string, user: RequestUser) => {
 							email: true,
 						},
 					},
-					serviceRequest: true,
+					serviceRequest: {
+						include: {
+							customer: {
+								select: {
+									id: true,
+									name: true,
+									email: true,
+								},
+							},
+						},
+					},
 					technicianReport: true,
 				},
 			},
