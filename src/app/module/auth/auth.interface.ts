@@ -9,6 +9,7 @@ export interface IRegisterCustomerPayload {
 	name: string;
 	email: string;
 	password: string;
+	confirmPassword: string;
 	customer: {
 		contactNumber?: string;
 		address?: string;
@@ -37,4 +38,8 @@ export interface IResetPasswordPayload {
 	email: string;
 	newPassword: string;
 	otp: string;
+}
+
+export interface IResendOtpPayload {
+	email: string;
 }

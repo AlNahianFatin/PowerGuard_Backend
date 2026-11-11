@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/style/useConst: <explanation> */
+/** biome-ignore-all lint/style/useConst: <45dr> */
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import ejs from "ejs";
@@ -24,12 +24,16 @@ import type {
 	ILoginUserPayload,
 	IRegisterCustomerPayload,
 	IRequestUser,
+	IResendOtpPayload,
 	IResetPasswordPayload,
 	IVerifyEmailPayload,
 } from "./auth.interface";
 
 const registerCustomer = async (payload: IRegisterCustomerPayload) => {
-	const { name, password, customer: customerData } = payload;
+	const { name, password, confirmPassword, customer: customerData } = payload;
+
+	if (password !== confirmPassword)
+		throw new AppError(httpStatus.CONFLICT, "Passwords do not match!")
 
 	const email = payload.email.trim().toLowerCase();
 
@@ -66,7 +70,7 @@ const registerCustomer = async (payload: IRegisterCustomerPayload) => {
 		name,
 		email,
 		password: hashedPassword,
-		patient: customerData,
+		customer: customerData,
 	};
 
 	await redisClient.set(
@@ -102,6 +106,77 @@ const registerCustomer = async (payload: IRegisterCustomerPayload) => {
 		// html: `<h1>Your OTP is ${otp}</h1>`
 		html,
 	});
+};
+
+const resendOtp = async (payload: IResendOtpPayload) => {
+  const email = payload.email.trim().toLowerCase();
+
+  const customerRegistrationKey = `customer-registration-data:${email}`;
+
+  const redisCustomerData = await redisClient.get(
+    customerRegistrationKey,
+  );
+
+  if (!redisCustomerData) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "Registration session has expired. Please register again.",
+    );
+  }
+
+  let registrationData: {
+    name: string;
+    email: string;
+    password: string;
+    [key: string]: unknown;
+  };
+
+  try {
+    registrationData = JSON.parse(redisCustomerData);
+  } catch {
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "Invalid registration data",
+    );
+  }
+
+  const expirationSeconds = 5 * 60;
+  const otpKey = `customer-registration-otp:${email}`;
+
+  const otpValue = crypto.randomInt(100000, 1000000).toString();
+
+  await redisClient.set(otpKey, otpValue, {
+    expiration: {
+      type: "EX",
+      value: expirationSeconds,
+    },
+  });
+
+  const templatePath = path.join(
+    process.cwd(),
+    "src/app/templates/registration-user-otp.ejs",
+  );
+
+  const templateData = {
+    name: registrationData.name,
+    email,
+    otp: otpValue,
+    expirationMinutes: expirationSeconds / 60,
+  };
+
+  try {
+    const html = await ejs.renderFile(templatePath, templateData);
+
+    await transporter.sendMail({
+      from: config.email_sender,
+      to: email,
+      subject: "Email Verification",
+      html,
+    });
+  } catch (error) {
+    await redisClient.del(otpKey);
+    throw error;
+  }
 };
 
 const verifyCustomerEmail = async (payload: IVerifyEmailPayload) => {
@@ -146,23 +221,23 @@ const verifyCustomerEmail = async (payload: IVerifyEmailPayload) => {
 		throw new AppError(httpStatus.NOT_FOUND, "Customer Doesn't Exist");
 	}
 
-	const patientPayload: IRegisterCustomerPayload =
+	const customerPayload: IRegisterCustomerPayload =
 		JSON.parse(redisCustomerData);
 
 	const createdUser = await prisma.user.create({
 		data: {
-			name: patientPayload.name,
-			email: patientPayload.email,
-			password: patientPayload.password,
+			name: customerPayload.name,
+			email: customerPayload.email,
+			password: customerPayload.password,
 			role: Role.CUSTOMER,
 			status: UserStatus.ACTIVE,
 			emailVerified: true,
 			customer: {
 				create: {
-					name: patientPayload.name,
-					email: patientPayload.email,
-					contactNumber: patientPayload?.customer?.contactNumber || "",
-					address: patientPayload?.customer?.address || "",
+					name: customerPayload.name,
+					email: customerPayload.email,
+					contactNumber: customerPayload?.customer?.contactNumber || "",
+					address: customerPayload?.customer?.address || "",
 				},
 			},
 		},
@@ -231,7 +306,6 @@ const loginUser = async (payload: ILoginUserPayload) => {
 	});
 
 	if (!user) {
-		// throw new Error("User not found");
 		throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
 	}
 
@@ -393,7 +467,7 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 		);
 	}
 
-	const ifPatientExistWithGoogleAuth = await prisma.user.findUnique({
+	const ifCustomerExistWithGoogleAuth = await prisma.user.findUnique({
 		where: {
 			email: googleIdTokenPayload.email,
 			role: Role.CUSTOMER,
@@ -401,10 +475,10 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 		},
 	});
 
-	let user = ifPatientExistWithGoogleAuth;
+	let user = ifCustomerExistWithGoogleAuth;
 
-	if (!ifPatientExistWithGoogleAuth) {
-		const ifPatientExistWithCredentials = await prisma.user.findUnique({
+	if (!ifCustomerExistWithGoogleAuth) {
+		const ifCustomerExistWithCredentials = await prisma.user.findUnique({
 			where: {
 				email: googleIdTokenPayload.email,
 				role: Role.CUSTOMER,
@@ -412,25 +486,25 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 			},
 		});
 
-		if (ifPatientExistWithCredentials) {
-			if (!ifPatientExistWithCredentials.emailVerified) {
+		if (ifCustomerExistWithCredentials) {
+			if (!ifCustomerExistWithCredentials.emailVerified) {
 				throw new AppError(httpStatus.FORBIDDEN, "Email Not Verified");
 			}
 
-			if (ifPatientExistWithCredentials.status === UserStatus.BLOCKED) {
+			if (ifCustomerExistWithCredentials.status === UserStatus.BLOCKED) {
 				throw new AppError(httpStatus.FORBIDDEN, "User Is Blocked");
 			}
 
 			if (
-				ifPatientExistWithCredentials.isDeleted ||
-				ifPatientExistWithCredentials.status === UserStatus.DELETED
+				ifCustomerExistWithCredentials.isDeleted ||
+				ifCustomerExistWithCredentials.status === UserStatus.DELETED
 			) {
 				throw new AppError(httpStatus.FORBIDDEN, "User Is Deleted");
 			}
 
 			user = await prisma.user.update({
 				where: {
-					id: ifPatientExistWithCredentials.id,
+					id: ifCustomerExistWithCredentials.id,
 				},
 
 				data: {
@@ -447,7 +521,7 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 					googleId: googleIdTokenPayload.sub,
 					authProvider: AuthProvider.GOOGLE,
 					emailVerified: true,
-					patient: {
+					customer: {
 						create: {
 							name: googleIdTokenPayload.name,
 							email: googleIdTokenPayload.email,
@@ -657,6 +731,7 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
 
 export const AuthService = {
 	registerCustomer,
+	resendOtp,
 	verifyCustomerEmail,
 	loginUser,
 	getMe,

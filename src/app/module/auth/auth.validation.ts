@@ -2,29 +2,44 @@ import z from "zod";
 
 const CustomerRegistrationZodSchema = z.object({
 	name: z
-		.string("Not a string!!!!!")
+		.string("Not a string!")
 		.trim()
-		.min(3, "Name must be at least 3 characters long!!!")
-		.max(15, "Name cannot be greater than 15 characters long!!!"),
+		.min(3, "Name must be at least 3 characters long!")
+		.max(15, "Name cannot be greater than 15 characters long!"),
 	email: z.email("Not a valid email!").trim().toLowerCase(),
 	password: z
-		.string("Not a string!!!!!")
+		.string("Not a string!")
 		.min(8, "Password must be minimum 8 characters Long.")
 		.regex(/[a-z]/, "Password must contain at least 1 lowercase letter")
 		.regex(/[A-Z]/, "Password must contain at least 1 uppercase letter")
-
 		.regex(/[0-9]/, "Password must contain at least 1 number")
 		.regex(
 			/[^A-Za-z0-9]/,
 			"Password must contain at least 1 special character",
 		),
+	confirmPassword: z.string("Not a string!").min(1, "Please confirm your password"),
 	customer: z
 		.object({
-			contactNumber: z.string().optional(),
-			address: z.string().optional(),
+			contactNumber: z
+				.string("Not a string!")
+				.refine((val) => val === "" || /^(?:\+?880|0)1[3-9]\d{8}$/.test(val), {
+					message: "Please provide valid Bangladeshi number",
+				})
+				.optional(),
+			address: z.string("Not a string!").optional(),
 		})
 		.optional(),
+})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: "Passwords do not match!",
+		path: ["confirmPassword"],
+	});
+
+const ResendOtpZodSchema = z.object({
+	email: z.email("Not a valid email!").trim().toLowerCase(),
+	// otp: z.string().length(6),
 });
+
 const CustomerEmailVerifyZodSchema = z.object({
 	email: z.email("Not a valid email!").trim().toLowerCase(),
 	otp: z.string().length(6),
@@ -33,11 +48,10 @@ const CustomerEmailVerifyZodSchema = z.object({
 const LoginZodSchema = z.object({
 	email: z.email("Not a valid email!").trim().toLowerCase(),
 	password: z
-		.string("Not a string!!!!!")
+		.string("Not a string!")
 		.min(8, "Password must be minimum 8 characters Long.")
 		.regex(/[a-z]/, "Password must contain at least 1 lowercase letter")
 		.regex(/[A-Z]/, "Password must contain at least 1 uppercase letter")
-
 		.regex(/[0-9]/, "Password must contain at least 1 number")
 		.regex(
 			/[^A-Za-z0-9]/,
@@ -67,6 +81,7 @@ const ResetPasswordZodSchema = z.object({
 
 export const UserValidation = {
 	CustomerRegistrationZodSchema,
+	ResendOtpZodSchema,
 	CustomerEmailVerifyZodSchema,
 	LoginZodSchema,
 	ForgotPasswordZodSchema,
