@@ -76,8 +76,13 @@ const ResetPasswordZodSchema = z.object({
 			/[^A-Za-z0-9]/,
 			"Password must contain at least 1 special character",
 		),
+	confirmNewPassword: z.string("Not a string!").min(1, "Please confirm your new password"),
 	otp: z.string().length(6),
-});
+})
+	.refine((data) => data.newPassword === data.confirmNewPassword, {
+		message: "Passwords do not match!",
+		path: ["confirmNewPassword"],
+	});
 
 export const UserValidation = {
 	CustomerRegistrationZodSchema,

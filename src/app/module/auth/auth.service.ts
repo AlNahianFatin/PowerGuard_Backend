@@ -102,82 +102,112 @@ const registerCustomer = async (payload: IRegisterCustomerPayload) => {
 		from: config.email_sender,
 		to: email,
 		subject: "Email Verification",
-		// text : `Your OTP is ${otp}`
-		// html: `<h1>Your OTP is ${otp}</h1>`
 		html,
 	});
 };
 
 const resendOtp = async (payload: IResendOtpPayload) => {
-  const email = payload.email.trim().toLowerCase();
+	const email = payload.email.trim().toLowerCase();
 
-  const customerRegistrationKey = `customer-registration-data:${email}`;
+	const expirationSeconds = 5 * 60;
 
-  const redisCustomerData = await redisClient.get(
-    customerRegistrationKey,
-  );
+	let name: string;
+	let otpKey: string;
+	let recipientEmail = email;
+	let subject: string;
+	let templatePath: string;
 
-  if (!redisCustomerData) {
-    throw new AppError(
-      httpStatus.NOT_FOUND,
-      "Registration session has expired. Please register again.",
-    );
-  }
+	const customerRegistrationKey = `customer-registration-data:${email}`;
 
-  let registrationData: {
-    name: string;
-    email: string;
-    password: string;
-    [key: string]: unknown;
-  };
+	const redisCustomerData = await redisClient.get(
+		customerRegistrationKey,
+	);
 
-  try {
-    registrationData = JSON.parse(redisCustomerData);
-  } catch {
-    throw new AppError(
-      httpStatus.INTERNAL_SERVER_ERROR,
-      "Invalid registration data",
-    );
-  }
+	if (redisCustomerData) {
+		try {
+			const registrationData = JSON.parse(redisCustomerData);
 
-  const expirationSeconds = 5 * 60;
-  const otpKey = `customer-registration-otp:${email}`;
+			name = registrationData.name;
+			otpKey = `customer-registration-otp:${email}`;
+			subject = "Email Verification";
 
-  const otpValue = crypto.randomInt(100000, 1000000).toString();
+			templatePath = path.join(
+				process.cwd(),
+				"src/app/templates/registration-user-otp.ejs",
+			);
 
-  await redisClient.set(otpKey, otpValue, {
-    expiration: {
-      type: "EX",
-      value: expirationSeconds,
-    },
-  });
+		} catch {
+			throw new AppError(
+				httpStatus.INTERNAL_SERVER_ERROR,
+				"Invalid registration data",
+			);
+		}
+	} else {
+		const isUserExist = await prisma.user.findFirst({
+			where: {
+				email,
+				emailVerified: true,
+			},
+			select: {
+				name: true,
+				email: true,
+			},
+		});
 
-  const templatePath = path.join(
-    process.cwd(),
-    "src/app/templates/registration-user-otp.ejs",
-  );
+		if (!isUserExist) {
+			throw new AppError(
+				httpStatus.NOT_FOUND,
+				"No registration session or verified account found for this email.",
+			);
+		}
 
-  const templateData = {
-    name: registrationData.name,
-    email,
-    otp: otpValue,
-    expirationMinutes: expirationSeconds / 60,
-  };
+		name = isUserExist.name;
+		recipientEmail = isUserExist.email;
 
-  try {
-    const html = await ejs.renderFile(templatePath, templateData);
+		otpKey = `forgot-password-otp:${isUserExist.email}`;
+		subject = "Password Reset OTP";
 
-    await transporter.sendMail({
-      from: config.email_sender,
-      to: email,
-      subject: "Email Verification",
-      html,
-    });
-  } catch (error) {
-    await redisClient.del(otpKey);
-    throw error;
-  }
+		templatePath = path.join(
+		process.cwd(),
+		"src/app/templates/forgot-password.ejs",
+	);
+	}
+
+	const otpValue = crypto.randomInt(100000, 1000000).toString();
+
+	await redisClient.set(otpKey, otpValue, {
+		expiration: {
+			type: "EX",
+			value: expirationSeconds,
+		},
+	});
+
+	const templateData = {
+		name,
+		email: recipientEmail,
+		otp: otpValue,
+		expirationMinutes: expirationSeconds / 60,
+	};
+
+	try {
+		const html = await ejs.renderFile(templatePath, templateData);
+
+		await transporter.sendMail({
+			from: config.email_sender,
+			to: recipientEmail,
+			subject,
+			html,
+		});
+	} catch (error) {
+		await redisClient.del(otpKey);
+		throw error;
+	}
+
+	return {
+		message: "A new OTP has been sent to your email.",
+	};
 };
+
 
 const verifyCustomerEmail = async (payload: IVerifyEmailPayload) => {
 	const otp = payload.otp;
@@ -262,8 +292,6 @@ const verifyCustomerEmail = async (payload: IVerifyEmailPayload) => {
 		from: config.email_sender,
 		to: email,
 		subject: "Welcome To Power Guard",
-		// text : `Your OTP is ${otp}`
-		// html: `<h1>Your OTP is ${otp}</h1>`
 		html,
 	});
 
@@ -296,8 +324,6 @@ const verifyCustomerEmail = async (payload: IVerifyEmailPayload) => {
 };
 
 const loginUser = async (payload: ILoginUserPayload) => {
-	// throw new Error("Test Error");
-
 	const { password } = payload;
 	const email = payload.email.trim().toLowerCase();
 
@@ -544,8 +570,6 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 				from: config.email_sender,
 				to: user.email,
 				subject: "Welcome To Power Guard",
-				// text : `Your OTP is ${otp}`
-				// html: `<h1>Your OTP is ${otp}</h1>`
 				html,
 			});
 		}
@@ -614,7 +638,7 @@ const forgotPassword = async (payload: IForgotPasswordPayload) => {
 	}
 
 	if (isUserExist.googleId && isUserExist.authProvider === "GOOGLE") {
-		throw new AppError(httpStatus.BAD_REQUEST, "User Has Account With Google");
+		throw new AppError(httpStatus.BAD_REQUEST, "No password is set yet. Just login with Google");
 	}
 
 	const otp = crypto.randomInt(100000, 1000000).toString();
@@ -723,8 +747,6 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
 		from: config.email_sender,
 		to: isUserExist.email,
 		subject: "Password Changed",
-		// text : `Your OTP is ${otp}`
-		// html: `<h1>Your Password Is Changed</h1>`
 		html,
 	});
 };
