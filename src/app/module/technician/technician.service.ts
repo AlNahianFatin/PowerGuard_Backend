@@ -1,14 +1,12 @@
 import bcrypt from "bcryptjs";
 import type { UploadApiResponse } from "cloudinary";
 import crypto from "crypto";
-import { addDays, startOfDay } from "date-fns";
 import ejs from "ejs";
 import httpStatus from "http-status";
 import path from "path";
 import {
 	TechnicianVerificationStatus,
 	Role,
-	ScheduleStatus,
 	TechnicianStatus,
 	UserStatus,
 } from "../../../generated/prisma/enums";
@@ -291,10 +289,9 @@ const approveTechnician = async (
 
 	const templatePath = path.join(
 		process.cwd(),
-		`src/app/templates/${
-			isApproved
-				? "technician-application-approved.ejs"
-				: "technician-application-rejected.ejs"
+		`src/app/templates/${isApproved
+			? "technician-application-approved.ejs"
+			: "technician-application-rejected.ejs"
 		}`,
 	);
 
@@ -425,6 +422,13 @@ const getAllTechnicians = async (query: IQuery) => {
 	}
 
 	//filtering
+	if (query.status) {
+		andConditions.push({
+			status:
+				query.status as TechnicianStatus,
+		});
+	}
+
 	if (query.email) {
 		andConditions.push({
 			email: { contains: query.email, mode: "insensitive" },

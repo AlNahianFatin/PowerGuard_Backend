@@ -39,7 +39,7 @@ export const UpdateSubstationValidationZodSchema = z.object({
 
 	zoneId: z.string("Distribution zone ID must be a valid string").optional(),
 
-	substationIds: z
+	feederIds: z
 		.array(
 			z.string("Each feeder ID must be a valid string"),
 			"Feeder IDs must be an array",

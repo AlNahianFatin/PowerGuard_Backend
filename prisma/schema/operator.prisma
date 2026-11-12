@@ -1,6 +1,5 @@
 model Operator {
-  id String @id @default(uuid())
-
+  id      String  @id @default(uuid())
   name    String
   email   String  @unique
   address String?

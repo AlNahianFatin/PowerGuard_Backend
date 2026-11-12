@@ -1,6 +1,6 @@
 import type { TechnicianVerificationStatus } from "../../../generated/prisma/enums";
 
-export interface IApplyAsTechnicianPayload {
+export interface TechnicianApplicationData {
 	user: {
 		name: string;
 		email: string;
@@ -11,6 +11,12 @@ export interface IApplyAsTechnicianPayload {
 		bio?: string;
 		contactNumber?: string;
 	};
+}
+
+export interface IApplyAsTechnicianPayload {
+	resume: File;
+	additionalFiles: File[];
+	data: TechnicianApplicationData;
 }
 
 export interface IVerifyTechnicianEmailPayload {
