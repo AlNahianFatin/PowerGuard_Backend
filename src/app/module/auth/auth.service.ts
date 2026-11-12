@@ -168,9 +168,9 @@ const resendOtp = async (payload: IResendOtpPayload) => {
 		subject = "Password Reset OTP";
 
 		templatePath = path.join(
-		process.cwd(),
-		"src/app/templates/forgot-password.ejs",
-	);
+			process.cwd(),
+			"src/app/templates/forgot-password.ejs",
+		);
 	}
 
 	const otpValue = crypto.randomInt(100000, 1000000).toString();
@@ -749,6 +749,30 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
 		subject: "Password Changed",
 		html,
 	});
+
+	const jwtPayload = {
+		userId: isUserExist.id,
+		name: isUserExist.name,
+		email: isUserExist.email,
+		role: isUserExist.role,
+	};
+
+	const accessToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_access_secret,
+		config.jwt_access_expires_in as SignOptions,
+	);
+
+	const refreshToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_refresh_secret,
+		config.jwt_refresh_expires_in as SignOptions,
+	);
+
+	return {
+		accessToken,
+		refreshToken,
+	};
 };
 
 export const AuthService = {

@@ -21,7 +21,7 @@ router.post(
 
 router.post(
 	"/verify-email",
-	validateRequest(UserValidation.CustomerEmailVerifyZodSchema),
+	validateRequest(UserValidation.UserVerificationZodSchema),
 	AuthController.verifyCustomerEmail,
 );
 

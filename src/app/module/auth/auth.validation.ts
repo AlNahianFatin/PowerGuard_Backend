@@ -37,12 +37,11 @@ const CustomerRegistrationZodSchema = z.object({
 
 const ResendOtpZodSchema = z.object({
 	email: z.email("Not a valid email!").trim().toLowerCase(),
-	// otp: z.string().length(6),
 });
 
-const CustomerEmailVerifyZodSchema = z.object({
+const UserVerificationZodSchema = z.object({
 	email: z.email("Not a valid email!").trim().toLowerCase(),
-	otp: z.string().length(6),
+	otp: z.string().length(6, "OTP must be 6-digits long"),
 });
 
 const LoginZodSchema = z.object({
@@ -65,6 +64,7 @@ const ForgotPasswordZodSchema = z.object({
 
 const ResetPasswordZodSchema = z.object({
 	email: z.email("Not a valid email!").trim().toLowerCase(),
+	otp: z.string().length(6, "OTP must be 6-digits long"),
 	newPassword: z
 		.string("Not a string!!!!!")
 		.min(8, "Password must be minimum 8 characters Long.")
@@ -77,7 +77,6 @@ const ResetPasswordZodSchema = z.object({
 			"Password must contain at least 1 special character",
 		),
 	confirmNewPassword: z.string("Not a string!").min(1, "Please confirm your new password"),
-	otp: z.string().length(6),
 })
 	.refine((data) => data.newPassword === data.confirmNewPassword, {
 		message: "Passwords do not match!",
@@ -87,7 +86,7 @@ const ResetPasswordZodSchema = z.object({
 export const UserValidation = {
 	CustomerRegistrationZodSchema,
 	ResendOtpZodSchema,
-	CustomerEmailVerifyZodSchema,
+	UserVerificationZodSchema,
 	LoginZodSchema,
 	ForgotPasswordZodSchema,
 	ResetPasswordZodSchema,
