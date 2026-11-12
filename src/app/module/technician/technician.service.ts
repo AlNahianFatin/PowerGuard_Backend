@@ -36,7 +36,7 @@ const applyAsTechnician = async (
 ) => {
 	const isUserExists = await prisma.user.findUnique({
 		where: {
-			email: payload.user.email,
+			email: payload.data.user.email,
 		},
 	});
 
@@ -111,15 +111,15 @@ const applyAsTechnician = async (
 
 	const technicianApplication = await prisma.user.create({
 		data: {
-			...payload.user,
+			...payload.data.user,
 			password: hashedPassword,
 			role: Role.TECHNICIAN,
 			needPasswordChange: true,
 			technician: {
 				create: {
-					name: payload.user.name,
-					email: payload.user.email,
-					...payload.technician,
+					name: payload.data.user.name,
+					email: payload.data.user.email,
+					...payload.data.technician,
 					resume: resumeUploadResult.secure_url,
 					resumePublicId: resumeUploadResult.public_id,
 					additionalFiles: additionalFilesUploadResults.map((file) => ({
@@ -137,7 +137,7 @@ const applyAsTechnician = async (
 
 	const expirationSeconds = 60 * 60;
 
-	const otpKey = `technician-application-otp:${payload.user.email}`;
+	const otpKey = `technician-application-otp:${payload.data.user.email}`;
 	const otpValue = crypto.randomInt(100000, 1000000).toString();
 
 	await redisClient.set(otpKey, otpValue, {
@@ -153,8 +153,8 @@ const applyAsTechnician = async (
 	);
 
 	const templateData = {
-		name: payload.user.name,
-		email: payload.user.email,
+		name: payload.data.user.name,
+		email: payload.data.user.email,
 		otp: otpValue,
 		expirationMinutes: expirationSeconds / 60,
 	};
@@ -163,7 +163,7 @@ const applyAsTechnician = async (
 
 	await transporter.sendMail({
 		from: config.email_sender,
-		to: payload.user.email,
+		to: payload.data.user.email,
 		subject: "Technician Application - Email Verification",
 		html,
 	});

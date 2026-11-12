@@ -8,13 +8,21 @@ import { ApplyAsTechnicianValidationZodSchema } from "./technician.validation";
 import { TechnicianVerificationStatus } from "../../../generated/prisma/enums";
 
 const applyAsTechnician = catchAsync(async (req: Request, res: Response) => {
-	const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-	const resume = files?.["resume"] ? files["resume"][0] : null;
-	const additionalFiles = files?.["additionalFiles"] || [];
+	const files = req.files as {
+		[fieldname: string]: Express.Multer.File[];
+	};
 
-	const zodValidationResult = ApplyAsTechnicianValidationZodSchema.safeParse(
-		JSON.parse(req.body.data),
-	);
+	const resume = files?.["resume"]?.[0] ?? null;
+	const additionalFiles = files?.["additionalFiles"] ?? [];
+
+	const validationData = {
+		resume,
+		additionalFiles,
+		data: JSON.parse(req.body.data),
+	};
+
+	const zodValidationResult =
+		ApplyAsTechnicianValidationZodSchema.safeParse(validationData);
 
 	if (!zodValidationResult.success) {
 		throw new AppError(
@@ -30,6 +38,7 @@ const applyAsTechnician = catchAsync(async (req: Request, res: Response) => {
 		resume,
 		additionalFiles,
 	);
+
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,

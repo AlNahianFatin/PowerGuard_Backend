@@ -31,6 +31,7 @@ export interface IApproveTechnicianPayload {
 }
 
 export interface IUpdateTechnicianProfilePayload {
+	name?: string;
 	address?: string;
 	bio?: string;
 	contactNumber?: string;
