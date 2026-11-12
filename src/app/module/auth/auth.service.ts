@@ -208,7 +208,6 @@ const resendOtp = async (payload: IResendOtpPayload) => {
 	};
 };
 
-
 const verifyCustomerEmail = async (payload: IVerifyEmailPayload) => {
 	const otp = payload.otp;
 	const email = payload.email.trim().toLowerCase();
@@ -676,7 +675,10 @@ const forgotPassword = async (payload: IForgotPasswordPayload) => {
 };
 
 const resetPassword = async (payload: IResetPasswordPayload) => {
-	const { email, otp, newPassword } = payload;
+	const { email, otp, newPassword, confirmNewPassword } = payload;
+
+	if (newPassword !== confirmNewPassword)
+		throw new AppError(httpStatus.CONFLICT, "Passwords do not match!");
 
 	const isUserExist = await prisma.user.findUnique({
 		where: {
@@ -701,7 +703,7 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
 	}
 
 	if (isUserExist.googleId && isUserExist.authProvider === "GOOGLE") {
-		throw new AppError(httpStatus.BAD_REQUEST, "User Has Account With Google");
+		throw new AppError(httpStatus.BAD_REQUEST, "No password is set yet. Just login with Google");
 	}
 
 	const key = `forgot-password-otp:${isUserExist.email}`;
