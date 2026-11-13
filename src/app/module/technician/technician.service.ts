@@ -38,12 +38,27 @@ const applyAsTechnician = async (
 		where: {
 			email: payload.data.user.email,
 		},
+		include: { technician: true }
 	});
 
-	if (isUserExists && !isUserExists?.isDeleted) {
+	if (isUserExists && (!isUserExists?.isDeleted && isUserExists.technician?.verificationStatus === TechnicianVerificationStatus.APPROVED)) {
 		throw new AppError(
 			httpStatus.CONFLICT,
 			"User Already Exists With This Email",
+		);
+	}
+
+	if (isUserExists && isUserExists.technician?.verificationStatus === TechnicianVerificationStatus.REJECTED) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			`Unfortunately your application has been rejected. Contact ${config.smtp_user} for support`,
+		);
+	}
+
+	if (isUserExists && isUserExists.technician?.verificationStatus === TechnicianVerificationStatus.PENDING) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			"You have already applied for technician. Please wait for admin review",
 		);
 	}
 

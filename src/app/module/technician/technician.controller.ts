@@ -55,7 +55,7 @@ const verifyTechnicianEmail = catchAsync(
 		sendResponse(res, {
 			statusCode: httpStatus.OK,
 			success: true,
-			message: "Technician Email Verified Successfully",
+			message: "An admin will approve your account. Please check your email in a few days",
 			data: result,
 		});
 	},
