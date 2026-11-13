@@ -5,7 +5,7 @@ import { auth } from "../../middleware/checkAuth";
 import { validateRequest } from "../../middleware/validateRequest";
 import { TechnicianController } from "./technician.controller";
 import {
-	ChangeTechnicianPasswordValidationZodSchema,
+	SetTechnicianPasswordValidationZodSchema,
 	UpdateTechnicianProfileValidationZodSchema,
 } from "./technician.validation";
 
@@ -40,7 +40,7 @@ router.post(
 
 router.patch(
 	"/change-password",
-	validateRequest(ChangeTechnicianPasswordValidationZodSchema),
+	validateRequest(SetTechnicianPasswordValidationZodSchema),
 	TechnicianController.changePassword,
 );
 

@@ -83,16 +83,13 @@ export const ApplyAsTechnicianValidationZodSchema = z.object({
 			address: z
 				.string("Not a string!")
 				.trim()
-				.min(5, "Address must be at least 5 characters long")
 				.max(100, "Address cannot be greater than 100 characters long")
 				.optional(),
 
 			experienceYears: z
-				.string()
-				.trim()
-				.refine((value) => /^\d+$/.test(value), {
-					message: "Years of experience must be whole value",
-				})
+				.coerce
+				.number()
+				.int("Years of experience must be whole value")
 				.refine((value) => Number(value) >= 0 && Number(value) <= 60, {
 					message: "Years of experience must be between 0 and 60",
 				}),
@@ -124,7 +121,6 @@ export const UpdateTechnicianProfileValidationZodSchema = z.object({
 	address: z
 		.string("Not a string!")
 		.trim()
-		.min(5, "Address must be at least 5 characters long")
 		.max(100, "Address cannot be greater than 100 characters long")
 		.optional(),
 
