@@ -54,6 +54,13 @@ router.post(
 );
 
 router.post(
+	"/change-password",
+	validateRequest(UserValidation.ChangePasswordZodSchema),
+	auth(),
+	AuthController.changePassword,
+);
+
+router.post(
 	"/logout",
 	auth(Role.ADMIN, Role.OPERATOR, Role.TECHNICIAN, Role.CUSTOMER),
 	AuthController.logoutUser,

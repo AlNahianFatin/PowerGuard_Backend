@@ -213,6 +213,44 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
+		message: "Password reset successfully",
+		data: null,
+	});
+});
+
+const changePassword = catchAsync(async (req: Request, res: Response) => {
+	const payload = req.body;
+
+	const user = req.user as unknown as IRequestUser;
+
+	if (!user) {
+		throw new AppError(
+			httpStatus.UNAUTHORIZED,
+			"User information is missing in the request",
+		);
+	}
+
+	await AuthService.changePassword(user, payload);
+
+	// const { accessToken, refreshToken } = result;
+
+	// res.cookie("accessToken", accessToken, {
+	// 	httpOnly: true,
+	// 	secure: config.node_env !== "development",
+	// 	sameSite: config.node_env === "development" ? "lax" : "none",
+	// 	maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
+	// });
+	// res.cookie("refreshToken", refreshToken, {
+	// 	httpOnly: true,
+	// 	secure: config.node_env !== "development",
+	// 	sameSite: config.node_env === "development" ? "lax" : "none",
+	// 	maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+	// });
+
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
 		message: "Password Changed Successfully",
 		data: null,
 	});
@@ -240,5 +278,6 @@ export const AuthController = {
 	googleLogin,
 	forgotPassword,
 	resetPassword,
+	changePassword,
 	logoutUser
 };

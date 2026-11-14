@@ -97,6 +97,29 @@ const ResetPasswordZodSchema = z.object({
 		path: ["confirmNewPassword"],
 	});
 
+const ChangePasswordZodSchema = z.object({
+	password: z
+		.string("Not a string!")
+		.min(8, "Password must have been minimum 8 characters Long."),
+
+	newPassword: z
+		.string("Not a string!")
+		.min(8, "Password must be minimum 8 characters Long.")
+		.regex(/[a-z]/, "Password must contain at least 1 lowercase letter")
+		.regex(/[A-Z]/, "Password must contain at least 1 uppercase letter")
+		.regex(/[0-9]/, "Password must contain at least 1 number")
+		.regex(
+			/[^A-Za-z0-9]/,
+			"Password must contain at least 1 special character",
+		),
+
+	confirmNewPassword: z.string("Not a string!").min(1, "Please confirm your new password"),
+})
+	.refine((data) => data.newPassword === data.confirmNewPassword, {
+		message: "Passwords do not match!",
+		path: ["confirmNewPassword"],
+	});
+
 export const UserValidation = {
 	CustomerRegistrationZodSchema,
 	ResendOtpZodSchema,
@@ -104,4 +127,5 @@ export const UserValidation = {
 	LoginZodSchema,
 	ForgotPasswordZodSchema,
 	ResetPasswordZodSchema,
+	ChangePasswordZodSchema,
 };

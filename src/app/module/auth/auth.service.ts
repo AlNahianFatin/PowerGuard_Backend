@@ -19,6 +19,7 @@ import { redisClient } from "../../lib/redis";
 import { AppError } from "../../utils/AppError";
 import { jwtUtils } from "../../utils/jwt";
 import type {
+	IChangePasswordPayload,
 	IForgotPasswordPayload,
 	IGoogleLoginPayload,
 	ILoginUserPayload,
@@ -777,6 +778,87 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
 	};
 };
 
+const changePassword = async (user: IRequestUser, payload: IChangePasswordPayload) => {
+	const { password, newPassword, confirmNewPassword } = payload;
+
+	if (newPassword !== confirmNewPassword)
+		throw new AppError(httpStatus.CONFLICT, "Passwords do not match!");
+
+	const isUserExists = await prisma.user.findUnique({
+		where: {
+			id: user.userId,
+		},
+		include: {
+			operator: true,
+			technician: true,
+			customer: true,
+		},
+	});
+
+	if (!isUserExists) {
+		throw new AppError(httpStatus.NOT_FOUND, "User not found");
+	}
+
+	if (isUserExists.status === UserStatus.BLOCKED) {
+		throw new AppError(httpStatus.FORBIDDEN, "User is Blocked");
+	}
+
+	if (!isUserExists.emailVerified) {
+		throw new AppError(httpStatus.FORBIDDEN, "User Not Verified");
+	}
+
+	if (isUserExists.isDeleted || isUserExists.status === UserStatus.DELETED) {
+		throw new AppError(httpStatus.FORBIDDEN, "User is Deleted");
+	}
+
+	if (isUserExists.googleId && isUserExists.authProvider === "GOOGLE") {
+		throw new AppError(httpStatus.BAD_REQUEST, "No password is set yet. Just login with Google");
+	}
+
+	const isPasswordMatched = await bcrypt.compare(
+		password,
+		isUserExists.password as string,
+	);
+
+	if (!isPasswordMatched) {
+		throw new AppError(httpStatus.UNAUTHORIZED, "Invalid credentials");
+	}
+
+	const hashedNewPassword = await bcrypt.hash(
+		newPassword,
+		Number(config.bcrypt_salt_rounds),
+	);
+
+	await prisma.user.update({
+		where: {
+			id: user.userId,
+		},
+		data: {
+			password: hashedNewPassword,
+		},
+	});
+
+	const templatePath = path.join(
+		process.cwd(),
+		"src/app/templates/change-password-success.ejs",
+	);
+
+	const templateData = {
+		name: isUserExists.name,
+	};
+
+	const html = await ejs.renderFile(templatePath, templateData);
+
+	await transporter.sendMail({
+		from: config.email_sender,
+		to: isUserExists.email,
+		subject: "Password Changed",
+		html,
+	});
+
+	return;
+};
+
 export const AuthService = {
 	registerCustomer,
 	resendOtp,
@@ -787,4 +869,5 @@ export const AuthService = {
 	googleLogin,
 	forgotPassword,
 	resetPassword,
+	changePassword,
 };

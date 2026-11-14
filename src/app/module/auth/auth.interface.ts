@@ -41,6 +41,12 @@ export interface IResetPasswordPayload {
 	confirmNewPassword: string;
 }
 
+export interface IChangePasswordPayload {
+	password: string;
+	newPassword: string;
+	confirmNewPassword: string;
+}
+
 export interface IResendOtpPayload {
 	email: string;
 }
