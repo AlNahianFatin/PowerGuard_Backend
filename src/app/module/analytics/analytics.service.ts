@@ -436,7 +436,9 @@ const getCustomerAnalytics = async (user: RequestUser) => {
 
 	const totalAmountSpentResult = await prisma.payment.aggregate({
 		where: {
-			customerId: customer.id,
+			assignment: {
+				serviceRequest: { customerId: customer.id }
+			},
 			status: PaymentStatus.PAID,
 		},
 		_sum: {
@@ -448,7 +450,9 @@ const getCustomerAnalytics = async (user: RequestUser) => {
 
 	const totalRefundedResult = await prisma.payment.aggregate({
 		where: {
-			customerId: customer.id,
+			assignment: {
+				serviceRequest: { customerId: customer.id }
+			},
 			status: PaymentStatus.REFUNDED,
 		},
 		_sum: {

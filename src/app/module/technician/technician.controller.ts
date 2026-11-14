@@ -79,35 +79,35 @@ const approveTechnician = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-const changePassword = catchAsync(async (req: Request, res: Response) => {
-	const payload = req.body;
+// const setPassword = catchAsync(async (req: Request, res: Response) => {
+// 	const payload = req.body;
 
-	const result = await TechnicianService.changePassword(payload);
-	const { accessToken, refreshToken } = result;
+// 	const result = await TechnicianService.setPassword(payload);
+// 	const { accessToken, refreshToken } = result;
 
-	res.cookie("accessToken", accessToken, {
-		httpOnly: true,
-		secure: false,
-		sameSite: "none",
-		maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
-	});
-	res.cookie("refreshToken", refreshToken, {
-		httpOnly: true,
-		secure: false,
-		sameSite: "none",
-		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-	});
+// 	res.cookie("accessToken", accessToken, {
+// 		httpOnly: true,
+// 		secure: false,
+// 		sameSite: "none",
+// 		maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
+// 	});
+// 	res.cookie("refreshToken", refreshToken, {
+// 		httpOnly: true,
+// 		secure: false,
+// 		sameSite: "none",
+// 		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+// 	});
 
-	sendResponse(res, {
-		statusCode: httpStatus.OK,
-		success: true,
-		message: "Technician Password Updated and Logged in Successfully",
-		data: {
-			accessToken,
-			refreshToken,
-		},
-	});
-});
+// 	sendResponse(res, {
+// 		statusCode: httpStatus.OK,
+// 		success: true,
+// 		message: "Technician Password Updated and Logged in Successfully",
+// 		data: {
+// 			accessToken,
+// 			refreshToken,
+// 		},
+// 	});
+// });
 
 const getAllTechnicians = catchAsync(async (req: Request, res: Response) => {
 	const { data, meta } = await TechnicianService.getAllTechnicians(req.query);
@@ -171,7 +171,7 @@ export const TechnicianController = {
 	applyAsTechnician,
 	verifyTechnicianEmail,
 	approveTechnician,
-	changePassword,
+	// setPassword,
 	getAllTechnicians,
 	updateTechnicianProfile,
 	getAvailableTechnicianByTodaysSchedule,

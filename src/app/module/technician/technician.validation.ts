@@ -137,24 +137,24 @@ export const UpdateTechnicianProfileValidationZodSchema = z.object({
 		.optional(),
 });
 
-export const SetTechnicianPasswordValidationZodSchema = z.object({
-	email: z.email("Not a valid email!").trim().toLowerCase(),
+// export const SetTechnicianPasswordValidationZodSchema = z.object({
+// 	email: z.email("Not a valid email!").trim().toLowerCase(),
 
-	password: z
-		.string("Not a string!!!!!")
-		.min(8, "Password must be minimum 8 characters Long.")
-		.regex(/[a-z]/, "Password must contain at least 1 lowercase letter")
-		.regex(/[A-Z]/, "Password must contain at least 1 uppercase letter")
+// 	password: z
+// 		.string("Not a string!!!!!")
+// 		.min(8, "Password must be minimum 8 characters Long.")
+// 		.regex(/[a-z]/, "Password must contain at least 1 lowercase letter")
+// 		.regex(/[A-Z]/, "Password must contain at least 1 uppercase letter")
 
-		.regex(/[0-9]/, "Password must contain at least 1 number")
-		.regex(
-			/[^A-Za-z0-9]/,
-			"Password must contain at least 1 special character",
-		),
+// 		.regex(/[0-9]/, "Password must contain at least 1 number")
+// 		.regex(
+// 			/[^A-Za-z0-9]/,
+// 			"Password must contain at least 1 special character",
+// 		),
 
-	confirmPassword: z.string("Not a string!").min(1, "Please confirm your password"),
-})
-	.refine((data) => data.password === data.confirmPassword, {
-		message: "Passwords do not match!",
-		path: ["confirmPassword"],
-	});
+// 	confirmPassword: z.string("Not a string!").min(1, "Please confirm your password"),
+// })
+// 	.refine((data) => data.password === data.confirmPassword, {
+// 		message: "Passwords do not match!",
+// 		path: ["confirmPassword"],
+// 	});

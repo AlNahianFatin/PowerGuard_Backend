@@ -37,7 +37,8 @@ export interface IUpdateTechnicianProfilePayload {
 	contactNumber?: string;
 }
 
-export interface IChangeTechnicianPasswordPayload {
-	email: string;
-	password: string;
-}
+// export interface ISetTechnicianPasswordPayload {
+// 	email: string;
+// 	password: string;
+// 	confirmPassword: string;
+// }

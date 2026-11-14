@@ -8,7 +8,6 @@ import {
 	TechnicianVerificationStatus,
 	Role,
 	TechnicianStatus,
-	UserStatus,
 } from "../../../generated/prisma/enums";
 import type { TechnicianWhereInput } from "../../../generated/prisma/models";
 import config from "../../config";
@@ -22,12 +21,11 @@ import { AppError } from "../../utils/AppError";
 import type {
 	IApplyAsTechnicianPayload,
 	IApproveTechnicianPayload,
-	IChangeTechnicianPasswordPayload,
+	// ISetTechnicianPasswordPayload,
 	IUpdateTechnicianProfilePayload,
 	IVerifyTechnicianEmailPayload,
 } from "./technician.interface";
-import type { SignOptions } from "jsonwebtoken";
-import { jwtUtils } from "../../utils/jwt";
+import generateRandomPassword from "../../utils/randomPassword";
 
 const applyAsTechnician = async (
 	payload: IApplyAsTechnicianPayload,
@@ -286,21 +284,54 @@ const approveTechnician = async (
 		);
 	}
 
+	const isApproved =
+		verificationStatus === TechnicianVerificationStatus.APPROVED;
+
+	const randomTechnicianPassword = isApproved
+		? generateRandomPassword()
+		: undefined;
+
+	const hashedPassword = randomTechnicianPassword
+		? await bcrypt.hash(randomTechnicianPassword, Number(config.bcrypt_salt_rounds))
+		: undefined;
+
 	const updatedTechnician = await prisma.technician.update({
-		where: { id: technicianId },
+		where: {
+			id: technicianId,
+		},
 		data: {
 			verificationStatus,
 			rejectionReason:
 				verificationStatus === TechnicianVerificationStatus.REJECTED
 					? rejectionReason
 					: null,
-			reviewedBy: reviewer.userId,
 			reviewedAt: new Date(),
+
+			reviewer: {
+				connect: {
+					id: reviewer.userId,
+				},
+			},
+
+			...(hashedPassword && {
+				user: {
+					update: {
+						password: hashedPassword,
+						needPasswordChange: true,
+					},
+				},
+			}),
+		},
+		include: {
+			user: {
+				select: {
+					email: true,
+					needPasswordChange: true,
+				},
+			},
+			reviewer: true,
 		},
 	});
-
-	const isApproved =
-		verificationStatus === TechnicianVerificationStatus.APPROVED;
 
 	const templatePath = path.join(
 		process.cwd(),
@@ -310,12 +341,12 @@ const approveTechnician = async (
 		}`,
 	);
 
-	const changePassLink = `${config.frontend_technician_change_pass_link}/${updatedTechnician.userId}/change-password`;
+	// const setPassLink = `${config.frontend_technician_set_pass_link}/technician-set-password/${updatedTechnician.email}`;
 
 	const templateData = {
 		name: updatedTechnician.name,
 		reason: updatedTechnician.rejectionReason,
-		changePassLink,
+		randomTechnicianPassword,
 	};
 
 	const html = await ejs.renderFile(templatePath, templateData);
@@ -332,86 +363,93 @@ const approveTechnician = async (
 	return updatedTechnician;
 };
 
-const changePassword = async (payload: IChangeTechnicianPasswordPayload) => {
-	const email = payload.email;
-	const password = payload.password;
+// const setPassword = async (payload: ISetTechnicianPasswordPayload) => {
+// 	const email = payload.email;
+// 	const password = payload.password;
+// 	const confirmPassword = payload.confirmPassword;
 
-	const user = await prisma.user.findUnique({
-		where: { email },
-		include: { technician: true },
-	});
+// 	if (password !== confirmPassword)
+// 		throw new AppError(httpStatus.CONFLICT, "Passwords do not match!");
 
-	if (!user?.technician) {
-		throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
-	}
+// 	const user = await prisma.user.findUnique({
+// 		where: { email },
+// 		include: { technician: true },
+// 	});
 
-	if (user.status === UserStatus.BLOCKED) {
-		throw new AppError(httpStatus.FORBIDDEN, "Your account is blocked");
-	}
+// 	if (!user?.technician) {
+// 		throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
+// 	}
 
-	if (user.isDeleted || user.status === UserStatus.DELETED) {
-		throw new AppError(httpStatus.FORBIDDEN, "Your account is deleted");
-	}
+// 	if (user.status === UserStatus.BLOCKED) {
+// 		throw new AppError(httpStatus.FORBIDDEN, "Your account is blocked");
+// 	}
 
-	if (
-		user.technician.verificationStatus === TechnicianVerificationStatus.REJECTED
-	) {
-		throw new AppError(
-			httpStatus.FORBIDDEN,
-			`Your profile is rejected : ${user.technician.rejectionReason}`,
-		);
-	}
+// 	if (user.isDeleted || user.status === UserStatus.DELETED) {
+// 		throw new AppError(httpStatus.FORBIDDEN, "Your account is deleted");
+// 	}
 
-	if (!user.emailVerified) {
-		throw new AppError(
-			httpStatus.BAD_REQUEST,
-			"Please verify your email with the OTP sent to your email first!",
-		);
-	}
+// 	if (
+// 		user.technician.verificationStatus === TechnicianVerificationStatus.REJECTED
+// 	) {
+// 		throw new AppError(
+// 			httpStatus.FORBIDDEN,
+// 			`Your profile is rejected : ${user.technician.rejectionReason}`,
+// 		);
+// 	}
 
-	if (!user.needPasswordChange) {
-		throw new AppError(
-			httpStatus.BAD_REQUEST,
-			"Your account currently doesn't require password change",
-		);
-	}
+// 	if (!user.emailVerified) {
+// 		throw new AppError(
+// 			httpStatus.BAD_REQUEST,
+// 			"Please verify your email with the OTP sent to your email first!",
+// 		);
+// 	}
 
-	const hashedPassword = await bcrypt.hash(
-		password,
-		Number(config.bcrypt_salt_rounds),
-	);
+// 	if (!user.needPasswordChange) {
+// 		throw new AppError(
+// 			httpStatus.BAD_REQUEST,
+// 			"Your account currently doesn't require password change",
+// 		);
+// 	}
 
-	const updatedTechnician = await prisma.user.update({
-		where: { email },
-		data: { password: hashedPassword, needPasswordChange: false },
-		omit: { password: true },
-		include: { technician: true },
-	});
+// 	const hashedPassword = await bcrypt.hash(
+// 		password,
+// 		Number(config.bcrypt_salt_rounds),
+// 	);
 
-	const jwtPayload = {
-		userId: updatedTechnician.id,
-		name: updatedTechnician.name,
-		email: updatedTechnician.email,
-		role: updatedTechnician.role,
-	};
+// 	const updatedTechnician = await prisma.user.update({
+// 		where: { email },
+// 		data: {
+// 			password: hashedPassword,
+// 			needPasswordChange: false
+// 		},
+// 		omit: { password: true },
+// 		include: { technician: true },
+// 	});
 
-	const accessToken = jwtUtils.createToken(
-		jwtPayload,
-		config.jwt_access_secret,
-		config.jwt_access_expires_in as SignOptions,
-	);
+// 	const jwtPayload = {
+// 		userId: updatedTechnician.id,
+// 		name: updatedTechnician.name,
+// 		email: updatedTechnician.email,
+// 		role: updatedTechnician.role,
+// 	};
 
-	const refreshToken = jwtUtils.createToken(
-		jwtPayload,
-		config.jwt_refresh_secret,
-		config.jwt_refresh_expires_in as SignOptions,
-	);
+// 	const accessToken = jwtUtils.createToken(
+// 		jwtPayload,
+// 		config.jwt_access_secret,
+// 		config.jwt_access_expires_in as SignOptions,
+// 	);
 
-	return {
-		accessToken,
-		refreshToken,
-	};
-};
+// 	const refreshToken = jwtUtils.createToken(
+// 		jwtPayload,
+// 		config.jwt_refresh_secret,
+// 		config.jwt_refresh_expires_in as SignOptions,
+// 	);
+
+// 	return {
+// 		accessToken,
+// 		refreshToken,
+// 	};
+// };
 
 const getAllTechnicians = async (query: IQuery) => {
 	const limit = query.limit ? Number(query.limit) : 10;
@@ -478,6 +516,12 @@ const getAllTechnicians = async (query: IQuery) => {
 					password: true,
 				},
 			},
+			reviewer: {
+				select: {
+					id: true,
+					name: true,
+				}
+			}
 		},
 	});
 
@@ -572,74 +616,6 @@ const getAvailableTechnicianByTodaysSchedule = async (query: IQuery) => {
 	};
 };
 
-// const getAllDoctorsListPublic = async (query: IQuery) => {
-// 	const limit = query.limit ? Number(query.limit) : 10;
-// 	const page = query.page ? Number(query.page) : 1;
-// 	const skip = (page - 1) * limit;
-// 	const sortBy = query.sortBy ? query.sortBy : "createdAt";
-// 	const sortOrder = query.sortOrder ? query.sortOrder : "desc";
-
-// 	const andConditions: DoctorWhereInput[] = [
-// 		{ isDeleted: false },
-// 		{ verificationStatus: DoctorVerificationStatus.APPROVED },
-// 	];
-
-// 	if (query.searchTerm) {
-// 		andConditions.push({
-// 			OR: [
-// 				{ name: { contains: query.searchTerm, mode: "insensitive" } },
-// 				{ specialization: { contains: query.searchTerm, mode: "insensitive" } },
-// 				{ qualifications: { contains: query.searchTerm, mode: "insensitive" } },
-// 			],
-// 		});
-// 	}
-
-// 	if (query.specialization) {
-// 		andConditions.push({
-// 			specialization: { equals: query.specialization, mode: "insensitive" },
-// 		});
-// 	}
-
-// 	const allDoctors = await prisma.doctor.findMany({
-// 		where: {
-// 			AND: andConditions,
-// 		},
-
-// 		take: limit,
-// 		skip,
-
-// 		orderBy: {
-// 			[sortBy]: sortOrder,
-// 		},
-
-// 		select: {
-// 			id: true,
-// 			name: true,
-// 			specialization: true,
-// 			licenseNumber: true,
-// 			qualifications: true,
-// 			experienceYears: true,
-// 			bio: true,
-// 			consultationFee: true,
-// 			createdAt: true,
-// 		},
-// 	});
-
-// 	const totalDoctorCount = await prisma.doctor.count({
-// 		where: { AND: andConditions },
-// 	});
-
-// 	return {
-// 		data: allDoctors,
-// 		meta: {
-// 			page,
-// 			limit,
-// 			total: totalDoctorCount,
-// 			totalPages: Math.ceil(totalDoctorCount / limit),
-// 		},
-// 	};
-// };
-
 const getSingleTechnicianPublicProfile = async (technicianId: string) => {
 	const technician = await prisma.technician.findUnique({
 		where: {
@@ -669,10 +645,9 @@ export const TechnicianService = {
 	applyAsTechnician,
 	verifyTechnicianEmail,
 	approveTechnician,
-	changePassword,
+	// setPassword,
 	getAllTechnicians,
 	updateTechnicianProfile,
 	getAvailableTechnicianByTodaysSchedule,
-	// getAllDoctorsListPublic,
 	getSingleTechnicianPublicProfile,
 };
