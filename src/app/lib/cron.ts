@@ -5,6 +5,7 @@ import {
 	TechnicianVerificationStatus,
 } from "../../generated/prisma/enums";
 import { prisma } from "./prisma";
+import { calculateExperienceYears } from "../utils/calculateExperienceYears";
 
 export const deleteUnverifiedTechnicians = async () => {
 	cron.schedule("*/10 * * * *", async () => {
@@ -34,84 +35,203 @@ export const deleteUnverifiedTechnicians = async () => {
 				new Date().toLocaleTimeString(),
 			);
 		}
+	},
+		{
+			timezone: "Asia/Dhaka",
+		},
+	);
 
-		console.log(
-			"Cron: Unverified technician delete scheduled (every 10 minutes): ",
-			new Date().toLocaleDateString(),
-			new Date().toLocaleTimeString(),
-		);
-	});
+	console.log(
+		"Cron: Unverified technician delete scheduled (every 10 minutes): ",
+		new Date().toLocaleDateString("en-BD", {
+			timeZone: "Asia/Dhaka",
+		}),
+		new Date().toLocaleTimeString("en-BD", {
+			timeZone: "Asia/Dhaka",
+		}),
+	);
 };
 
-export const updateTechnicianExperience = async () => {
-	cron.schedule("0 0 * * *", async () => {
-		try {
-			const today = new Date();
-			const technicians = await prisma.technician.findMany({
-				where: {
-					verificationStatus: TechnicianVerificationStatus.APPROVED,
-					user: {
-						role: Role.TECHNICIAN,
-						emailVerified: true,
-						createdAt: {
-							lt: new Date(
-								today.getFullYear() - 1,
-								today.getMonth(),
-								today.getDate(),
-							),
+// export const updateTechnicianExperience = async () => {
+// 	cron.schedule("0 0 * * *", async () => {
+// 		try {
+// 			const today = new Date();
+
+// 			const technicians = await prisma.technician.findMany({
+// 				where: {
+// 					verificationStatus: TechnicianVerificationStatus.APPROVED,
+// 					user: {
+// 						role: Role.TECHNICIAN,
+// 						emailVerified: true,
+// 						createdAt: {
+// 							lt: new Date(
+// 								today.getFullYear() - 1,
+// 								today.getMonth(),
+// 								today.getDate(),
+// 							),
+// 						},
+// 					},
+// 				},
+// 				select: {
+// 					id: true,
+// 					user: {
+// 						select: { createdAt: true },
+// 					},
+// 				},
+// 			});
+
+// 			const techniciansToUpdate = technicians.filter((technician) => {
+// 				const createdAt = technician.user.createdAt;
+// 				return (
+// 					createdAt.getMonth() === today.getMonth() &&
+// 					createdAt.getDate() === today.getDate()
+// 				);
+// 			});
+
+// 			if (techniciansToUpdate.length === 0) {
+// 				return;
+// 			}
+
+// 			const ids = techniciansToUpdate.map((technician) => technician.id);
+
+// 			const updatedTechnicians = await prisma.technician.updateMany({
+// 				where: {
+// 					id: { in: ids },
+// 				},
+// 				data: {
+// 					experienceYears: { increment: 1 },
+// 				},
+// 			});
+
+// 			if (updatedTechnicians.count > 0) {
+// 				console.log(
+// 					`Cron: Updated ${updatedTechnicians.count} technician anniversary experience milestones.`,
+// 				);
+// 			}
+// 		} catch (error) {
+// 			console.error(
+// 				"Cron: Failed to update verified technician experience",
+// 				error,
+// 				new Date().toLocaleDateString(),
+// 				new Date().toLocaleTimeString(),
+// 			);
+// 		}
+// 		console.log(
+// 			"Cron: Verified technician experience scheduled (every day at midnight): ",
+// 			new Date().toLocaleDateString(),
+// 			new Date().toLocaleTimeString(),
+// 		);
+// 	});
+// };
+
+export const updateTechnicianExperience = () => {
+	cron.schedule(
+		"0 0 * * *",
+		async () => {
+			try {
+				const today = new Date();
+
+				const technicians = await prisma.technician.findMany({
+					where: {
+						verificationStatus: TechnicianVerificationStatus.APPROVED,
+						reviewedAt: {
+							not: null,
+						},
+						user: {
+							role: Role.TECHNICIAN,
+							emailVerified: true,
 						},
 					},
-				},
-				select: {
-					id: true,
-					user: {
-						select: { createdAt: true },
+					select: {
+						id: true,
+						experienceYears: true,
+						reviewedAt: true,
 					},
-				},
-			});
+				});
 
-			const techniciansToUpdate = technicians.filter((technician) => {
-				const createdAt = technician.user.createdAt;
-				return (
-					createdAt.getMonth() === today.getMonth() &&
-					createdAt.getDate() === today.getDate()
+				if (technicians.length === 0)
+					return;
+
+				const techniciansByExperience = new Map<number, string[]>();
+
+				for (const technician of technicians) {
+					if (!technician.reviewedAt)
+						continue;
+
+					const calculatedExperience = calculateExperienceYears(
+						technician.reviewedAt,
+						today,
+					);
+
+					if (technician.experienceYears === calculatedExperience)
+						continue;
+
+					const ids =
+						techniciansByExperience.get(calculatedExperience) ?? [];
+
+					ids.push(technician.id);
+
+					techniciansByExperience.set(calculatedExperience, ids);
+				}
+
+				if (techniciansByExperience.size === 0)
+					return;
+
+				const updateOperations = Array.from(
+					techniciansByExperience.entries(),
+				).map(([experienceYears, ids]) =>
+					prisma.technician.updateMany({
+						where: {
+							id: {
+								in: ids,
+							},
+							verificationStatus: TechnicianVerificationStatus.APPROVED,
+						},
+						data: {
+							experienceYears,
+						},
+					}),
 				);
-			});
 
-			if (techniciansToUpdate.length === 0) {
-				return;
-			}
+				const results = await prisma.$transaction(updateOperations);
 
-			const ids = techniciansToUpdate.map((technician) => technician.id);
+				const totalUpdated = results.reduce(
+					(total, result) => total + result.count,
+					0,
+				);
 
-			const updatedTechnicians = await prisma.technician.updateMany({
-				where: {
-					id: { in: ids },
-				},
-				data: {
-					experienceYears: { increment: 1 },
-				},
-			});
-
-			if (updatedTechnicians.count > 0) {
-				console.log(
-					`Cron: Updated ${updatedTechnicians.count} technician anniversary experience milestones.`,
+				if (totalUpdated > 0) {
+					console.log(
+						`Cron: Recalculated experience for ${totalUpdated} approved technicians.`,
+					);
+				}
+			} catch (error) {
+				console.error(
+					"Cron: Failed to recalculate approved technician experience.",
+					error,
+					new Date().toLocaleDateString("en-BD", {
+						timeZone: "Asia/Dhaka",
+					}),
+					new Date().toLocaleTimeString("en-BD", {
+						timeZone: "Asia/Dhaka",
+					}),
 				);
 			}
-		} catch (error) {
-			console.error(
-				"Cron: Failed to update verified technician experience",
-				error,
-				new Date().toLocaleDateString(),
-				new Date().toLocaleTimeString(),
-			);
-		}
-		console.log(
-			"Cron: Verified technician experience scheduled (every day at midnight): ",
-			new Date().toLocaleDateString(),
-			new Date().toLocaleTimeString(),
-		);
-	});
+		},
+		{
+			timezone: "Asia/Dhaka",
+		},
+	);
+
+	console.log(
+		"Cron: Approved technician experience recalculation scheduled daily at 12:00 AM (Asia/Dhaka): ",
+		new Date().toLocaleDateString("en-BD", {
+			timeZone: "Asia/Dhaka",
+		}),
+		new Date().toLocaleTimeString("en-BD", {
+			timeZone: "Asia/Dhaka",
+		}),
+	);
 };
 
 export const updateCompletedSchedules = async () => {
@@ -139,14 +259,27 @@ export const updateCompletedSchedules = async () => {
 			console.error(
 				"Cron: Failed to update schedule completion.",
 				error,
-				new Date().toLocaleDateString(),
-				new Date().toLocaleTimeString(),
+				new Date().toLocaleDateString("en-BD", {
+					timeZone: "Asia/Dhaka",
+				}),
+				new Date().toLocaleTimeString("en-BD", {
+					timeZone: "Asia/Dhaka",
+				}),
 			);
 		}
-		console.log(
-			"Cron: Schedule status update scheduled (every 10 minutes): ",
-			new Date().toLocaleDateString(),
-			new Date().toLocaleTimeString(),
-		);
-	});
+	},
+		{
+			timezone: "Asia/Dhaka",
+		},
+	);
+
+	console.log(
+		"Cron: Schedule status update scheduled (every 10 minutes): ",
+		new Date().toLocaleDateString("en-BD", {
+			timeZone: "Asia/Dhaka",
+		}),
+		new Date().toLocaleTimeString("en-BD", {
+			timeZone: "Asia/Dhaka",
+		}),
+	);
 };
