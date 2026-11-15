@@ -829,14 +829,27 @@ const changePassword = async (user: IRequestUser, payload: IChangePasswordPayloa
 		Number(config.bcrypt_salt_rounds),
 	);
 
-	await prisma.user.update({
-		where: {
-			id: user.userId,
-		},
-		data: {
-			password: hashedNewPassword,
-		},
-	});
+	if (!isUserExists.needPasswordChange) {
+		await prisma.user.update({
+			where: {
+				id: user.userId,
+			},
+			data: {
+				password: hashedNewPassword,
+			},
+		});
+	}
+	else {
+		await prisma.user.update({
+			where: {
+				id: user.userId,
+			},
+			data: {
+				password: hashedNewPassword,
+				needPasswordChange: false,
+			},
+		});
+	}
 
 	const templatePath = path.join(
 		process.cwd(),
