@@ -1,5 +1,4 @@
 import z from "zod";
-import { ServiceRequestStatus } from "../../../generated/prisma/enums";
 
 export const SubmitRequestValidationZodSchema = z.object({
 	title: z
