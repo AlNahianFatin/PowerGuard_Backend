@@ -571,12 +571,20 @@ const createSchedule = async (
 				isDeleted: false,
 			},
 			OR: [
+				{ status: ScheduleStatus.DRAFT },
 				{ status: ScheduleStatus.PUBLISHED },
 				{ status: ScheduleStatus.COMPLETED },
 			],
 		},
 	});
 
+	if (existingScheduleOnThisDate?.status === ScheduleStatus.DRAFT) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			"An existing outage schedule already covers this date and time as DRAFT. You may publish it",
+		);
+	}
+	
 	if (existingScheduleOnThisDate) {
 		throw new AppError(
 			httpStatus.CONFLICT,
@@ -742,12 +750,20 @@ const updateSchedule = async (
 				isDeleted: false,
 			},
 			OR: [
+				{ status: ScheduleStatus.DRAFT },
 				{ status: ScheduleStatus.PUBLISHED },
 				{ status: ScheduleStatus.COMPLETED },
 			],
 		},
 	});
 
+	if (existingScheduleOnThisDate?.status === ScheduleStatus.DRAFT) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			"An existing outage schedule already covers this date and time as DRAFT. You may publish it instead",
+		);
+	}
+	
 	if (existingScheduleOnThisDate) {
 		throw new AppError(
 			httpStatus.CONFLICT,
