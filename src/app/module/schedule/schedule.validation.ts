@@ -6,15 +6,18 @@ export const CreateScheduleValidationZodSchema = z.object({
 		.datetime({
 			error: "Please select a valid start date and time",
 		}),
+
 	endDateTime: z
 		.iso
 		.datetime({
 			error: "Please select a valid end date and time",
 		}),
+
 	reason: z
 		.string("Must include a valid reason")
 		.min(1, "Must declare a reason")
 		.max(1000, "Reason must be within 1000 characters!"),
+		
 	feederId: z
 		.string("Must include a valid feeder")
 		.min(1, "Must select a feeder on which the outage will be scheduled on"),
