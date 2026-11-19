@@ -51,21 +51,31 @@ export const ApplyAsTechnicianValidationZodSchema = z.object({
 			message: "A resume or CV is required",
 		}),
 
+	// additionalFiles: z
+	// 	.array(z.custom<File>((value) => value instanceof File))
+	// 	.max(
+	// 		MAX_ADDITIONAL_FILES,
+	// 		`You can attach at most ${MAX_ADDITIONAL_FILES} supporting documents`,
+	// 	)
+	// 	.refine(
+	// 		(files) =>
+	// 			files.every(
+	// 				(file) =>
+	// 					isAcceptedFileSize(file.size) && isAcceptedFileType(file.type),
+	// 			),
+	// 		{
+	// 			message: `Each file must be a PDF, DOC, DOCX or an image file under ${MAX_FILE_SIZE}MB`,
+	// 		},
+	// 	),
 	additionalFiles: z
-		.array(z.custom<File>((value) => value instanceof File))
+		.array(
+			getCustomFileSchema<Express.Multer.File>(
+				`Each file must be a PDF, DOC, DOCX or an image file under ${MAX_FILE_SIZE}MB`
+			)
+		)
 		.max(
 			MAX_ADDITIONAL_FILES,
-			`You can attach at most ${MAX_ADDITIONAL_FILES} supporting documents`,
-		)
-		.refine(
-			(files) =>
-				files.every(
-					(file) =>
-						isAcceptedFileSize(file.size) && isAcceptedFileType(file.type),
-				),
-			{
-				message: `Each file must be a PDF, DOC, DOCX or an image file under ${MAX_FILE_SIZE}MB`,
-			},
+			`You can attach at most ${MAX_ADDITIONAL_FILES} supporting documents`
 		),
 
 	data: z.object({

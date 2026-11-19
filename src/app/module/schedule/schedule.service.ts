@@ -19,17 +19,14 @@ const getAllSchedules = async (query: IQuery) => {
 	const sortOrder = query.sortOrder ? query.sortOrder : "desc";
 
 	const andConditions: ScheduleWhereInput[] = [
-		{
-			isDeleted: false,
-		},
-		{
-			isDeleted: false,
-		},
-		{
-			feeder: {
-				isDeleted: false,
-			},
-		},
+		// {
+		// 	isDeleted: false,
+		// },
+		// {
+		// 	feeder: {
+		// 		isDeleted: false,
+		// 	},
+		// },
 	];
 
 	if (query.createdByUser) {
@@ -153,6 +150,20 @@ const getAllSchedules = async (query: IQuery) => {
 			[sortBy]: sortOrder,
 		},
 		include: {
+			createdByUser: {
+				select: {
+					name: true,
+					email: true,
+					role: true
+				}
+			},
+			deletedByUser: {
+				select: {
+					name: true,
+					email: true,
+					role: true
+				}
+			},
 			feeder: {
 				include: {
 					areas: true,
@@ -584,7 +595,7 @@ const createSchedule = async (
 			"An existing outage schedule already covers this date and time as DRAFT. You may publish it",
 		);
 	}
-	
+
 	if (existingScheduleOnThisDate) {
 		throw new AppError(
 			httpStatus.CONFLICT,
@@ -763,7 +774,7 @@ const updateSchedule = async (
 			"An existing outage schedule already covers this date and time as DRAFT. You may publish it instead",
 		);
 	}
-	
+
 	if (existingScheduleOnThisDate) {
 		throw new AppError(
 			httpStatus.CONFLICT,

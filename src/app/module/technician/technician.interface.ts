@@ -15,7 +15,8 @@ export interface TechnicianApplicationData {
 
 export interface IApplyAsTechnicianPayload {
 	resume: File;
-	additionalFiles: File[];
+	additionalFiles: Express.Multer.File[];
+	// additionalFiles: File[];
 	data: TechnicianApplicationData;
 }
 

@@ -66,15 +66,11 @@ const approveTechnician = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user!;
 
 	const result = await TechnicianService.approveTechnician(payload, user);
+
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
-		message:
-			payload.reason === TechnicianVerificationStatus.APPROVED
-				? "Technician approved successfully"
-				: payload.reason === TechnicianVerificationStatus.REJECTED
-					? "Technician rejected successfully"
-					: "Request managed",
+		message: `Application ${payload.verificationStatus.toString().toLowerCase()} successfully`,
 		data: result,
 	});
 });
