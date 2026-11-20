@@ -587,7 +587,7 @@ const submitRequest = async (
 	if (existingRequest) {
 		throw new AppError(
 			httpStatus.BAD_REQUEST,
-			"You have already requested for a service",
+			"You have already requested for a service for this area",
 		);
 	}
 

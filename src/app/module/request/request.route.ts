@@ -43,7 +43,7 @@ router.patch(
 	RequestController.updateRequest,
 );
 
-router.post(
+router.patch(
 	"/cancel-request",
 	auth(Role.CUSTOMER),
 	RequestController.cancelRequest,
