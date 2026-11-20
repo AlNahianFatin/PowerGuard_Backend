@@ -19,7 +19,7 @@ enum AuthProvider {
 enum ScheduleStatus {
   DRAFT
   PUBLISHED
-  CANCELLED
+  // CANCELLED
   COMPLETED
 }
 
