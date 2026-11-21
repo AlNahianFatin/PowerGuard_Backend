@@ -19,7 +19,6 @@ export const SubmitRequestValidationZodSchema = z.object({
 export const UpdateRequestValidationZodSchema = z.object({
 	title: z
 		.string("Must include a valid service request title")
-		.min(1, "Service request title is required")
 		.max(255, "Service request title must be within 255 characters")
 		.optional(),
 
