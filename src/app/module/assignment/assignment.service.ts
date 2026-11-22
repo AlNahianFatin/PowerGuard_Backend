@@ -57,6 +57,57 @@ const getAllAssignments = async (query: IQuery, user: RequestUser) => {
 		);
 	}
 
+	const isTrue = (value: unknown) => value === true || value === "true";
+
+	const statusFilters = [
+		{
+			value: isTrue(query.isCancelled),
+			status: ServiceRequestStatus.CANCELLED,
+		},
+		{
+			value: isTrue(query.isRejected),
+			status: ServiceRequestStatus.REJECTED,
+		},
+		{
+			value: isTrue(query.isFailed),
+			status: ServiceRequestStatus.FAILED,
+		},
+		{
+			value: isTrue(query.isResolved),
+			status: ServiceRequestStatus.RESOLVED,
+		},
+	];
+
+	const selectedStatusFilters = statusFilters.filter((filter) => filter.value);
+
+	const hasDirectStatus = Boolean(query.status);
+
+	const numOfFilters =
+		selectedStatusFilters.length + (hasDirectStatus ? 1 : 0);
+
+	if (numOfFilters > 1) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"You can only filter by one service request status at a time",
+		);
+	}
+
+	if (selectedStatusFilters.length === 1) {
+		andConditions.push({
+			serviceRequest: {
+				status: selectedStatusFilters[0].status
+			},
+		});
+	}
+
+	if (hasDirectStatus) {
+		andConditions.push({
+			serviceRequest: {
+				status: query.status as ServiceRequestStatus,
+			},
+		});
+	}
+
 	if (query.deletedBy) {
 		andConditions.push({ deletedBy: query.deletedBy });
 	}
@@ -412,6 +463,57 @@ const getMyAssignments = async (query: IQuery, user: RequestUser) => {
 
 	const andConditions: AssignmentWhereInput[] = [];
 
+	const isTrue = (value: unknown) => value === true || value === "true";
+
+	const statusFilters = [
+		{
+			value: isTrue(query.isCancelled),
+			status: ServiceRequestStatus.CANCELLED,
+		},
+		{
+			value: isTrue(query.isRejected),
+			status: ServiceRequestStatus.REJECTED,
+		},
+		{
+			value: isTrue(query.isFailed),
+			status: ServiceRequestStatus.FAILED,
+		},
+		{
+			value: isTrue(query.isResolved),
+			status: ServiceRequestStatus.RESOLVED,
+		},
+	];
+
+	const selectedStatusFilters = statusFilters.filter((filter) => filter.value);
+
+	const hasDirectStatus = Boolean(query.status);
+
+	const numOfFilters =
+		selectedStatusFilters.length + (hasDirectStatus ? 1 : 0);
+
+	if (numOfFilters > 1) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"You can only filter by one service request status at a time",
+		);
+	}
+
+	if (selectedStatusFilters.length === 1) {
+		andConditions.push({
+			serviceRequest: {
+				status: selectedStatusFilters[0].status
+			},
+		});
+	}
+
+	if (hasDirectStatus) {
+		andConditions.push({
+			serviceRequest: {
+				status: query.status as ServiceRequestStatus,
+			},
+		});
+	}
+
 	if (
 		requestedUser.role === Role.ADMIN ||
 		requestedUser.role === Role.OPERATOR
@@ -445,40 +547,6 @@ const getMyAssignments = async (query: IQuery, user: RequestUser) => {
 				notes: {
 					contains: query.searchTerm,
 					mode: "insensitive",
-				},
-			},
-
-			{
-				assignedByUser: {
-					name: {
-						contains: query.searchTerm,
-						mode: "insensitive",
-					},
-				},
-			},
-			{
-				assignedByUser: {
-					email: {
-						contains: query.searchTerm,
-						mode: "insensitive",
-					},
-				},
-			},
-
-			{
-				technician: {
-					name: {
-						contains: query.searchTerm,
-						mode: "insensitive",
-					},
-				},
-			},
-			{
-				technician: {
-					email: {
-						contains: query.searchTerm,
-						mode: "insensitive",
-					},
 				},
 			},
 
@@ -595,6 +663,23 @@ const getMyAssignments = async (query: IQuery, user: RequestUser) => {
 		) {
 			searchConditions.push(
 				{
+					technician: {
+						name: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+				{
+					technician: {
+						email: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+
+				{
 					deletedByUser: {
 						name: {
 							contains: query.searchTerm,
@@ -604,6 +689,27 @@ const getMyAssignments = async (query: IQuery, user: RequestUser) => {
 				},
 				{
 					deletedByUser: {
+						email: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+			);
+		}
+
+		if (requestedUser.role === Role.TECHNICIAN) {
+			searchConditions.push(
+				{
+					assignedByUser: {
+						name: {
+							contains: query.searchTerm,
+							mode: "insensitive",
+						},
+					},
+				},
+				{
+					assignedByUser: {
 						email: {
 							contains: query.searchTerm,
 							mode: "insensitive",
@@ -972,10 +1078,10 @@ const deleteAssignment = async (assignmentId: string, user: RequestUser) => {
 
 	if (
 		existingAssignment.serviceRequest.status !==
-			ServiceRequestStatus.RESOLVED &&
+		ServiceRequestStatus.RESOLVED &&
 		existingAssignment.serviceRequest.status !== ServiceRequestStatus.FAILED &&
 		existingAssignment.serviceRequest.status !==
-			ServiceRequestStatus.REJECTED &&
+		ServiceRequestStatus.REJECTED &&
 		existingAssignment.serviceRequest.status !== ServiceRequestStatus.CANCELLED
 	) {
 		throw new AppError(
@@ -1054,7 +1160,7 @@ const updateAssignmentStatusByTechnician = async (
 
 	if (
 		existingAssignment.serviceRequest.status !==
-			ServiceRequestStatus.ASSIGNED &&
+		ServiceRequestStatus.ASSIGNED &&
 		status === ServiceRequestStatus.INSPECTING
 	) {
 		throw new AppError(
@@ -1065,7 +1171,7 @@ const updateAssignmentStatusByTechnician = async (
 
 	if (
 		existingAssignment.serviceRequest.status !==
-			ServiceRequestStatus.INPROGRESS &&
+		ServiceRequestStatus.INPROGRESS &&
 		(status === ServiceRequestStatus.RESOLVED ||
 			status === ServiceRequestStatus.FAILED)
 	) {
