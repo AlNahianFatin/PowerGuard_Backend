@@ -23,18 +23,40 @@ export const UpdateAssignmentValidationZodSchema = z.object({
 		.optional(),
 });
 
-export const UpdateAssignmentStatusValidationZodSchema = z.object({
-	status: z.enum(
-		[
-			ServiceRequestStatus.INSPECTING,
-			ServiceRequestStatus.RESOLVED,
-			ServiceRequestStatus.FAILED,
-		],
-		"Please enter a valid status!",
-	),
-	failureNote: z
-		.string("Must include a valid failure note for the customer")
-		.min(1, "Note is required")
-		.max(255, "Note must be within 255 characters")
-		.optional(),
-});
+export const UpdateAssignmentStatusValidationZodSchema = z
+	.object({
+		status: z.enum(
+			[
+				"",
+				ServiceRequestStatus.INSPECTING,
+				ServiceRequestStatus.RESOLVED,
+				ServiceRequestStatus.FAILED,
+			],
+			"Please enter a valid status!",
+		),
+
+		failureNote: z
+			.string("Must include a valid failure note for the customer")
+			.max(255, "Note must be within 255 characters")
+			.optional(),
+	})
+	.superRefine((data, ctx) => {
+		if (!data.status) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["status"],
+				message: "Please select a status",
+			});
+		}
+
+		if (
+			data.status === ServiceRequestStatus.FAILED &&
+			!data.failureNote?.trim()
+		) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["failureNote"],
+				message: "Must include a valid failure note",
+			});
+		}
+	});

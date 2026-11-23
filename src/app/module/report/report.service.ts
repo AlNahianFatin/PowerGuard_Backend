@@ -735,6 +735,151 @@ const submitReport = async (
 	return report;
 };
 
+// const updateReport = async (
+// 	reportId: string,
+// 	payload: IUpdateReportPayload,
+// 	user: RequestUser,
+// ) => {
+// 	const technician = await prisma.technician.findUnique({
+// 		where: { userId: user.userId },
+// 	});
+
+// 	if (!technician || technician.isDeleted) {
+// 		throw new AppError(httpStatus.NOT_FOUND, "Technician Profile Not Found");
+// 	}
+
+// 	const diagnosis = payload.diagnosis?.trim();
+// 	const charge = Number(payload.charge);
+
+// 	const existingReport = await prisma.technicianReport.findUnique({
+// 		where: {
+// 			id: reportId,
+// 		},
+// 		include: {
+// 			assignment: {
+// 				include: {
+// 					serviceRequest: true,
+// 				},
+// 			},
+// 		},
+// 	});
+
+// 	if (!existingReport || existingReport.isDeleted) {
+// 		throw new AppError(httpStatus.NOT_FOUND, "Technician report not found");
+// 	}
+
+// 	if (technician.id !== existingReport.assignment?.technicianId) {
+// 		throw new AppError(
+// 			httpStatus.UNAUTHORIZED,
+// 			"You are not authorized to update report other than yours",
+// 		);
+// 	}
+
+// 	if (
+// 		existingReport.assignment.serviceRequest.status ===
+// 		ServiceRequestStatus.PENDING
+// 	) {
+// 		throw new AppError(
+// 			httpStatus.BAD_REQUEST,
+// 			"The service request has not even been assigned yet!",
+// 		);
+// 	}
+
+// 	if (
+// 		existingReport.assignment.serviceRequest.status ===
+// 		ServiceRequestStatus.CANCELLED
+// 	) {
+// 		throw new AppError(
+// 			httpStatus.BAD_REQUEST,
+// 			"The customer has cancelled the service request",
+// 		);
+// 	}
+
+// 	if (
+// 		existingReport.assignment.serviceRequest.status ===
+// 		ServiceRequestStatus.REJECTED
+// 	) {
+// 		throw new AppError(
+// 			httpStatus.BAD_REQUEST,
+// 			"The service request has been rejected by authority",
+// 		);
+// 	}
+
+// 	if (
+// 		existingReport.assignment.serviceRequest.status ===
+// 		ServiceRequestStatus.ASSIGNED
+// 	) {
+// 		throw new AppError(
+// 			httpStatus.BAD_REQUEST,
+// 			`Please update service request status to '${ServiceRequestStatus.INSPECTING}' first`,
+// 		);
+// 	}
+
+// 	if (
+// 		existingReport.assignment.serviceRequest.status ===
+// 		ServiceRequestStatus.RESOLVED
+// 	) {
+// 		throw new AppError(
+// 			httpStatus.BAD_REQUEST,
+// 			`The service request has already been resolved`,
+// 		);
+// 	}
+
+// 	if (
+// 		existingReport.assignment.serviceRequest.status ===
+// 		ServiceRequestStatus.FAILED
+// 	) {
+// 		throw new AppError(
+// 			httpStatus.BAD_REQUEST,
+// 			`The service request has already been declared as failed`,
+// 		);
+// 	}
+
+// 	if (
+// 		existingReport.assignment.serviceRequest.status ===
+// 		ServiceRequestStatus.INPROGRESS && charge
+// 	) {
+// 		throw new AppError(
+// 			httpStatus.BAD_REQUEST,
+// 			`The service request has already been paid. So cannot update service charge`,
+// 		);
+// 	}
+
+// 	const updatedReport = await prisma.technicianReport.update({
+// 		where: {
+// 			id: existingReport.id,
+// 		},
+// 		data: {
+// 			diagnosis,
+// 			charge,
+// 		},
+// 		include: {
+// 			assignment: {
+// 				include: {
+// 					serviceRequest: {
+// 						include: {
+// 							customer: {
+// 								select: {
+// 									id: true,
+// 									name: true,
+// 									email: true,
+// 								},
+// 							},
+// 							area: {
+// 								include: {
+// 									feeder: true,
+// 								},
+// 							},
+// 						},
+// 					},
+// 				},
+// 			},
+// 		},
+// 	});
+
+// 	return updatedReport;
+// };
+
 const updateReport = async (
 	reportId: string,
 	payload: IUpdateReportPayload,
@@ -745,16 +890,14 @@ const updateReport = async (
 	});
 
 	if (!technician || technician.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Technician Profile Not Found");
+		throw new AppError(
+			httpStatus.NOT_FOUND,
+			"Technician Profile Not Found",
+		);
 	}
 
-	const diagnosis = payload.diagnosis?.trim();
-	const charge = Number(payload.charge);
-
 	const existingReport = await prisma.technicianReport.findUnique({
-		where: {
-			id: reportId,
-		},
+		where: { id: reportId },
 		include: {
 			assignment: {
 				include: {
@@ -765,7 +908,10 @@ const updateReport = async (
 	});
 
 	if (!existingReport || existingReport.isDeleted) {
-		throw new AppError(httpStatus.NOT_FOUND, "Technician report not found");
+		throw new AppError(
+			httpStatus.NOT_FOUND,
+			"Technician report not found",
+		);
 	}
 
 	if (technician.id !== existingReport.assignment?.technicianId) {
@@ -775,54 +921,83 @@ const updateReport = async (
 		);
 	}
 
-	if (
-		existingReport.assignment.serviceRequest.status ===
-		ServiceRequestStatus.PENDING
-	) {
+	// Prepare only the values that were actually provided.
+	const diagnosis = payload.diagnosis?.trim();
+	const hasDiagnosis = diagnosis !== undefined && diagnosis.length > 0;
+
+	const hasCharge =
+		payload.charge !== undefined && payload.charge !== null;
+
+	// Status validation
+	const status = existingReport.assignment?.serviceRequest.status;
+
+	if (status === "PENDING") {
 		throw new AppError(
 			httpStatus.BAD_REQUEST,
-			"The service request has not even been assigned yet!",
+			"Cannot update report for a pending service request",
 		);
 	}
 
-	if (
-		existingReport.assignment.serviceRequest.status ===
-		ServiceRequestStatus.CANCELLED
-	) {
+	if (status === "CANCELLED") {
 		throw new AppError(
 			httpStatus.BAD_REQUEST,
-			"The customer has cancelled the service request",
+			"Cannot update report for a cancelled service request",
 		);
 	}
 
-	if (
-		existingReport.assignment.serviceRequest.status ===
-		ServiceRequestStatus.REJECTED
-	) {
+	if (status === "REJECTED") {
 		throw new AppError(
 			httpStatus.BAD_REQUEST,
-			"The service request has been rejected by authority",
+			"Cannot update report for a rejected service request",
 		);
 	}
 
-	if (
-		existingReport.assignment.serviceRequest.status ===
-		ServiceRequestStatus.ASSIGNED
-	) {
+	if (status === "ASSIGNED") {
 		throw new AppError(
 			httpStatus.BAD_REQUEST,
-			`Please update service request status to '${ServiceRequestStatus.INSPECTING}' first`,
+			"Please change the service request status to INSPECTING before updating the report",
 		);
+	}
+
+	if (status === "RESOLVED") {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"Cannot update a report for a resolved service request",
+		);
+	}
+
+	if (status === "FAILED") {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"Cannot update a report for a failed service request",
+		);
+	}
+
+	// Prevent changing the charge after payment.
+	if (status === "INPROGRESS" && hasCharge) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"Service charge cannot be updated because it has already been paid",
+		);
+	}
+
+	// Build a partial update so omitted or empty values remain unchanged.
+	const updateData: {
+		diagnosis?: string;
+		charge?: number;
+	} = {};
+
+	if (hasDiagnosis) {
+		updateData.diagnosis = diagnosis;
+	}
+
+	if (hasCharge) {
+		updateData.charge = Number(payload.charge);
 	}
 
 	const updatedReport = await prisma.technicianReport.update({
-		where: {
-			id: existingReport.id,
-		},
-		data: {
-			diagnosis,
-			charge,
-		},
+		where: { id: existingReport.id },
+		data: updateData,
 		include: {
 			assignment: {
 				include: {

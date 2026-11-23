@@ -15,7 +15,6 @@ export const SubmitReportValidationZodSchema = z.object({
 export const UpdateReportValidationZodSchema = z.object({
 	diagnosis: z
 		.string("Must include a valid report diagnosis")
-		.min(1, "Report diagnosis is required")
 		.max(255, "Report diagnosis must be within 255 characters")
 		.optional(),
 

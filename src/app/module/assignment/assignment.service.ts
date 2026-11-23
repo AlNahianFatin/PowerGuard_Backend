@@ -893,11 +893,178 @@ const assignTechnician = async (
 	return assignment;
 };
 
+// const updateAssignment = async (
+// 	payload: IUpdateAssignmentPayload,
+// 	assignmentId: string,
+// 	user: RequestUser,
+// ) => {
+// 	const requestedUser = await prisma.user.findUnique({
+// 		where: { id: user.userId },
+// 	});
+
+// 	if (!requestedUser || requestedUser.isDeleted) {
+// 		throw new AppError(httpStatus.NOT_FOUND, "Your profile not found");
+// 	}
+
+// 	const assignedByUserId = requestedUser.id;
+
+// 	if (payload.technicianId) {
+// 		const technician = await prisma.technician.findUnique({
+// 			where: {
+// 				id: payload.technicianId,
+// 			},
+// 		});
+
+// 		if (!technician || technician.isDeleted) {
+// 			throw new AppError(httpStatus.NOT_FOUND, "Technician not found");
+// 		}
+
+// 		if (technician.status !== TechnicianStatus.AVAILABLE) {
+// 			throw new AppError(
+// 				httpStatus.BAD_REQUEST,
+// 				`Technician ${technician.name} is not available right now`,
+// 			);
+// 		}
+// 	}
+
+// 	const existingAssignment = await prisma.assignment.findUnique({
+// 		where: {
+// 			id: assignmentId,
+// 		},
+// 		include: {
+// 			serviceRequest: {
+// 				include: {
+// 					rejectedByUser: {
+// 						select: {
+// 							id: true,
+// 							name: true,
+// 						},
+// 					},
+// 					customer: {
+// 						select: {
+// 							id: true,
+// 							name: true,
+// 						},
+// 					},
+// 				},
+// 			},
+// 		},
+// 	});
+
+// 	if (!existingAssignment || existingAssignment.isDeleted) {
+// 		throw new AppError(httpStatus.NOT_FOUND, "The assignment does not exist");
+// 	}
+
+// 	if (
+// 		existingAssignment.serviceRequest.status === ServiceRequestStatus.CANCELLED
+// 	) {
+// 		throw new AppError(
+// 			httpStatus.CONFLICT,
+// 			`The service request has already been cancelled by ${existingAssignment.serviceRequest.customer.name}`,
+// 		);
+// 	}
+
+// 	if (
+// 		existingAssignment.serviceRequest.status === ServiceRequestStatus.REJECTED
+// 	) {
+// 		throw new AppError(
+// 			httpStatus.CONFLICT,
+// 			`The service request has already been rejected by ${existingAssignment.serviceRequest?.rejectedByUser?.name}. Rejection reason: ${existingAssignment.serviceRequest?.rejectionReason}`,
+// 		);
+// 	}
+
+// 	if (
+// 		existingAssignment.serviceRequest.status === ServiceRequestStatus.FAILED
+// 	) {
+// 		throw new AppError(
+// 			httpStatus.CONFLICT,
+// 			`The service request was failed. Failure note: ${existingAssignment.serviceRequest?.failureNote}`,
+// 		);
+// 	}
+
+// 	if (
+// 		existingAssignment.serviceRequest.status === ServiceRequestStatus.RESOLVED
+// 	) {
+// 		throw new AppError(
+// 			httpStatus.CONFLICT,
+// 			"The service request has already been resolved",
+// 		);
+// 	}
+
+// 	if (
+// 		payload.technicianId &&
+// 		existingAssignment.serviceRequest.status !== ServiceRequestStatus.PENDING &&
+// 		existingAssignment.serviceRequest.status !== ServiceRequestStatus.ASSIGNED
+// 	) {
+// 		throw new AppError(
+// 			httpStatus.CONFLICT,
+// 			"Can not change technician for ongoing service",
+// 		);
+// 	}
+
+// 	const updatedAssignment = await prisma.$transaction(async (tx) => {
+// 		if (payload.technicianId) {
+// 			await tx.serviceRequest.update({
+// 				where: {
+// 					id: existingAssignment.serviceRequestId,
+// 				},
+// 				data: {
+// 					status: ServiceRequestStatus.ASSIGNED,
+// 				},
+// 			});
+
+// 			await tx.technician.update({
+// 				where: {
+// 					id: existingAssignment.technicianId,
+// 				},
+// 				data: {
+// 					status: TechnicianStatus.AVAILABLE,
+// 				},
+// 			});
+
+// 			await tx.technician.update({
+// 				where: {
+// 					id: payload.technicianId,
+// 				},
+// 				data: {
+// 					status: TechnicianStatus.ASSIGNED,
+// 				},
+// 			});
+// 		}
+
+// 		const updatedAssignment = await tx.assignment.update({
+// 			where: {
+// 				id: existingAssignment.id,
+// 			},
+// 			data: {
+// 				...(payload.notes !== undefined && {
+// 					notes: payload.notes,
+// 				}),
+
+// 				...(payload?.technicianId && {
+// 					technicianId: payload.technicianId,
+// 					assigneeId: assignedByUserId,
+// 				}),
+// 			},
+// 		});
+
+// 		return updatedAssignment;
+// 	});
+
+// 	return updatedAssignment;
+// };
+
 const updateAssignment = async (
 	payload: IUpdateAssignmentPayload,
 	assignmentId: string,
 	user: RequestUser,
 ) => {
+	const technicianId = payload.technicianId?.trim();
+	const notes = payload.notes?.trim();
+
+	const shouldUpdateTechnician = Boolean(technicianId);
+	const shouldUpdateNotes = Boolean(notes);
+
 	const requestedUser = await prisma.user.findUnique({
 		where: { id: user.userId },
 	});
@@ -908,11 +1075,9 @@ const updateAssignment = async (
 
 	const assignedByUserId = requestedUser.id;
 
-	if (payload.technicianId) {
+	if (shouldUpdateTechnician) {
 		const technician = await prisma.technician.findUnique({
-			where: {
-				id: payload.technicianId,
-			},
+			where: { id: technicianId },
 		});
 
 		if (!technician || technician.isDeleted) {
@@ -928,9 +1093,7 @@ const updateAssignment = async (
 	}
 
 	const existingAssignment = await prisma.assignment.findUnique({
-		where: {
-			id: assignmentId,
-		},
+		where: { id: assignmentId },
 		include: {
 			serviceRequest: {
 				include: {
@@ -955,36 +1118,30 @@ const updateAssignment = async (
 		throw new AppError(httpStatus.NOT_FOUND, "The assignment does not exist");
 	}
 
-	if (
-		existingAssignment.serviceRequest.status === ServiceRequestStatus.CANCELLED
-	) {
+	const serviceRequest = existingAssignment.serviceRequest;
+
+	if (serviceRequest.status === ServiceRequestStatus.CANCELLED) {
 		throw new AppError(
 			httpStatus.CONFLICT,
-			`The service request has already been cancelled by ${existingAssignment.serviceRequest.customer.name}`,
+			`The service request has already been cancelled by ${serviceRequest.customer.name}`,
 		);
 	}
 
-	if (
-		existingAssignment.serviceRequest.status === ServiceRequestStatus.REJECTED
-	) {
+	if (serviceRequest.status === ServiceRequestStatus.REJECTED) {
 		throw new AppError(
 			httpStatus.CONFLICT,
-			`The service request has already been rejected by ${existingAssignment.serviceRequest?.rejectedByUser?.name}. Rejection reason: ${existingAssignment.serviceRequest?.rejectionReason}`,
+			`The service request has already been rejected by ${serviceRequest.rejectedByUser?.name}. Rejection reason: ${serviceRequest.rejectionReason}`,
 		);
 	}
 
-	if (
-		existingAssignment.serviceRequest.status === ServiceRequestStatus.FAILED
-	) {
+	if (serviceRequest.status === ServiceRequestStatus.FAILED) {
 		throw new AppError(
 			httpStatus.CONFLICT,
-			`The service request was failed. Failure note: ${existingAssignment.serviceRequest?.failureNote}`,
+			`The service request was failed. Failure note: ${serviceRequest.failureNote}`,
 		);
 	}
 
-	if (
-		existingAssignment.serviceRequest.status === ServiceRequestStatus.RESOLVED
-	) {
+	if (serviceRequest.status === ServiceRequestStatus.RESOLVED) {
 		throw new AppError(
 			httpStatus.CONFLICT,
 			"The service request has already been resolved",
@@ -992,18 +1149,18 @@ const updateAssignment = async (
 	}
 
 	if (
-		payload.technicianId &&
-		existingAssignment.serviceRequest.status !== ServiceRequestStatus.PENDING &&
-		existingAssignment.serviceRequest.status !== ServiceRequestStatus.ASSIGNED
+		shouldUpdateTechnician &&
+		serviceRequest.status !== ServiceRequestStatus.PENDING &&
+		serviceRequest.status !== ServiceRequestStatus.ASSIGNED
 	) {
 		throw new AppError(
 			httpStatus.CONFLICT,
-			"Can not change technician for ongoing service",
+			"Cannot change technician for ongoing service",
 		);
 	}
 
 	const updatedAssignment = await prisma.$transaction(async (tx) => {
-		if (payload.technicianId) {
+		if (shouldUpdateTechnician) {
 			await tx.serviceRequest.update({
 				where: {
 					id: existingAssignment.serviceRequestId,
@@ -1024,7 +1181,7 @@ const updateAssignment = async (
 
 			await tx.technician.update({
 				where: {
-					id: payload.technicianId,
+					id: technicianId,
 				},
 				data: {
 					status: TechnicianStatus.ASSIGNED,
@@ -1032,23 +1189,19 @@ const updateAssignment = async (
 			});
 		}
 
-		const updatedAssignment = await tx.assignment.update({
+		return tx.assignment.update({
 			where: {
 				id: existingAssignment.id,
 			},
 			data: {
-				...(payload.notes !== undefined && {
-					notes: payload.notes,
-				}),
+				...(shouldUpdateNotes && { notes }),
 
-				...(payload?.technicianId && {
-					technicianId: payload.technicianId,
+				...(shouldUpdateTechnician && {
+					technicianId,
 					assigneeId: assignedByUserId,
 				}),
 			},
 		});
-
-		return updatedAssignment;
 	});
 
 	return updatedAssignment;
