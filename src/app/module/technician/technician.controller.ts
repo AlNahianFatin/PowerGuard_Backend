@@ -5,7 +5,6 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { TechnicianService } from "./technician.service";
 import { ApplyAsTechnicianValidationZodSchema } from "./technician.validation";
-import { TechnicianVerificationStatus } from "../../../generated/prisma/enums";
 
 const applyAsTechnician = catchAsync(async (req: Request, res: Response) => {
 	const files = req.files as {

@@ -76,12 +76,14 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
 		secure: config.node_env !== "development",
 		sameSite: config.node_env === "development" ? "lax" : "none",
 		maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
+		path: "/",
 	});
 	res.cookie("refreshToken", refreshToken, {
 		httpOnly: true,
 		secure: config.node_env !== "development",
 		sameSite: config.node_env === "development" ? "lax" : "none",
 		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+		path: "/",
 	});
 
 	sendResponse(res, {
@@ -257,8 +259,25 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 });
 
 const logoutUser = catchAsync(async (req: Request, res: Response) => {
-	res.clearCookie("accessToken");
-	res.clearCookie("refreshToken");
+	res.clearCookie(
+		"accessToken",
+		{
+			httpOnly: true,
+			secure: config.node_env !== "development",
+			sameSite: config.node_env === "development" ? "lax" : "none",
+			path: "/",
+		}
+	);
+
+	res.clearCookie(
+		"refreshToken",
+		{
+			httpOnly: true,
+			secure: config.node_env !== "development",
+			sameSite: config.node_env === "development" ? "lax" : "none",
+			path: "/",
+		}
+	);
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,

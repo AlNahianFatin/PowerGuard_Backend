@@ -53,7 +53,7 @@ const payServiceRequest = catchAsync(async (req: Request, res: Response) => {
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
-		message: "Payment Retrieved Successfully",
+		message: "Payment procedure started successfully",
 		data: result,
 	});
 });

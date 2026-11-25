@@ -1108,6 +1108,17 @@ const payServiceRequest = async (
 
 		const bkashCreatePaymentResult = await bkashCreatePaymentResponse.json();
 
+		if (
+			bkashCreatePaymentResult.statusCode !== "0000" ||
+			!bkashCreatePaymentResult.paymentID ||
+			!bkashCreatePaymentResult.bkashURL
+		) {
+			throw new AppError(
+				httpStatus.BAD_GATEWAY,
+				`bKash create payment failed: ${bkashCreatePaymentResult.statusMessage ?? "Unknown error"}`,
+			);
+		}
+
 		await prisma.payment.create({
 			data: {
 				amount,
@@ -1123,7 +1134,11 @@ const payServiceRequest = async (
 		};
 	} catch (error: any) {
 		console.log(error);
-		return error.message;
+
+		if (error instanceof AppError)
+			throw error;
+
+		throw new AppError(httpStatus.BAD_GATEWAY, error.message);
 	}
 };
 
@@ -1151,7 +1166,7 @@ const payServiceRequestCallback = async (query: Record<string, any>) => {
 		});
 
 		return {
-			redirectUrl: `${config.frontend_url}/dashboard/my-service-requests?status=failure`,
+			redirectUrl: `${config.frontend_url}/customer/my-service-requests?status=failure`,
 		};
 	}
 
@@ -1167,13 +1182,13 @@ const payServiceRequestCallback = async (query: Record<string, any>) => {
 		});
 
 		return {
-			redirectUrl: `${config.frontend_url}/dashboard/my-service-requests?status=cancel`,
+			redirectUrl: `${config.frontend_url}/customer/my-service-requests?status=cancel`,
 		};
 	}
 
 	if (status !== "success") {
 		return {
-			redirectUrl: `${config.frontend_url}/dashboard/my-service-requests?status=failure`,
+			redirectUrl: `${config.frontend_url}/customer/my-service-requests?status=failure`,
 		};
 	}
 
@@ -1215,7 +1230,7 @@ const payServiceRequestCallback = async (query: Record<string, any>) => {
 		});
 
 		return {
-			redirectUrl: `${config.frontend_url}/dashboard/my-service-requests?status=failure`,
+			redirectUrl: `${config.frontend_url}/customer/my-service-requests?status=failure`,
 		};
 	}
 
@@ -1278,7 +1293,7 @@ const payServiceRequestCallback = async (query: Record<string, any>) => {
 		});
 
 		return {
-			redirectUrl: `${config.frontend_url}/dashboard/my-service-requests?status=success`,
+			redirectUrl: `${config.frontend_url}/customer/my-service-requests?status=success`,
 		};
 	});
 
