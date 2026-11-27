@@ -42,10 +42,6 @@ The backend is built with **Node.js, Express, TypeScript, Prisma ORM, and Postgr
 - **RESTful API Architecture**: Organizes backend functionality into maintainable API modules.
 - **Type-Safe Development**: Uses TypeScript to improve maintainability and reduce runtime errors.
 
-## 🖥️ Screenshots
-
-<!-- Add application or API workflow screenshots here when available. -->
-
 ## 🛠️ Tech Stack
 
 ### **Backend & Runtime**
