@@ -9,7 +9,7 @@
 
 **A role-based backend API for managing scheduled load shedding, unexpected power outages, service requests, technician assignments, and power restoration workflows.**
 
-[Frontend Repository](https://github.com/AlNahianFatin/PowerGuard_Frontend) 
+[Frontend Repo](https://github.com/AlNahianFatin/PowerGuard_Frontend) 
 
 </div>
 
